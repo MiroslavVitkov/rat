@@ -1,0 +1,5 @@
+view_status <bitchg\h>
+set_status
+send <bitch> <msg>
+view_status_history <bitch>
+
