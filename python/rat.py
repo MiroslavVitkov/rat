@@ -18,7 +18,6 @@ def create_server(port):
     s.listen()
     conn, addr = s.accept()
     print('New connection from', addr)
-    # Err: Transport endpoint is not conected!
     data = conn.recv(1024)
     print('READ:', data)
 
@@ -28,7 +27,8 @@ def create_client(ip, port):
     s.sendall(b'Heya')
 
 
-if __name__ == '__main__':
+def test():
+    import socket
     import threading
     port = 42666
 
@@ -41,3 +41,7 @@ if __name__ == '__main__':
                     , args=['localhost', port]
                     , name='client'
                     ).start()
+
+
+if __name__ == '__main__':
+    test()
