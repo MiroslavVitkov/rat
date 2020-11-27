@@ -6,26 +6,52 @@ Asymmetric criptography of chat messages.
 '''
 
 
+import os
+from pathlib import Path
 import rsa
 
 
-def create_keypair(bits=1024):
+# Location to first look for a private key.
+DEFAULT_PRIV = Path(Path.home() / '.ssh/id_rsa')
+
+
+def generate_keypair(bits: int=1024) -> (rsa.key.PrivateKey, rsa.key.PublicKey):
     pub, priv = rsa.newkeys(bits)
-    return pub, priv
+    return priv, pub
 
 
-def write_keypair(path='~/.ssh/id_rsa'):
+def write_keypair(priv: rsa.key.PrivateKey
+                 , pub: rsa.key.PublicKey=None
+                 , p: Path=DEFAULT_PRIV):
     '''Obviously this function violates the RAM-only constraint.'''
-    pass  # TODO
+    if p.exists():
+        raise BaseException('Refusing to ovewrite an existing private key.')
+    with open(p, 'wb') as f:
+        f.write(priv.save_pkcs1())
+    if pub:
+        with open(p.with_suffix('.pub'), 'wb') as f:
+            f.write(pub.save_pkcs1())
 
 
-# TODO The private key can be generated from the public one.
-def read_keypair(path='~/.ssh/id_rsa'):
-    with open(path, mode='rb') as privatefile:
-        keydata = privatefile.read()
-        priv = rsa.PrivateKey.load_pkcs1(keydata)
-        pub = None  # TODO
-        return pub, priv
+def regenerate_pub(path_priv: Path=DEFAULT_PRIV):
+    os.run('ssh-keygen -y -f ' + path_priv
+          + ' > ' + path_priv + '.pub')
+
+
+def read_keypair(p: Path=DEFAULT_PRIV):
+    with open(p, mode='rb') as priv_file:
+        key_data = priv_file.read()
+        priv = rsa.PrivateKey.load_pkcs1(key_data)
+
+    pub = None
+    if not Path(p.with_suffix('.pub')).is_file():
+        regenerate_pub()
+    with open(p.with_suffix('.pub'), 'rb') as f:
+        key_data = f.read()
+        pub = rsa.PublicKey.load_pkcs1(key_data)
+    assert(pub is not None)
+
+    return priv, pub
 
 
 def encrypt(text, pub):
@@ -53,11 +79,15 @@ def sign(bytes, priv):
 
 def verify(bytes, pub):
     '''VerificationError - when the signature doesn't match the message.'''
-    rsa.verify(bytes, signature, pub):
+    rsa.verify(bytes, signature, pub)
 
 
 def test():
-    pass
+    priv, pub = generate_keypair()
+    write_keypair(priv, pub, Path('/tmp/whatever'))
+    newpriv, newpub = read_keypair(Path('/tmp/whatever'))
+    assert(priv == newpriv)
+    assert(pub == newpub)
 
 if __name__ == '__main__':
     test()
