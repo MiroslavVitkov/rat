@@ -18,13 +18,16 @@ def create_server(port):
     s.listen()
     conn, addr = s.accept()
     print('New connection from', addr)
-    data = conn.recv(1024)
-    print('READ:', data)
+    while True:
+        data = conn.recv(1024)
+        if data:
+            print('READ:', data)
 
 
 def create_client(ip, port):
     s = socket.create_connection((ip, port))
-    s.sendall(b'Heya')
+    for i in range(202):
+        s.sendall(b'Heya')
 
 
 def test():
