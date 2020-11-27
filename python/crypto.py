@@ -11,11 +11,19 @@ from pathlib import Path
 import rsa
 
 
+Priv = rsa.key.PrivateKey
+Pub = rsa.key.PublicKey
+Keypair = (Priv, Pub)
+
+
 # Location to first look for a private key.
 DEFAULT_PRIV = Path(Path.home() / '.ssh/id_rsa')
 
+# 'MD5', 'SHA-1', 'SHA-224', 'SHA-256', 'SHA-384' or 'SHA-512'
+HASH = 'SHA-256'
 
-def generate_keypair(bits: int=1024) -> (rsa.key.PrivateKey, rsa.key.PublicKey):
+
+def generate_keypair(bits: int=1024) -> Keypair:
     pub, priv = rsa.newkeys(bits)
     return priv, pub
 
@@ -38,7 +46,7 @@ def regenerate_pub(path_priv: Path=DEFAULT_PRIV):
           + ' > ' + path_priv + '.pub')
 
 
-def read_keypair(p: Path=DEFAULT_PRIV):
+def read_keypair(p: Path=DEFAULT_PRIV) -> Keypair:
     with open(p, mode='rb') as priv_file:
         key_data = priv_file.read()
         priv = rsa.PrivateKey.load_pkcs1(key_data)
@@ -54,14 +62,14 @@ def read_keypair(p: Path=DEFAULT_PRIV):
     return priv, pub
 
 
-def encrypt(text, pub):
+def encrypt(text: str, pub: Pub) -> bytes:
     '''Encrypt a message so that only the owner of the private key can read it.'''
     bytes = text.encode('utf8')
     encrypted = rsa.encrypt(bytes, pub)
     return encrypted
 
 
-def decrypt(encrypted, priv):
+def decrypt(encrypted: bytes, priv: Priv) -> str:
     try:
         bytes = rsa.decrypt(encrypted, priv)
         string = bytes.decode('utf8')
@@ -71,15 +79,24 @@ def decrypt(encrypted, priv):
     return string
 
 
-def sign(bytes, priv):
-    '''Prove you wrote the message.'''
-    signature = rsa.sign(bytes, priv)
+def sign(msg: str, priv: Priv) -> bytes:
+    '''Prove you wrote the message.
+
+    It is debatable should sicgning be performed on the plaintext
+    or on the encrypted bytes.
+
+    I have chosen the former because it is not vulnerable to the following.
+    Tim sends an encrypted and then sign packet to a server containing a password.
+    Joe intercepts the packet, strips the signature, signs it with his own key
+    and gets access on the server ever though he doesn't know Tim's password.
+    '''
+    signature = rsa.sign(msg.encode('utf8'), priv, HASH)
     return signature
 
 
-def verify(bytes, pub):
+def verify(msg: str, signature: bytes, pub: Pub):
     '''VerificationError - when the signature doesn't match the message.'''
-    rsa.verify(bytes, signature, pub)
+    rsa.verify(msg.encode('utf8'), signature, pub)
 
 
 def test():
@@ -88,6 +105,14 @@ def test():
     newpriv, newpub = read_keypair(Path('/tmp/whatever'))
     assert(priv == newpriv)
     assert(pub == newpub)
+
+    msg = "We come in peace!"
+    bytes = encrypt(msg, pub)
+    newmsg = decrypt(bytes, priv)
+    assert(msg == newmsg)
+
+    signature = sign(msg, priv)
+    verify(msg, signature, pub)
 
 if __name__ == '__main__':
     test()
