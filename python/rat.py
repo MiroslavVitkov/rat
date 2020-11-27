@@ -7,6 +7,7 @@ Refer to the README for dessign goals and usage.
 '''
 
 
+import time
 import socket
 
 
@@ -19,6 +20,7 @@ def create_server(port):
     conn, addr = s.accept()
     print('New connection from', addr)
     while True:
+        time.sleep(0.1)
         data = conn.recv(1024)
         if data:
             print('READ:', data)
@@ -26,7 +28,7 @@ def create_server(port):
 
 def create_client(ip, port):
     s = socket.create_connection((ip, port))
-    for i in range(202):
+    for i in range(9999):
         s.sendall(b'Heya')
 
 
