@@ -4,7 +4,8 @@
 '''
 Asymmetric criptography of chat messages.
 '''
-
+#TODO: implement perfect foreward secrecy
+#Because of forward secrecy an attacker would need to have access to the internal SSH state of either the client or server at the time the SSH connection still exists.
 
 import os
 from pathlib import Path
@@ -83,13 +84,16 @@ def decrypt(encrypted: bytes, priv: Priv) -> str:
 def sign(msg: str, priv: Priv) -> bytes:
     '''Prove you wrote the message.
 
-    It is debatable should sicgning be performed on the plaintext
+    It is debatable should signing be performed on the plaintext
     or on the encrypted bytes.
 
-    I have chosen the former because it is not vulnerable to the following.
+    The former has been chosen because it is not vulnerable to the following.
     Tim sends an encrypted and then sign packet to a server containing a password.
     Joe intercepts the packet, strips the signature, signs it with his own key
     and gets access on the server ever though he doesn't know Tim's password.
+
+    Furthermore it increases privacy.
+    Only the recepient can validatet the sender instead of anyone intercepting.
     '''
     signature = rsa.sign(msg.encode('utf8'), priv, HASH)
     return signature
