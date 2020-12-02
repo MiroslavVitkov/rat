@@ -2,50 +2,53 @@
 
 
 '''
-A serverless chat client.
+A peer to peer chat client.
 Refer to the README for dessign goals and usage.
 '''
 
 
-import time
-import socket
+import crypto
+import pack
+import sock
 
 
-def create_server(port):
-    '''
-    Anticipate connections. Mind your firewall.
-    '''
-    s = socket.create_server(('', port))
-    s.listen()
-    conn, addr = s.accept()
-    print('New connection from', addr)
+# TODO
+priv, pub = crypto.generate_keypair()
+
+
+def send(text: str
+        , s: sock.socket.socket
+        , own_priv: crypto.Priv
+        , recepient_pub: crypto.Pub):
+    signature = crypto.sign(text, priv)
+    encrypted = crypto.encrypt(text, recepient_pub)
+    msg = Packet(encrypted, signature)
+    s.sendall(msg.encrypted + msg.signature)
+
+
+def receive_one(s: sock.socket.socket
+                , own_priv: crypto.Priv
+                , sender_pub: crypto.Pub):
+    '''Blocks until one message has been read and decoded.'''
     while True:
         time.sleep(0.1)
-        data = conn.recv(1024)
+        data = s.recv(1024)
         if data:
-            print('READ:', data)
+            import traceback
+            traceback.print_stack()
+            print('NOW LETS READ')
 
-
-def create_client(ip, port):
-    s = socket.create_connection((ip, port))
-    for i in range(9999):
-        s.sendall(b'Heya')
+            packet = Packet.from_bytes(data)
+            text = crypto.decrypt(packet.encrypted, priv)
+            #crypto.verify(text, packet.signature, pub)
+            return text
 
 
 def test():
-    import socket
-    import threading
-    port = 42666
-
-    threading.Thread(target=create_server
-                    , args=[port]
-                    , name='server'
-                    ).start()
-
-    threading.Thread(target=create_client
-                    , args=['localhost', port]
-                    , name='client'
-                    ).start()
+    sock.test()
+    crypto.test()
+    pack.test()
+    print('ALL TESTS PASSED')
 
 
 if __name__ == '__main__':
