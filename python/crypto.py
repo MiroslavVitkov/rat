@@ -11,6 +11,7 @@ Asymmetric criptography of chat messages.
 
 import os
 from pathlib import Path
+import random
 import rsa
 
 
@@ -108,8 +109,9 @@ def verify(msg: str, signature: bytes, pub: Pub):
 
 def test():
     priv, pub = generate_keypair()
-    write_keypair(priv, pub, Path('/tmp/whatever'))
-    newpriv, newpub = read_keypair(Path('/tmp/whatever'))
+    p = Path('/tmp/whatever' + str(random.randint(0, 1e6)))
+    write_keypair(priv, pub, p)
+    newpriv, newpub = read_keypair(p)
     assert(priv == newpriv)
     assert(pub == newpub)
 
