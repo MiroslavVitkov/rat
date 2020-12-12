@@ -88,14 +88,15 @@ def test():
     # Thread handlers are hard to write.
     # It would be nice to incorporate most of the complexity into the class.
     def listen(s):
-        timeout = 0
+        timeout = 20
         while True:
             time.sleep(0.1)
             d = s.recv(1024)
             if d:
                 print('received', len(d), 'bytes:', d)
-            timeout += 1
-            if timeout > 20:
+                timeout += 20
+            timeout -= 1
+            if timeout == 0:
                 return
 
     def yell(s):
