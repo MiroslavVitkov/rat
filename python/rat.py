@@ -12,18 +12,42 @@ import pack
 import sock
 
 
-# TODO
-priv, pub = crypto.generate_keypair()
-
-
 def send(text: str
         , s: sock.socket.socket
         , own_priv: crypto.Priv
         , recepient_pub: crypto.Pub):
-    signature = crypto.sign(text, priv)
+    signature = crypto.sign(text, own_priv)
     encrypted = crypto.encrypt(text, recepient_pub)
-    msg = Packet(encrypted, signature)
+    msg = pack.Packet(encrypted, signature)
     s.sendall(msg.encrypted + msg.signature)
+
+
+def listen(s: sock.socket.socket):
+    for i in range (10):
+        data = s.recv(1024)
+        if data:
+            print('RECEIVED:', data)
+            i += 10
+        time.sleep(0.1)
+
+
+class Rat:
+    '''A rodent.'''
+    def __init__(me):
+        me.priv, me.pub = crypto.generate_keypair()
+        port = 42666
+
+        me.server = sock.Server(port, listen)
+
+        import time
+        time.sleep(1)
+
+        def say_hello(s):
+            send('Hello World!', s, me.priv, me.pub)
+        me.client = sock.Client('localhost', port, say_hello)
+        time.sleep(1)
+
+        me.server.alive = False
 
 
 def receive_one(s: sock.socket.socket
@@ -34,13 +58,9 @@ def receive_one(s: sock.socket.socket
         time.sleep(0.1)
         data = s.recv(1024)
         if data:
-            import traceback
-            traceback.print_stack()
-            print('NOW LETS READ')
-
             packet = Packet.from_bytes(data)
             text = crypto.decrypt(packet.encrypted, priv)
-            #crypto.verify(text, packet.signature, pub)
+            crypto.verify(text, packet.signature, pub)
             return text
 
 
@@ -48,7 +68,13 @@ def test():
     sock.test()
     crypto.test()
     pack.test()
-    print('ALL TESTS PASSED')
+    print('ALL UNIT TESTS PASSED')
+    print()
+
+    sock.time.sleep(10)
+    r = Rat()
+    print('INTEGRATION TEST PASSED')
+    print()
 
 
 if __name__ == '__main__':
