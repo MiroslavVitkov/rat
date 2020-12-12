@@ -33,6 +33,8 @@ class Server:
     Each returned connection is a content communication port with a client.     
 
     func(socket.socket) - communicate with one client until connection drops
+
+    Set `me.alive = False` to kill permanently.
     '''
 
 
@@ -40,24 +42,37 @@ class Server:
 
 
     def __init__(me, port: int, func: callable):
-        t = threading.Thread( target=me._listen
-                            , args=[port, func]
-                            , name='server'
-                            )
+        me.alive = True
+        threading.Thread( target=me._listen
+                        , args=[port, func]
+                        , name='server'
+                        ).start()
 
 
     def _listen(me, port: int, func: callable):
         assert(port >= 0 and port <= 2**16-1)
+
         s = socket.create_server(('', port))
         s.listen()
+
         with ThreadPoolExecutor(max_workers=me.MAX_THREADS) as t:
-            while True:
-                conn, addr = s.accept()    # conn - socket.socket to a peer
+            for conn, addr in me._live(s):
                 print('New client connected:', addr)
                 t.map(func, [conn])
-                if True:
-                    return
-                time.sleep(0.1)
+
+        print('Server shutting down.')
+
+
+    def _live(me, s: socket.socket):
+        '''Check every second should we die.'''
+        s.settimeout(1.0)
+
+        while me.alive:
+            try:
+                conn, addr = s.accept()
+                yield conn, addr
+            except socket.timeout as e:
+                pass
 
 
 
