@@ -40,7 +40,13 @@ class Server:
 
 
     def __init__(me, port: int, func: callable):
-        '''func(socket.socket) - handle that client forever'''
+        t = threading.Thread( target=me._listen
+                            , args=[port, func]
+                            , name='server'
+                            )
+
+
+    def _listen(me, port: int, func: callable):
         assert(port >= 0 and port <= 2**16-1)
         s = socket.create_server(('', port))
         s.listen()
@@ -52,6 +58,8 @@ class Server:
                 if True:
                     return
                 time.sleep(0.1)
+
+
 
 class Client:
     def __init__(me, ip: str, port: int, func: callable):
