@@ -103,26 +103,13 @@ def test():
             msg = 'This is the' + str(i) + 'th message!'
             s.sendall(msg.encode('utf8'))
 
-    # Internally starts a new thread per client.
-    ts = threading.Thread(target=Server
-                         , args=[port, listen]
-                         , name='server'
-                         )
-    tc0 = threading.Thread(target=Client
-                          , args=['localhost', port, yell]
-                          , name='client0'
-                          )
-    tc1 = threading.Thread(target=Client
-                          , args=['localhost', port, yell]
-                          , name='client1'
-                          )
-
-    ts.start()
-    tc0.start()
-    tc1.start()
-    tc0.join()
-    tc1.join()
-    ts.join()
+    port = 42666
+    s = Server(port, listen)
+    import time
+    time.sleep(1)
+    c = Client('localhost', port, yell)
+    time.sleep(1)
+    s.alive = False
 
 
 if __name__ == '__main__':
