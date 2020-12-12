@@ -6,6 +6,8 @@ Asymmetric criptography of chat messages.
 '''
 #TODO: implement perfect foreward secrecy
 #Because of forward secrecy an attacker would need to have access to the internal SSH state of either the client or server at the time the SSH connection still exists.
+#TODO: protect aainst traffic analysis
+# Everything is peer to peer, which is cool, but the IP fetching needs to be anonymysed as well.
 
 import os
 from pathlib import Path
