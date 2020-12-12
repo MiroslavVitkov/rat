@@ -10,6 +10,10 @@ Refer to the README for dessign goals and usage.
 import crypto
 import pack
 import sock
+import time
+
+
+PORT = 42666
 
 
 def send(text: str
@@ -18,8 +22,8 @@ def send(text: str
         , recepient_pub: crypto.Pub):
     signature = crypto.sign(text, own_priv)
     encrypted = crypto.encrypt(text, recepient_pub)
-    msg = pack.Packet(encrypted, signature)
-    s.sendall(msg.encrypted + msg.signature)
+    msg = pack.Packet(encrypted, signature).to_bytes()
+    s.sendall(msg)
 
 
 def listen(s: sock.socket.socket):
@@ -31,37 +35,38 @@ def listen(s: sock.socket.socket):
         time.sleep(0.1)
 
 
+def receive_one( s: sock.socket.socket
+               , own_priv: crypto.Priv
+               , sender_pub: crypto.Pub):
+    '''Blocks until one message has been read and decoded.'''
+    while True:
+        data = s.recv(1024)
+        print('RECEIVED', len(data), 'BYTES')
+        if data:
+            packet = pack.Packet.from_bytes(data)
+            text = crypto.decrypt(packet.encrypted, priv)
+            crypto.verify(text, packet.signature, pub)
+        time.sleep(0.1)
+
+
 class Rat:
     '''A rodent.'''
     def __init__(me):
         me.priv, me.pub = crypto.generate_keypair()
-        port = 42666
+        def listen2(s):
+            receive_one(s, me.priv, me.pub)
+        me.server = sock.Server(PORT, listen2)
 
-        me.server = sock.Server(port, listen)
+
+    def connect(me, ip: str):
+        def func(s: sock.socket.socket):
+            send('Hello World!', s, me.priv, me.pub)
 
         import time
-        time.sleep(1)
-
-        def say_hello(s):
-            send('Hello World!', s, me.priv, me.pub)
-        me.client = sock.Client('localhost', port, say_hello)
-        time.sleep(1)
-
+        time.sleep(2)
+        client = sock.Client(ip, PORT, func)
+        time.sleep(2)
         me.server.alive = False
-
-
-def receive_one(s: sock.socket.socket
-                , own_priv: crypto.Priv
-                , sender_pub: crypto.Pub):
-    '''Blocks until one message has been read and decoded.'''
-    while True:
-        time.sleep(0.1)
-        data = s.recv(1024)
-        if data:
-            packet = Packet.from_bytes(data)
-            text = crypto.decrypt(packet.encrypted, priv)
-            crypto.verify(text, packet.signature, pub)
-            return text
 
 
 def test():
@@ -71,8 +76,9 @@ def test():
     print('ALL UNIT TESTS PASSED')
     print()
 
-    sock.time.sleep(10)
+    time.sleep(5)
     r = Rat()
+    r.connect('192.168.0.100')
     print('INTEGRATION TEST PASSED')
     print()
 

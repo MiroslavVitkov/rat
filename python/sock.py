@@ -18,11 +18,10 @@ time.sleep() is the current workaround.
 '''
 
 
+from concurrent.futures import ThreadPoolExecutor
 import socket
 import threading
 import time
-
-from concurrent.futures import ThreadPoolExecutor
 
 
 class Server:

@@ -123,5 +123,6 @@ def test():
     signature = sign(msg, priv)
     verify(msg, signature, pub)
 
+
 if __name__ == '__main__':
     test()
