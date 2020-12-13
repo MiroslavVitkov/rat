@@ -41,11 +41,11 @@ def receive_one( s: sock.socket.socket
     '''Blocks until one message has been read and decoded.'''
     while True:
         data = s.recv(1024)
-        print('RECEIVED', len(data), 'BYTES')
         if data:
             packet = pack.Packet.from_bytes(data)
-            text = crypto.decrypt(packet.encrypted, priv)
-            crypto.verify(text, packet.signature, pub)
+            text = crypto.decrypt(packet.encrypted, own_priv)
+            crypto.verify(text, packet.signature, sender_pub)
+            return text
         time.sleep(0.1)
 
 
@@ -54,7 +54,8 @@ class Rat:
     def __init__(me):
         me.priv, me.pub = crypto.generate_keypair()
         def listen2(s):
-            receive_one(s, me.priv, me.pub)
+            t = receive_one(s, me.priv, me.pub)
+            print(t)
         me.server = sock.Server(PORT, listen2)
 
 
