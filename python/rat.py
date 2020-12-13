@@ -16,36 +16,13 @@ import time
 PORT = 42666
 
 
-def send(text: str
-        , s: sock.socket.socket
-        , own_priv: crypto.Priv
-        , recepient_pub: crypto.Pub):
-    signature = crypto.sign(text, own_priv)
-    encrypted = crypto.encrypt(text, recepient_pub)
-    msg = pack.Packet(encrypted, signature).to_bytes()
-    s.sendall(msg)
 
-
-def listen(s: sock.socket.socket):
+def listen_orig(s: sock.socket.socket):
     for i in range (10):
         data = s.recv(1024)
         if data:
             print('RECEIVED:', data)
             i += 10
-        time.sleep(0.1)
-
-
-def receive_one( s: sock.socket.socket
-               , own_priv: crypto.Priv
-               , sender_pub: crypto.Pub):
-    '''Blocks until one message has been read and decoded.'''
-    while True:
-        data = s.recv(1024)
-        if data:
-            packet = pack.Packet.from_bytes(data)
-            text = crypto.decrypt(packet.encrypted, own_priv)
-            crypto.verify(text, packet.signature, sender_pub)
-            return text
         time.sleep(0.1)
 
 
@@ -82,6 +59,46 @@ def test():
     r.connect('192.168.0.100')
     print('INTEGRATION TEST PASSED')
     print()
+
+
+def receive_one( s: sock.socket.socket
+               , own_priv: crypto.Priv
+               , sender_pub: crypto.Pub):
+    '''Blocks until one message has been read and decoded.'''
+    while True:
+        data = s.recv(1024)
+        if data:
+            packet = pack.Packet.from_bytes(data)
+            text = crypto.decrypt(packet.encrypted, own_priv)
+            crypto.verify(text, packet.signature, sender_pub)
+            return text
+        time.sleep(0.1)
+
+
+def listen():
+        priv, pub = crypto.generate_keypair()
+        def forever(s):
+            while True:
+                t = receive_one(s, priv, pub)
+                print(t)
+        server = sock.Server(PORT, forever)
+
+
+def send( text: str
+        , s: sock.socket.socket
+        , own_priv: crypto.Priv
+        , recepient_pub: crypto.Pub):
+    signature = crypto.sign(text, own_priv)
+    encrypted = crypto.encrypt(text, recepient_pub)
+    msg = pack.Packet(encrypted, signature).to_bytes()
+    s.sendall(msg)
+
+
+def connect(ip: str):
+    priv, pub = crypto.generate_keypair()
+    def func(s: sock.socket.socket):
+         send('Hello World!', s, priv, pub)
+    client = sock.Client(ip, PORT, func)
 
 
 def print_help():
