@@ -85,4 +85,18 @@ def test():
 
 
 if __name__ == '__main__':
-    test()
+    import sys
+
+    # rat test - run all tests of the program
+    if sys.argv[1] == 'test':
+        test()
+
+    # rat listen - accept connections on port PORT
+    if sys.argv[1] == 'listen':
+        r = Rat()
+
+    # rat connect 24.69.09.11
+    if sys.argv[1] == 'connect':
+        ip = sys.argv[2]
+        r = Rat()
+        r.connect(ip)
