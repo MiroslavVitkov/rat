@@ -46,6 +46,7 @@ class Server:
                         , args=[port, func]
                         , name='server'
                         ).start()
+        print('Server listening on port', port)
 
 
     def _listen(me, port: int, func: callable):

@@ -84,19 +84,30 @@ def test():
     print()
 
 
+def print_help():
+    print('Usage:')
+    print('rat test - run all tests of the program')
+    print('rat listen - accept connections on port', PORT)
+    print('rat connect xx.xx.xx.xx - start chatting if they are listening')
+
+
 if __name__ == '__main__':
     import sys
 
-    # rat test - run all tests of the program
+    if len(sys.argv) < 2 or sys.argv[1] == 'help':
+        print_help()
+        sys.exit()
+
     if sys.argv[1] == 'test':
         test()
+        sys.exit()
 
-    # rat listen - accept connections on port PORT
     if sys.argv[1] == 'listen':
         r = Rat()
+        sys.exit()
 
-    # rat connect 24.69.09.11
     if sys.argv[1] == 'connect':
         ip = sys.argv[2]
         r = Rat()
         r.connect(ip)
+        sys.exit()
