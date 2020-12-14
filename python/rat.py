@@ -7,10 +7,12 @@ Refer to the README for dessign goals and usage.
 '''
 
 
+import time
+
+import bot
 import crypto
 import pack
 import sock
-import time
 
 
 PORT = 42666
@@ -67,8 +69,9 @@ def connect(ip: str):
     priv, pub = crypto.read_keypair(SECRET)
     def func(s: sock.socket.socket):
         while True:
-             send('Hello World!', s, priv, pub)
-             time.sleep(1)
+             insult = bot.curse()
+             send(insult, s, priv, pub)
+             time.sleep(bot.random.randint(1,8))
     client = sock.Client(ip, PORT, func)
 
 
