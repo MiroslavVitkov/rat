@@ -23,7 +23,12 @@ Adhering to the linux design guidelines, the program output is easily parsable b
 
 Usage example
 ---
-miro@general -> hi
-ruzhka@lqlq <- heya 
+miro@general-> hi
+ruzhka@lqlq<- heya
 
-# do ensure global groups to make a community
+
+Scripting
+---
+The client is interactive (the binary keeps on running between commands).
+However, it is intended to be machine understandable.
+Just capture stdout and stderr and parse them; synthetyse commands for stdin.
