@@ -13,6 +13,7 @@ import time
 import bot
 import crypto
 import pack
+import prompt
 import sock
 
 
@@ -39,8 +40,7 @@ def handle_input( s: sock.socket.socket
     '''
     def inp():
         while True:
-            prompt = 'miro@msi '
-            text = input(prompt)
+            text = input(prompt.get())
             send(text, s, own_priv, remote_pub)
     Thread(target=inp).start()
 
