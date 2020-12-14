@@ -16,37 +16,6 @@ import time
 PORT = 42666
 
 
-
-def listen_orig(s: sock.socket.socket):
-    for i in range (10):
-        data = s.recv(1024)
-        if data:
-            print('RECEIVED:', data)
-            i += 10
-        time.sleep(0.1)
-
-
-class Rat:
-    '''A rodent.'''
-    def __init__(me):
-        me.priv, me.pub = crypto.generate_keypair()
-        def listen2(s):
-            t = receive_one(s, me.priv, me.pub)
-            print(t)
-        me.server = sock.Server(PORT, listen2)
-
-
-    def connect(me, ip: str):
-        def func(s: sock.socket.socket):
-            send('Hello World!', s, me.priv, me.pub)
-
-        import time
-        time.sleep(2)
-        client = sock.Client(ip, PORT, func)
-        time.sleep(2)
-        me.server.alive = False
-
-
 def test():
     sock.test()
     crypto.test()
@@ -55,8 +24,8 @@ def test():
     print()
 
     time.sleep(5)
-    r = Rat()
-    r.connect('192.168.0.100')
+#    r = Rat()
+#    r.connect('192.168.0.100')
     print('INTEGRATION TEST PASSED')
     print()
 
@@ -113,18 +82,12 @@ if __name__ == '__main__':
 
     if len(sys.argv) < 2 or sys.argv[1] == 'help':
         print_help()
-        sys.exit()
-
-    if sys.argv[1] == 'test':
+    elif sys.argv[1] == 'test':
         test()
-        sys.exit()
-
-    if sys.argv[1] == 'listen':
-        r = Rat()
-        sys.exit()
-
-    if sys.argv[1] == 'connect':
-        ip = sys.argv[2]
-        r = Rat()
-        r.connect(ip)
-        sys.exit()
+    elif sys.argv[1] == 'listen':
+        listen()
+    elif sys.argv[1] == 'connect':
+        connect(sys.argv[2])
+    else:
+        print(sys.argv[1], '- command not recognised')
+        print_help()
