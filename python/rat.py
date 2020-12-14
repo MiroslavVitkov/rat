@@ -7,6 +7,7 @@ Refer to the README for dessign goals and usage.
 '''
 
 
+import threading
 import time
 
 import bot
@@ -18,25 +19,12 @@ import sock
 PORT = 42666
 
 
-def receive_one( s: sock.socket.socket
-               , own_priv: crypto.Priv
-               , remote_pub: crypto.Pub):
-    '''Blocks until one message has been read and decoded.'''
-    while True:
-        data = s.recv(1024)
-        if data:
-            packet = pack.Packet.from_bytes(data)
-            text = crypto.decrypt(packet.encrypted, own_priv)
-            crypto.verify(text, packet.signature, remote_pub)
-            return text
-        time.sleep(0.1)
-
-
 def listen():
         own_priv, own_pub = crypto.generate_keypair()
         remote_pub = None
 
         def forever(s):
+            # Handshake.
             while True:
                 data = s.recv(1024)
                 if data:
@@ -44,9 +32,23 @@ def listen():
                     s.sendall(own_pub.save_pkcs1())
                     break
 
+            # We need 2 threads to do simultaneous input and output.
+            # So use the current thread for listening and span an input one.
+            def inp():
+                prompt = 'miro@msi '
+                text = input(prompt)
+                send(text, s, own_priv, remote_pub)
+            threading.Thread(target=inp).start()
+
+            # Accept text messages.
             while True:
-                t = receive_one(s, own_priv, remote_pub)
-                print(t)
+                data = s.recv(1024)
+                if data:
+                    packet = pack.Packet.from_bytes(data)
+                    text = crypto.decrypt(packet.encrypted, own_priv)
+                    crypto.verify(text, packet.signature, remote_pub)
+                    print(text)
+                time.sleep(0.1)
 
         server = sock.Server(PORT, forever)
 
@@ -74,10 +76,23 @@ def connect(ip: str):
                 remote_pub = crypto.Pub.load_pkcs1(data)
                 break
 
-        while True:
-            prompt = 'vorac@msi<- '
+        # We need 2 threads to do simultaneous input and output.
+        # So use the current thread for listening and spawn an input one.
+        def inp():
+            prompt = 'miro@msi '
             text = input(prompt)
             send(text, s, own_priv, remote_pub)
+        threading.Thread(target=inp).start()
+
+        # Accept text messages.
+        while True:
+            data = s.recv(1024)
+            if data:
+                packet = pack.Packet.from_bytes(data)
+                text = crypto.decrypt(packet.encrypted, own_priv)
+                crypto.verify(text, packet.signature, remote_pub)
+                print(text)
+            time.sleep(0.1)
 
         while False:
              insult = bot.curse()
