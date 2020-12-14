@@ -14,13 +14,13 @@ import time
 
 
 PORT = 42666
-
+SECRET = '/tmp/whatever483055'
 
 def test():
     sock.test()
     crypto.test()
     pack.test()
-    print('ALL UNIT TESTS PASSED')
+    print('UNIT TESTS PASSED')
     print()
 
     time.sleep(5)
@@ -45,7 +45,7 @@ def receive_one( s: sock.socket.socket
 
 
 def listen():
-        priv, pub = crypto.generate_keypair()
+        priv, pub = crypto.read_keypair(SECRET)
         def forever(s):
             while True:
                 t = receive_one(s, priv, pub)
@@ -64,9 +64,11 @@ def send( text: str
 
 
 def connect(ip: str):
-    priv, pub = crypto.generate_keypair()
+    priv, pub = crypto.read_keypair(SECRET)
     def func(s: sock.socket.socket):
-         send('Hello World!', s, priv, pub)
+        while True:
+             send('Hello World!', s, priv, pub)
+             time.sleep(1)
     client = sock.Client(ip, PORT, func)
 
 

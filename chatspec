@@ -3,3 +3,8 @@ set_status
 send <bitch> <msg>
 view_status_history <bitch>
 
+
+name@room->
+name@room<-
+
+do ensure global groups to enable a community
