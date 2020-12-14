@@ -16,7 +16,6 @@ import sock
 
 
 PORT = 42666
-SECRET = '/tmp/whatever483055'
 
 
 def receive_one( s: sock.socket.socket
@@ -34,7 +33,7 @@ def receive_one( s: sock.socket.socket
 
 
 def listen():
-        own_priv, own_pub = crypto.read_keypair(SECRET)
+        own_priv, own_pub = crypto.generate_keypair()
         remote_pub = None
 
         def forever(s):
