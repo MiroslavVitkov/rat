@@ -81,6 +81,7 @@ def decrypt(encrypted: bytes, priv: Priv) -> str:
     except rsa.pkcs1.DecryptionError:
         # Printing a stack trace leaks information about the key.
         print('DecryptionError')
+        string = ''
     return string
 
 
