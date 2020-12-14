@@ -75,6 +75,11 @@ def connect(ip: str):
                 break
 
         while True:
+            prompt = 'vorac@msi<- '
+            text = input(prompt)
+            send(text, s, own_priv, remote_pub)
+
+        while False:
              insult = bot.curse()
              send(insult, s, own_priv, remote_pub)
              time.sleep(bot.random.randint(1,8))
