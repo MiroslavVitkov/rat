@@ -55,10 +55,12 @@ class Server:
         s = socket.create_server(('', port))
         s.listen()
 
-        with ThreadPoolExecutor(max_workers=me.MAX_THREADS) as t:
-            for conn, addr in me._live(s):
-                print('New client connected:', addr)
-                t.map(func, [conn])
+        for conn, addr in me._live(s):
+            print('New client connected:', addr)
+            threading.Thread( target=func
+                    , args=[conn]
+                    , name='server'
+                    ).start()
 
         print('Server shutting down.')
 
@@ -73,7 +75,6 @@ class Server:
                 yield conn, addr
             except socket.timeout as e:
                 pass
-
 
 
 class Client:

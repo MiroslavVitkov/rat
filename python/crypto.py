@@ -57,6 +57,7 @@ def read_keypair(p: Path=DEFAULT_PRIV) -> Keypair:
         priv = rsa.PrivateKey.load_pkcs1(key_data)
 
     pub = None
+    p = Path(p)
     if not Path(p.with_suffix('.pub')).is_file():
         regenerate_pub()
     with open(p.with_suffix('.pub'), 'rb') as f:
@@ -80,7 +81,7 @@ def decrypt(encrypted: bytes, priv: Priv) -> str:
         string = bytes.decode('utf8')
     except rsa.pkcs1.DecryptionError:
         # Printing a stack trace leaks information about the key.
-        print('DecryptionError')
+        print('ERROR: DecryptionError!')
         string = ''
     return string
 
