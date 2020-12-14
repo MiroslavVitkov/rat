@@ -19,20 +19,6 @@ PORT = 42666
 SECRET = '/tmp/whatever483055'
 
 
-def test():
-    sock.test()
-    crypto.test()
-    pack.test()
-    print('UNIT TESTS PASSED')
-    print()
-
-    time.sleep(5)
-#    r = Rat()
-#    r.connect('192.168.0.100')
-    print('INTEGRATION TEST PASSED')
-    print()
-
-
 def receive_one( s: sock.socket.socket
                , own_priv: crypto.Priv
                , remote_pub: crypto.Pub):
@@ -97,11 +83,26 @@ def connect(ip: str):
     client = sock.Client(ip, PORT, func)
 
 
+def test():
+    sock.test()
+    crypto.test()
+    pack.test()
+    print('UNIT TESTS PASSED')
+    print()
+
+    time.sleep(2)
+
+#    r = Rat()
+#    r.connect('192.168.0.100')
+    print('INTEGRATION TEST PASSED')
+    print()
+
+
 def print_help():
     print('Usage:')
-    print('rat test - run all tests of the program')
     print('rat listen - accept connections on port', PORT)
     print('rat connect xx.xx.xx.xx - start chatting if they are listening')
+    print('rat test - run all tests of the program')
 
 
 if __name__ == '__main__':
@@ -109,12 +110,12 @@ if __name__ == '__main__':
 
     if len(sys.argv) < 2 or sys.argv[1] == 'help':
         print_help()
-    elif sys.argv[1] == 'test':
-        test()
     elif sys.argv[1] == 'listen':
         listen()
     elif sys.argv[1] == 'connect':
         connect(sys.argv[2])
+    elif sys.argv[1] == 'test':
+        test()
     else:
         print(sys.argv[1], '- command not recognised')
         print_help()
