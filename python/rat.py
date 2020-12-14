@@ -18,6 +18,7 @@ import sock
 PORT = 42666
 SECRET = '/tmp/whatever483055'
 
+
 def test():
     sock.test()
     crypto.test()
@@ -34,24 +35,34 @@ def test():
 
 def receive_one( s: sock.socket.socket
                , own_priv: crypto.Priv
-               , sender_pub: crypto.Pub):
+               , remote_pub: crypto.Pub):
     '''Blocks until one message has been read and decoded.'''
     while True:
         data = s.recv(1024)
         if data:
             packet = pack.Packet.from_bytes(data)
             text = crypto.decrypt(packet.encrypted, own_priv)
-            crypto.verify(text, packet.signature, sender_pub)
+            crypto.verify(text, packet.signature, remote_pub)
             return text
         time.sleep(0.1)
 
 
 def listen():
-        priv, pub = crypto.read_keypair(SECRET)
+        own_priv, own_pub = crypto.read_keypair(SECRET)
+        remote_pub = None
+
         def forever(s):
             while True:
-                t = receive_one(s, priv, pub)
+                data = s.recv(1024)
+                if data:
+                    remote_pub = crypto.Pub.load_pkcs1(data)
+                    s.sendall(own_pub.save_pkcs1())
+                    break
+
+            while True:
+                t = receive_one(s, own_priv, remote_pub)
                 print(t)
+
         server = sock.Server(PORT, forever)
 
 
@@ -66,12 +77,23 @@ def send( text: str
 
 
 def connect(ip: str):
-    priv, pub = crypto.read_keypair(SECRET)
+    own_priv, own_pub = crypto.generate_keypair()
+    remote_pub = None
+
     def func(s: sock.socket.socket):
+        s.sendall(own_pub.save_pkcs1())
+        # Receive server public key.
+        while True:
+            data = s.recv(1024)
+            if data:
+                remote_pub = crypto.Pub.load_pkcs1(data)
+                break
+
         while True:
              insult = bot.curse()
-             send(insult, s, priv, pub)
+             send(insult, s, own_priv, remote_pub)
              time.sleep(bot.random.randint(1,8))
+
     client = sock.Client(ip, PORT, func)
 
 
