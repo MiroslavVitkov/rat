@@ -20,6 +20,12 @@ import sock
 PORT = 42666
 
 
+def get_extern_ip():
+    import requests
+    f = requests.request('GET', 'http://myip.dnsomatic.com')
+    ip = f.text
+
+
 def handshake(s: sock.socket.socket, own_pub: crypto.Pub) -> crypto.Pub:
     '''Exchange public keys in cleartext!'''
     while True:
