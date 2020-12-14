@@ -20,10 +20,21 @@ import sock
 PORT = 42666
 
 
+def handshake(s: sock.socket.socket, own_pub: crypto.Pub) -> crypto.Pub:
+    '''Exchange public keys in cleartext!'''
+    while True:
+        data = s.recv(1024)
+        if data:
+            remote_pub = crypto.Pub.load_pkcs1(data)
+            s.sendall(own_pub.save_pkcs1())
+            return remote_pub
+
+
 def send( text: str
         , s: sock.socket.socket
         , own_priv: crypto.Priv
-        , remote_pub: crypto.Pub):
+        , remote_pub: crypto.Pub
+        ) -> None:
     signature = crypto.sign(text, own_priv)
     encrypted = crypto.encrypt(text, remote_pub)
     msg = pack.Packet(encrypted, signature).to_bytes()
@@ -33,7 +44,7 @@ def send( text: str
 def handle_input( s: sock.socket.socket
                 , own_priv: crypto.Priv
                 , remote_pub: crypto.Pub
-                ) -> str:
+                ) -> None:
     '''
     We need 2 threads to do simultaneous input and output.
     So let's use the current thread for listening and span an input one.
