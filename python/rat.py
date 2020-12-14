@@ -38,9 +38,10 @@ def handle_input( s: sock.socket.socket
     So let's use the current thread for listening and span an input one.
     '''
     def inp():
-        prompt = 'miro@msi '
-        text = input(prompt)
-        send(text, s, own_priv, remote_pub)
+        while True:
+            prompt = 'miro@msi '
+            text = input(prompt)
+            send(text, s, own_priv, remote_pub)
     Thread(target=inp).start()
 
 
