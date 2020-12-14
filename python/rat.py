@@ -7,7 +7,7 @@ Refer to the README for dessign goals and usage.
 '''
 
 
-import threading
+from threading import Thread
 import time
 
 import bot
@@ -17,6 +17,31 @@ import sock
 
 
 PORT = 42666
+
+
+def send( text: str
+        , s: sock.socket.socket
+        , own_priv: crypto.Priv
+        , remote_pub: crypto.Pub):
+    signature = crypto.sign(text, own_priv)
+    encrypted = crypto.encrypt(text, remote_pub)
+    msg = pack.Packet(encrypted, signature).to_bytes()
+    s.sendall(msg)
+
+
+def handle_input( s: sock.socket.socket
+                , own_priv: crypto.Priv
+                , remote_pub: crypto.Pub
+                ) -> str:
+    '''
+    We need 2 threads to do simultaneous input and output.
+    So let's use the current thread for listening and span an input one.
+    '''
+    def inp():
+        prompt = 'miro@msi '
+        text = input(prompt)
+        send(text, s, own_priv, remote_pub)
+    Thread(target=inp).start()
 
 
 def listen():
@@ -32,13 +57,7 @@ def listen():
                     s.sendall(own_pub.save_pkcs1())
                     break
 
-            # We need 2 threads to do simultaneous input and output.
-            # So use the current thread for listening and span an input one.
-            def inp():
-                prompt = 'miro@msi '
-                text = input(prompt)
-                send(text, s, own_priv, remote_pub)
-            threading.Thread(target=inp).start()
+            handle_input(s, own_priv, remote_pub)
 
             # Accept text messages.
             while True:
@@ -51,16 +70,6 @@ def listen():
                 time.sleep(0.1)
 
         server = sock.Server(PORT, forever)
-
-
-def send( text: str
-        , s: sock.socket.socket
-        , own_priv: crypto.Priv
-        , recepient_pub: crypto.Pub):
-    signature = crypto.sign(text, own_priv)
-    encrypted = crypto.encrypt(text, recepient_pub)
-    msg = pack.Packet(encrypted, signature).to_bytes()
-    s.sendall(msg)
 
 
 def connect(ip: str):
@@ -76,13 +85,7 @@ def connect(ip: str):
                 remote_pub = crypto.Pub.load_pkcs1(data)
                 break
 
-        # We need 2 threads to do simultaneous input and output.
-        # So use the current thread for listening and spawn an input one.
-        def inp():
-            prompt = 'miro@msi '
-            text = input(prompt)
-            send(text, s, own_priv, remote_pub)
-        threading.Thread(target=inp).start()
+        handle_input(s, own_priv, remote_pub)
 
         # Accept text messages.
         while True:
@@ -106,13 +109,13 @@ def test():
     sock.test()
     crypto.test()
     pack.test()
+    time.sleep(2)
     print('UNIT TESTS PASSED')
     print()
 
-    time.sleep(2)
-
-#    r = Rat()
-#    r.connect('192.168.0.100')
+    Thread(target=listen).start()
+    time.sleep(1)
+    Thread(target=connect, args=['localhost']).start()
     print('INTEGRATION TEST PASSED')
     print()
 
