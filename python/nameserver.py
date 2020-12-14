@@ -5,7 +5,7 @@
 A server where users publish their (username, public key, ip)
 for everyone to see.
 
-Groups look like regular users, but are based on peer to peer broadcast.
+Groups look like regular users but are based on peer to peer broadcast.
 
 Encryption is cool but no authentication mechanism has been implemented yet!
 '''
@@ -20,6 +20,43 @@ import sock
 
 
 own_priv, own_pub = crypto.generate_keypair()
+
+
+class User:
+    def __init__( me
+                , name: str
+                , pub: crypto.Pub
+                , ip: str
+                , status: str=''
+                ):
+        me.name = name
+        me.pub = pub
+        me.ip = ip
+        me.status = status
+
+
+class Register:
+    def __init__(me):
+        me.users = set()
+
+
+    def add(me, u: User) -> None:
+        me.users.append(u)
+
+
+    def remove(me, u: User) -> None:
+        me.users.append(u)
+
+
+class Server:
+    def __init__(me):
+        me.register = Register()
+
+
+    def register(me, conn):
+        # It's accpting registrations from anyone anyway.
+        pass
+
 
 def anticipate(s: sock.socket.socket, remote_pub: crypto.Pub) -> None:
     while True:                                                         
