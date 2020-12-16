@@ -23,10 +23,13 @@ own_priv, own_pub = crypto.generate_keypair()
 
 
 class User:
+    '''
+    A user has a single IP value, a group has multiple.
+    '''
     def __init__( me
                 , name: str
                 , pub: crypto.Pub
-                , ip: str
+                , ip: [str]
                 , status: str=''
                 ):
         me.name = name
@@ -35,27 +38,19 @@ class User:
         me.status = status
 
 
-class Register:
-    def __init__(me):
-        me.users = set()
-
-
-    def add(me, u: User) -> None:
-        me.users.append(u)
-
-
-    def remove(me, u: User) -> None:
-        me.users.append(u)
-
-
 class Server:
     def __init__(me):
-        me.register = Register()
+        me.users = set()
+        me.server = sock.Server(port, func)
 
 
-    def register(me, conn):
-        # It's accpting registrations from anyone anyway.
-        pass
+    def add(me, conn):
+        # It's accepting registrations from anyone anyway.
+        name = 'miro'
+        pub = own_pub
+        ip = 'localhost'
+        status = 'suffering'
+        u = User(name, pub , ip, status)
 
 
 def anticipate(s: sock.socket.socket, remote_pub: crypto.Pub) -> None:
@@ -75,5 +70,12 @@ def func(s: sock.socket.socket) -> crypto.Pub:
     anticipate(s, remote_pub)
 
 
+def test():
+    s = Server(rat.PORT+1, func)
+    u = User('miro', own_pub,'localhost','suffering')
+    s.add(u)
+    print(s)
+
+
 if __name__ == "__main__":
-    s = sock.Server(rat.PORT, func)
+    test()
