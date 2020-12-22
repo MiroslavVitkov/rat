@@ -52,7 +52,13 @@ class Server:
     def _listen(me, port: int, func: callable):
         assert(port >= 0 and port <= 2**16-1)
 
-        s = socket.create_server(('', port))
+        try:
+            # Requires python > 3.7. Same for the client below.
+            s = socket.create_server(('', port))
+        except:
+            s = socket.socket()
+            # accept or whatever
+
         s.listen()
 
         for conn, addr in me._live(s):
@@ -79,7 +85,13 @@ class Server:
 
 class Client:
     def __init__(me, ip: str, port: int, func: callable):
-        s = socket.create_connection((ip, port))
+        try:
+            s = socket.create_connection((ip, port))
+        except:
+            s = socket.socket()
+            s.connect((ip, port))
+
+        assert(s)
         func(s)
 
 
