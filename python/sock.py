@@ -57,7 +57,7 @@ class Server:
             s = socket.create_server(('', port))
         except:
             s = socket.socket()
-            # accept or whatever
+            s.bind(('localhost', port))
 
         s.listen()
 
