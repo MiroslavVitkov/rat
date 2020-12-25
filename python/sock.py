@@ -19,6 +19,7 @@ time.sleep() is the current workaround.
 
 
 from concurrent.futures import ThreadPoolExecutor
+import requests
 import socket
 import threading
 import time
@@ -27,7 +28,7 @@ import time
 class Server:
     '''
     Anticipate connections forever. Mind your firewall.                         
-                                                                                 
+
     A server TCP socket is always meant to negotiate connections, not content.  
     Each returned connection is a content communication port with a client.     
 
@@ -46,7 +47,8 @@ class Server:
                         , args=[port, func]
                         , name='server'
                         ).start()
-        print('Server listening on port', port)
+        ip = me._get_extern_ip()
+        print('Server listening on ip', ip, ', port', port)
 
 
     def _listen(me, port: int, func: callable):
@@ -81,6 +83,11 @@ class Server:
                 yield conn, addr
             except socket.timeout as e:
                 pass
+
+
+    def _get_extern_ip(me):
+        ip = requests.get('https://api.ipify.org').text
+        return ip
 
 
 class Client:
