@@ -48,7 +48,7 @@ class Server:
                         , name='server'
                         ).start()
         ip = me._get_extern_ip()
-        print('Server listening on ip', ip, ', port', port)
+        print('Server listening on ip', ip, 'port', port)
 
 
     def _listen(me, port: int, func: callable):
@@ -73,8 +73,11 @@ class Server:
         print('Server shutting down.')
 
 
-    def _live(me, s: socket.socket):
-        '''Check every second should we die.'''
+    def _live(me, s: socket.socket) -> (socket.socket, tuple):
+        '''
+        Listens on a server socket, when a client connects, returns a client socket.
+        Check every second for a server stop request.
+        '''
         s.settimeout(1.0)
 
         while me.alive:
