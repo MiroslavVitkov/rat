@@ -11,8 +11,9 @@ import socket
 import sys
 
 
-def get():
-    name = os.getlogin()
-    host = socket.gethostname()
-    prompt = name + '@' + host + ' '
+def get(name=os.getlogin(), group=None):
+    if group is None:
+        prompt = name + '-> '
+    else:
+        prompt = name + '@' + group + '-> '
     return prompt

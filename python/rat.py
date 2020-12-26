@@ -12,11 +12,14 @@ import time
 
 import bot
 import crypto
+import nameserver
 import pack
 import prompt
 import sock
 
 
+import sys
+NAME = 'sys.argv[1]'
 PORT = 42666
 
 
@@ -51,7 +54,7 @@ def handle_input( s: sock.socket.socket
     '''
     def inp():
         while True:
-            text = input(prompt.get())
+            text = input(prompt.get(NAME))
             send(text, s, own_priv, remote_pub)
     Thread(target=inp).start()
 
@@ -65,6 +68,7 @@ def listen():
             while True:
                 data = s.recv(1024)
                 if data:
+                    remote_user = nameserver.User(data)
                     remote_pub = crypto.Pub.load_pkcs1(data)
                     s.sendall(own_pub.save_pkcs1())
                     break
