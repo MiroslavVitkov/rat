@@ -15,6 +15,7 @@ import crypto
 import nameserver
 import pack
 import prompt
+import port
 import sock
 
 
@@ -118,7 +119,7 @@ def connect(ip: str):
              send(insult, s, own_priv, remote_pub)
              time.sleep(bot.random.randint(1,8))
 
-    client = sock.Client(ip, PORT, func)
+    client = sock.Client(ip, port.NAMESERVER, func)
 
 
 def test():

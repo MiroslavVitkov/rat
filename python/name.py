@@ -17,7 +17,7 @@ import socket
 import time
 
 import crypto
-import ports
+import port
 import sock
 
 
@@ -29,7 +29,7 @@ Group = (str, crypto.Pub, [str], status)
 def handshake(s: socket.socket) -> User:
     '''
     The client has obtained the server's ip and public key via another medium.
-    They initiate a connection on ports.CHATSERVER.
+    They initiate a connection on port.CHATSERVER.
     The server and the client open a socket each.
     Those last until closed by one side.
     '''
@@ -54,7 +54,7 @@ class Server:
     '''
     def __init__(me):
         me.users = set()
-        me.server = sock.Server(port, handshake)
+        me.server = sock.Server(port.NAMESERVER, handshake)
 
 
     def register(me, u:User):
