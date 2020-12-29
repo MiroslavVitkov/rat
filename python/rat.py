@@ -163,11 +163,25 @@ def test():
 
 
 def print_help():
-    print('Usage:')
-    print('rat ask <regex> <ip1> [<ip2> ...]  - look for a specific user')
-    print('rat listen - accept connections on port', PORT)
-    print('rat connect <ip> - start chatting if they are listening')
-    print('rat test - run all tests of the program')
+    h = '''
+        Usage:
+
+        resolving users
+        ---
+            rat serve - start a nameserver
+            rat ask <regex> <ip1> [<ip2> ...]  - browse users on nameservers
+
+        chatting
+        ---
+            rat listen - accept incoming chats
+            rat connect <ip> - start chatting if they are listening
+
+        miscellaneous
+        ---
+            rat test - run all unnit and integration tests
+            rat help - print this message
+        '''
+    print(h)
 
 
 if __name__ == '__main__':
@@ -175,6 +189,9 @@ if __name__ == '__main__':
 
     if len(sys.argv) < 2 or sys.argv[1] == 'help':
         print_help()
+
+    elif sys.argv[1] == 'serve':
+        serve()
     elif sys.argv[1] == 'ask':
         if len(sys.argv) >= 4:
             ask(sys.argv[2], sys.argv[3:len(sys.argv)])
