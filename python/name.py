@@ -21,9 +21,9 @@ import port
 import sock
 
 
-# tuple(nickname, key, ip, public comment)
-User = (str, crypto.Pub, str, status)
-Group = (str, crypto.Pub, [str], status)
+# tuple(nickname, key, ip, status comment)
+User = (str, crypto.Pub, str, str)
+Group = (str, crypto.Pub, [str], str)
 
 
 def handshake(s: socket.socket) -> User:

@@ -42,13 +42,14 @@ class Server:
 
 
     def __init__(me, port: int, func: callable):
+        me.ip = me._get_extern_ip()
+        me.port = port
         me.alive = True
         threading.Thread( target=me._listen
                         , args=[port, func]
                         , name='server'
                         ).start()
-        ip = me._get_extern_ip()
-        print('Server listening on ip', ip, 'port', port)
+        print('Server listening on ip', me.ip, 'port', me.port)
 
 
     def _listen(me, port: int, func: callable):
@@ -70,7 +71,7 @@ class Server:
                     , name='server'
                     ).start()
 
-        print('Server shutting down.')
+        print('Shutting down server on ip', me.ip, 'port', me.port)
 
 
     def _live(me, s: socket.socket) -> (socket.socket, tuple):
