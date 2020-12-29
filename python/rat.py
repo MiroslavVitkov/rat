@@ -17,27 +17,33 @@ import pack
 import prompt
 import port
 import sock
-import pickle
 
 
-import sys
-NAME = 'sys.argv[1]'
-PORT = 42666
-
-
-def ask(regex, *ips):
-    '''Request a list of ip-s from one or more nameservers.'''
-    assert(len(ips))
-    print('Asking', ips, 'for', regex)
-
-
-    print('TERMINATES2')
-
-
+def serve():
+    '''
+    Run a nameserver forever.
+    On the standard port.
+    Acept all requests from everyone.
+    '''
     s = name.Server()
 
-    print('TERMINATES')
 
+def register():
+    pass
+
+
+def ask(regex, ip):
+    '''Request a list of matching userames from a nameserver.'''
+    def func(s: sock.socket.socket):
+        u = name.User()
+        s.sendall(regex.encode('utf-8', u))
+        while True:
+            d = s.recv(1024)
+            if d:
+                print('USERS ARE', len(d) / len(name.User))
+            else:
+                time.sleep(0.1)
+    c = sock.Client(ip='localhost', port=port.NAMESERVER, func=func)
 
 
 def handshake(s: sock.socket.socket, own_pub: crypto.Pub) -> crypto.Pub:
@@ -106,6 +112,7 @@ def listen():
 
 
 def connect(ip: str):
+    import pickle
     def transmit(s):
         own_priv, own_pub = crypto.generate_keypair()
         u = ('my_nickname', own_pub, 'localhost', 'Fuck you all!')
@@ -169,7 +176,8 @@ def print_help():
         resolving users
         ---
             rat serve - start a nameserver
-            rat ask <regex> <ip1> [<ip2> ...]  - browse users on nameservers
+            rat register <ip> - publish details to a nameserver
+            rat ask <regex> <ip>  - ask a nameservers for user details
 
         chatting
         ---
