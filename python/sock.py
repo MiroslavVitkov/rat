@@ -30,7 +30,7 @@ class Server:
     Anticipate connections forever. Mind your firewall.                         
 
     A server TCP socket is always meant to negotiate connections, not content.  
-    Each returned connection is a content communication port with a client.     
+    Each returned connection is a content socket with a client.
 
     func(socket.socket) - communicate with one client until connection drops
 

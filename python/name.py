@@ -37,10 +37,8 @@ def handshake(s: socket.socket) -> User:
         data = s.recv(1024)
         if data:
             assert(len(data) < 1024)
-
             remote_user = pickle.loads(data)
-            assert(type(remote_user) is User)
-
+            assert(type(remote_user) == type(User))
             return remote_user
         else:
             time.sleep(0.2)
@@ -54,7 +52,7 @@ class Server:
     '''
     def __init__(me):
         me.users = set()
-        me.server = sock.Server(port.NAMESERVER, handshake)
+        me.server = sock.Server(port.NAMESERVER, me._handle)
 
 
     def register(me, u:User):
@@ -65,7 +63,12 @@ class Server:
         me.users.add(u)
 
 
-
+    def _handle(me, c: socket.socket):
+        while True:
+            u = handshake(c)
+            me.register(u)
+            print('New user registered:', u)
+            print('Now there are', len(me.users), 'registered users.')
 
 
 
