@@ -1,0 +1,12 @@
+Name index and nameserver
+---
+
+A nameserver is provided to which anyone can submit in cleartext and for everyone to see:
+    - non-unique username
+    - public key
+    - personal ip; or group ip list
+    - optional public status message.
+
+The server offers unrestricted access.
+Queriess from it are in the form `give me all names conforming to a regex`.
+This should somewhat blind the server as to who does the asker want to message.
