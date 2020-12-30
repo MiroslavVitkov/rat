@@ -36,6 +36,7 @@ def write_keypair(priv: rsa.key.PrivateKey
                  , pub: rsa.key.PublicKey=None
                  , p: Path=DEFAULT_PRIV):
     '''Obviously this function violates the RAM-only constraint.'''
+    p = Path(p)
     if p.exists():
         raise BaseException('Refusing to ovewrite an existing private key: '
                            + str(p))

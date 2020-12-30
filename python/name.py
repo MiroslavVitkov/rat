@@ -84,12 +84,12 @@ class Server:
     
     '''
     def __init__(me):
-        me.users = set()
+        me.users = dict()
         me.server = sock.Server(port.NAMESERVER, me._handle)
 
 
     def register(me, u:User):
-        me.users.add(u)
+        me.users[u.pub] = u
 
 
     def _handle(me, s: socket.socket):

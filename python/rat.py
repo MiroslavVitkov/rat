@@ -201,11 +201,13 @@ if __name__ == '__main__':
     if len(sys.argv) < 2 or sys.argv[1] == 'help':
         print_help()
 
+    elif sys.argv[1] == 'generate':
+        priv, pub = crypto.generate_keypair()
+        crypto.write_keypair(priv, pub, '/tmp/kur')
     elif sys.argv[1] == 'serve':
         serve()
     elif sys.argv[1] == 'register':
-        # Obviously a stub.
-        own_priv, own_pub = crypto.generate_keypair()
+        _, own_pub = crypto.read_keypair('/tmp/kur')
         register(sys.argv[2], own_pub)
     elif sys.argv[1] == 'ask':
         if len(sys.argv) >= 4:
