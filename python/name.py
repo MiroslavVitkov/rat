@@ -109,15 +109,11 @@ class Server:
                 except:
                     print('SOMEONE IS ASKING FOR', data)
                     regex = data.decode('utf-8')
-                    as_string = ""
-                    for u in me.users:
-                        as_string.append(pickle.dumps(u))
-                    as_bytes = as_string.encode('utf8')
-                    print('SERVER RESPONDING', as_bytes)
-                    s.sendall(as_bytes)
+                    r = re.compile(regex)
+                    matches = [pickle.dumps(u) for u in me.users if r.match(u.name)]
+                    for u in matches:
+                        s.sendall(u)
                     continue
-
-
 
 
 
