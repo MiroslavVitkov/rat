@@ -94,7 +94,11 @@ class Server:
 
     def _handle(me, s: socket.socket):
         while True:
-            data = s.recv(1024)
+            try:
+                data = s.recv(1024)
+            except:
+                # Perhaps the user disconnected.
+                pass
             if data:
                 assert(len(data) < 1024)
 
@@ -112,7 +116,11 @@ class Server:
                     r = re.compile(regex)
                     matches = [pickle.dumps(u) for u in me.users if r.match(u.name)]
                     for u in matches:
-                        s.sendall(u)
+                        try:
+                            s.sendall(u)
+                        except:
+                            # Perhaps the user disconnected?
+                            continue
                     continue
 
 
