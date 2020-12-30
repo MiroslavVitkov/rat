@@ -107,8 +107,8 @@ class Server:
                     print('New user registered:', remote_user)
                     print('Now there are', len(me.users), 'registered users.')
                 except:
-                    print('SOMEONE IS ASKING FOR', data)
                     regex = data.decode('utf-8')
+                    print(s.getsockname(), 'is asking for', regex)
                     r = re.compile(regex)
                     matches = [pickle.dumps(u) for u in me.users if r.match(u.name)]
                     for u in matches:
