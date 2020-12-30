@@ -13,6 +13,7 @@ Encryption is cool but no authentication mechanism has been implemented yet!
 
 
 import pickle
+import re
 import socket
 import time
 
@@ -21,9 +22,41 @@ import port
 import sock
 
 
-# tuple(nickname, key, ip, status comment)
-User = (str, crypto.Pub, str, str)
-Group = (str, crypto.Pub, [str], str)
+class User:
+    '''
+    '''
+    def __init__( me
+                , name: str
+                , pub: crypto.Pub
+                , ip: [str]
+                , status: str=''
+                ):
+        me.name = name
+        me.pub = pub
+        me.ip = ip
+        me.status = status
+
+
+    @classmethod
+    def from_bytes(cls, b: bytes):
+        obj = pickle.loads(b)
+        assert(type(obj) == cls)
+        return obj
+
+
+    def to_bytes(me) -> bytes:
+        b = pickle.dumps(me)
+        assert(len(b) < 1024)
+        return b
+
+
+    def __repr__(me):
+        pub = str(me.pub.save_pkcs1())
+        return ( '\n'
+               + 'User: ' + me.name + '\n'
+               + 'public key: ' + pub + '\n'
+               + 'IP: ' + me.ip + '\n'
+               + 'status: ' + me.status)
 
 
 def handshake(s: socket.socket) -> User:
@@ -85,38 +118,6 @@ own_priv, own_pub = crypto.generate_keypair()
 
 
 
-class User2:
-    '''
-    A user has a single IP value, a group has multiple.
-    Should probably just be a tuple.
-    '''
-    def __init__( me
-                , name: str
-                , pub: crypto.Pub
-                , ip: [str]
-                , status: str=''
-                ):
-        me.name = name
-        me.pub = pub
-        me.ip = ip
-        me.status = status
-
-
-    @classmethod
-    def from_bytes(cls, b: bytes):
-        obj = pickle.loads(b)
-        assert(type(obj) == cls)
-        return onj
-
-
-    def to_bytes(me) -> bytes:
-        b = picle.dumps()
-        assert(len(b) < 1024)
-        return b
-
-
-    def __repr__(me):
-        return 'NA NIVATA'
 
 
 
