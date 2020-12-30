@@ -92,16 +92,33 @@ class Server:
         me.users.add(u)
 
 
-    def deregister(me, u:User):
-        me.users.add(u)
-
-
-    def _handle(me, c: socket.socket):
+    def _handle(me, s: socket.socket):
         while True:
-            u = handshake(c)
-            me.register(u)
-            print('New user registered:', u)
-            print('Now there are', len(me.users), 'registered users.')
+            data = s.recv(1024)
+            if data:
+                assert(len(data) < 1024)
+
+                # This could be an `ask` or a `register` request.
+                try:
+                    remote_user = User.from_bytes(data)
+                    assert(type(remote_user) == User)
+                    print('MNOGOLAINA')
+                    me.register(remote_user)
+                    print('New user registered:', remote_user)
+                    print('Now there are', len(me.users), 'registered users.')
+                except:
+                    print('SOMEONE IS ASKING FOR', data)
+                    regex = data.decode('utf-8')
+                    as_string = ""
+                    for u in me.users:
+                        as_string.append(pickle.dumps(u))
+                    as_bytes = as_string.encode('utf8')
+                    print('SERVER RESPONDING', as_bytes)
+                    s.sendall(as_bytes)
+                    continue
+
+
+
 
 
 

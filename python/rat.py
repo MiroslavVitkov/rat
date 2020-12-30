@@ -27,16 +27,17 @@ def serve():
     '''
     s = name.Server()
 
-
-def register():
-    pass
+def register(ip, own_pub):
+    def func(s: sock.socket.socket):
+        u = name.User('miro', own_pub, 'localhost', 'Cheers!')
+        s.sendall(u.to_bytes())
+    c = sock.Client(ip=ip, port=port.NAMESERVER, func=func)
 
 
 def ask(regex, ip):
     '''Request a list of matching userames from a nameserver.'''
     def func(s: sock.socket.socket):
-        u = name.User()
-        s.sendall(regex.encode('utf-8', u))
+        s.sendall(regex.encode('utf-8', regex))
         while True:
             d = s.recv(1024)
             if d:
@@ -118,7 +119,6 @@ def connect(ip: str):
         u = ('my_nickname', own_pub, 'localhost', 'Fuck you all!')
         s.sendall(pickle.dumps(u))
     c = sock.Client(ip='localhost', port=port.NAMESERVER, func=transmit)
-    print('BATKAAAA')
     while(True):
         pass
 
@@ -200,6 +200,10 @@ if __name__ == '__main__':
 
     elif sys.argv[1] == 'serve':
         serve()
+    elif sys.argv[1] == 'register':
+        # Obviously a stub.
+        own_priv, own_pub = crypto.generate_keypair()
+        register(sys.argv[2], own_pub)
     elif sys.argv[1] == 'ask':
         if len(sys.argv) >= 4:
             ask(sys.argv[2], sys.argv[3:len(sys.argv)])
