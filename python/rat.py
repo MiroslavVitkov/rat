@@ -19,6 +19,9 @@ import port
 import sock
 
 
+DEFAULT_KEY_PATH = '/home/vorac/.ssh/id_rsa2'
+
+
 def serve():
     '''
     Run a nameserver forever.
@@ -95,12 +98,14 @@ def listen():
             while True:
                 data = s.recv(1024)
                 if data:
-                    remote_user = nameserver.User(data)
-                    remote_pub = crypto.Pub.load_pkcs1(data)
-                    s.sendall(own_pub.save_pkcs1())
+                    remote_user = name.User(from_bytes(data))
+                    ip = sock.Server()
+                    ip = ip.ip
+                    us = name.User('a chat server', own_pub, ip, 'wellcome')
+                    s.sendall(us.to_bytes())
                     break
 
-            handle_input(s, own_priv, remote_pub)
+            handle_input(s, own_priv, remote_user.pub)
 
             # Accept text messages.
             while True:
@@ -112,16 +117,15 @@ def listen():
                     print(text)
                 time.sleep(0.1)
 
-        server = sock.Server(PORT, forever)
+        server = sock.Server(port.CHATSERVER, forever)
 
 
 def connect(ip: str):
-    import pickle
     def transmit(s):
         own_priv, own_pub = crypto.generate_keypair()
-        u = ('my_nickname', own_pub, 'localhost', 'Fuck you all!')
-        s.sendall(pickle.dumps(u))
-    c = sock.Client(ip='localhost', port=port.NAMESERVER, func=transmit)
+        u = name.User('my_nickname', own_pub, 'localhost', 'Hello World!')
+        s.sendall(u.to_bytes())
+    c = sock.Client(ip='localhost', port=port.CHATSERVER, func=transmit)
     while(True):
         pass
 
@@ -189,6 +193,7 @@ def print_help():
 
         miscellaneous
         ---
+            rat generate [<path>] - create a new RSA keypair and write it to disk
             rat test - run all unnit and integration tests
             rat help - print this message
         '''
@@ -203,11 +208,15 @@ if __name__ == '__main__':
 
     elif sys.argv[1] == 'generate':
         priv, pub = crypto.generate_keypair()
-        crypto.write_keypair(priv, pub, '/tmp/kur')
+        try:
+            dest = sys.argv[2]
+        except:
+            dest = DEFAULT_KEY_PATH
+        crypto.write_keypair(priv, pub, dest)
     elif sys.argv[1] == 'serve':
         serve()
     elif sys.argv[1] == 'register':
-        _, own_pub = crypto.read_keypair('/tmp/kur')
+        _, own_pub = crypto.read_keypair(DEFAULT_KEY_PATH)
         register(sys.argv[2], own_pub)
     elif sys.argv[1] == 'ask':
         if len(sys.argv) >= 4:

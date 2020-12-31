@@ -106,18 +106,20 @@ class Server:
                 try:
                     remote_user = User.from_bytes(data)
                     assert(type(remote_user) == User)
-                    print('MNOGOLAINA')
                     me.register(remote_user)
                     print('New user registered:', remote_user)
-                    print('Now there are', len(me.users), 'registered users.')
+                    print('Now there are', len(me.users), 'registered users.\n')
                 except:
                     regex = data.decode('utf-8')
                     print(s.getsockname(), 'is asking for', regex)
                     r = re.compile(regex)
-                    matches = [pickle.dumps(u) for u in me.users if r.match(u.name)]
+                    matches = [me.users[u] for u in me.users
+                               if r.match(me.users[u].name)]
                     for u in matches:
+                        print('HANDLE',u)
                         try:
-                            s.sendall(u)
+                            bytes = pickle.dumps(u)
+                            s.sendall(bytes)
                         except:
                             # Perhaps the user disconnected?
                             continue
