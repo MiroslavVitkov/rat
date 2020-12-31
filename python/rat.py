@@ -91,15 +91,14 @@ def handle_input( s: sock.socket.socket
 
 def listen():
         own_priv, own_pub = crypto.generate_keypair()
-        remote_pub = None
 
         def forever(s):
             # Handshake.
             while True:
                 data = s.recv(1024)
                 if data:
-                    remote_user = name.User(from_bytes(data))
-                    ip = sock.Server()
+                    remote_user = name.User.from_bytes(data)
+                    ip = sock.Server(0, '')
                     ip = ip.ip
                     us = name.User('a chat server', own_pub, ip, 'wellcome')
                     s.sendall(us.to_bytes())
@@ -113,7 +112,7 @@ def listen():
                 if data:
                     packet = pack.Packet.from_bytes(data)
                     text = crypto.decrypt(packet.encrypted, own_priv)
-                    crypto.verify(text, packet.signature, remote_pub)
+                    crypto.verify(text, packet.signature, remote_user.pub)
                     print(text)
                 time.sleep(0.1)
 
@@ -121,27 +120,24 @@ def listen():
 
 
 def connect(ip: str):
-    def transmit(s):
-        own_priv, own_pub = crypto.generate_keypair()
+    own_priv, own_pub = crypto.read_keypair(DEFAULT_KEY_PATH)
+
+    # Every communication begins with exchanging user objects.
+    def send_user(s: sock.socket.socket):
         u = name.User('my_nickname', own_pub, 'localhost', 'Hello World!')
         s.sendall(u.to_bytes())
-    c = sock.Client(ip='localhost', port=port.CHATSERVER, func=transmit)
-    while(True):
-        pass
-
-    own_priv, own_pub = crypto.generate_keypair()
-    remote_pub = None
 
     def func(s: sock.socket.socket):
-        s.sendall(own_pub.save_pkcs1())
+        send_user(s)
         # Receive server public key.
         while True:
             data = s.recv(1024)
             if data:
-                remote_pub = crypto.Pub.load_pkcs1(data)
+                remote_user = name.User.from_bytes(data)
+                print('The server identifies as', remote_user)
                 break
 
-        handle_input(s, own_priv, remote_pub)
+        handle_input(s, own_priv, remote_user.pub)
 
         # Accept text messages.
         while True:
@@ -149,7 +145,7 @@ def connect(ip: str):
             if data:
                 packet = pack.Packet.from_bytes(data)
                 text = crypto.decrypt(packet.encrypted, own_priv)
-                crypto.verify(text, packet.signature, remote_pub)
+                crypto.verify(text, packet.signature, remote_user.pub)
                 print(text)
             time.sleep(0.1)
 
@@ -158,7 +154,7 @@ def connect(ip: str):
              send(insult, s, own_priv, remote_pub)
              time.sleep(bot.random.randint(1,8))
 
-    client = sock.Client(ip, port.NAMESERVER, func)
+    client = sock.Client(ip, port.CHATSERVER, func)
 
 
 def test():

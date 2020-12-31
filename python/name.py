@@ -116,7 +116,6 @@ class Server:
                     matches = [me.users[u] for u in me.users
                                if r.match(me.users[u].name)]
                     for u in matches:
-                        print('HANDLE',u)
                         try:
                             bytes = pickle.dumps(u)
                             s.sendall(bytes)

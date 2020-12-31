@@ -53,8 +53,10 @@ def regenerate_pub(path_priv: Path=DEFAULT_PRIV):
 
 
 def read_keypair(p: Path=DEFAULT_PRIV) -> Keypair:
+    print('Reading', p)
     with open(p, mode='rb') as priv_file:
         key_data = priv_file.read()
+        assert(key_data)
         priv = rsa.PrivateKey.load_pkcs1(key_data)
 
     pub = None
@@ -107,6 +109,7 @@ def sign(msg: str, priv: Priv) -> bytes:
 
 def verify(msg: str, signature: bytes, pub: Pub):
     '''VerificationError - when the signature doesn't match the message.'''
+    assert(pub)
     rsa.verify(msg.encode('utf8'), signature, pub)
 
 
