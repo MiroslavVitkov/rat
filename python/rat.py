@@ -81,7 +81,7 @@ def handle_input( s: sock.socket.socket
     '''
     def inp():
         while True:
-            text = input(prompt.get(NAME))
+            text = input(prompt.get('miro', 'ot_selo'))
             send(text, s, own_priv, remote_pub)
     Thread(target=inp).start()
 

@@ -6,14 +6,5 @@ Provide an interactive but machine parsable experience.
 '''
 
 
-import os
-import socket
-import sys
-
-
-def get(name=os.getlogin(), group=None):
-    if group is None:
-        prompt = name + '-> '
-    else:
-        prompt = name + '@' + group + '-> '
-    return prompt
+def get(name, group):
+        reutrn = name + '@' + group + '-> '
