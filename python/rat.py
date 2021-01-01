@@ -20,9 +20,6 @@ import port
 import sock
 
 
-DEFAULT_KEY_PATH = '/home/vorac/.ssh/id_rsa2'
-
-
 def serve():
     '''
     Run a nameserver forever.
@@ -33,7 +30,8 @@ def serve():
 
 def register(ip, own_pub):
     def func(s: sock.socket.socket):
-        serv = sock.Server(0, "")
+        serv = sock.Server(0, lambda: 0)
+        serv.alive = False
         ip = serv.ip
         c = configparser.ConfigParser()
         c.read('../conf.ini')
@@ -128,7 +126,9 @@ def listen():
 
 
 def connect(ip: str):
-    own_priv, own_pub = crypto.read_keypair(DEFAULT_KEY_PATH)
+    c = configparser.ConfigParser()
+    c.read('../conf.ini')
+    own_priv, own_pub = crypto.read_keypair(c['user']['keypath'])
 
     # Every communication begins with exchanging user objects.
     def send_user(s: sock.socket.socket):
@@ -207,20 +207,20 @@ def print_help():
 if __name__ == '__main__':
     import sys
 
+    c = configparser.ConfigParser()
+    c.read('../conf.ini')
+    keypath = c['user']['keypath']
+
+
     if len(sys.argv) < 2 or sys.argv[1] == 'help':
         print_help()
-
     elif sys.argv[1] == 'generate':
         priv, pub = crypto.generate_keypair()
-        try:
-            dest = sys.argv[2]
-        except:
-            dest = DEFAULT_KEY_PATH
-        crypto.write_keypair(priv, pub, dest)
+        crypto.write_keypair(priv, pub, keypath)
     elif sys.argv[1] == 'serve':
         serve()
     elif sys.argv[1] == 'register':
-        _, own_pub = crypto.read_keypair(DEFAULT_KEY_PATH)
+        _, own_pub = crypto.read_keypair(keypath)
         register(sys.argv[2], own_pub)
     elif sys.argv[1] == 'ask':
         if len(sys.argv) >= 4:
