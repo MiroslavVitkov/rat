@@ -53,7 +53,7 @@ class User:
     def __repr__(me):
         pub = str(me.pub.save_pkcs1())
         return ( '\n'
-               + 'User: ' + me.name + '\n'
+               + 'nickname: ' + me.name + '\n'
                + 'public key: ' + pub + '\n'
                + 'IP: ' + me.ip + '\n'
                + 'status: ' + me.status)

@@ -7,6 +7,7 @@ Refer to the README for dessign goals and usage.
 '''
 
 
+import configparser
 from threading import Thread
 import time
 
@@ -32,7 +33,14 @@ def serve():
 
 def register(ip, own_pub):
     def func(s: sock.socket.socket):
-        u = name.User('miro', own_pub, 'localhost', 'Cheers!')
+        serv = sock.Server(0, "")
+        ip = serv.ip
+        c = configparser.ConfigParser()
+        c.read('../conf.ini')
+        u = name.User( c['user']['name']
+                     , own_pub
+                     , ip
+                     , c['user']['status'])
         s.sendall(u.to_bytes())
     c = sock.Client(ip=ip, port=port.NAMESERVER, func=func)
 
