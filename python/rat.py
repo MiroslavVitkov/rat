@@ -7,7 +7,6 @@ Refer to the README for dessign goals and usage.
 '''
 
 
-import configparser
 from threading import Thread
 import time
 
@@ -18,6 +17,20 @@ import pack
 import prompt
 import port
 import sock
+
+
+def get_config(path: str='../conf.ini', c: list=[]):
+    '''
+    Use like:
+        get_config()['section_name']['setting_name']
+    '''
+    if not len(c):
+        from configparser import ConfigParser
+        c_ = ConfigParser()
+        c_.read(path)
+        c.append(c_)
+
+    return c[0]
 
 
 def serve():
@@ -33,9 +46,7 @@ def register(ip, own_pub):
         serv = sock.Server(0, lambda: 0)
         serv.alive = False
         ip = serv.ip
-        c = configparser.ConfigParser()
-        c.read('../conf.ini')
-        u = name.User( c['user']['name']
+        u = name.User( get_config['user']['name']
                      , own_pub
                      , ip
                      , c['user']['status'])
@@ -125,14 +136,11 @@ def listen():
         server = sock.Server(port.CHATSERVER, forever)
 
 
-def connect(ip: str):
-    c = configparser.ConfigParser()
-    c.read('../conf.ini')
-    own_priv, own_pub = crypto.read_keypair(c['user']['keypath'])
-
+def connect(ip: str, own_priv, own_pub):
     # Every communication begins with exchanging user objects.
     def send_user(s: sock.socket.socket):
         u = name.User('my_nickname', own_pub, 'localhost', 'Hello World!')
+        # TODO: encrypt this to prove it's really you taht are updating your info.
         s.sendall(u.to_bytes())
 
     def func(s: sock.socket.socket):
@@ -207,11 +215,6 @@ def print_help():
 if __name__ == '__main__':
     import sys
 
-    c = configparser.ConfigParser()
-    c.read('../conf.ini')
-    keypath = c['user']['keypath']
-
-
     if len(sys.argv) < 2 or sys.argv[1] == 'help':
         print_help()
     elif sys.argv[1] == 'generate':
@@ -230,7 +233,8 @@ if __name__ == '__main__':
     elif sys.argv[1] == 'listen':
         listen()
     elif sys.argv[1] == 'connect':
-        connect(sys.argv[2])
+        priv, pub = crypto.read_keypair(get_config()['user']['keypath'])
+        connect(sys.argv[2], priv, pub)
     elif sys.argv[1] == 'test':
         test()
     else:
