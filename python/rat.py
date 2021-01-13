@@ -19,10 +19,10 @@ import port
 import sock
 
 
-def get_config(path: str='../conf.ini', c: list=[]):
+def get_conf(path: str='../conf.ini', c: list=[]):
     '''
     Use like:
-        get_config()['section_name']['setting_name']
+        get_conf()['section_name']['setting_name']
     '''
     if not len(c):
         from configparser import ConfigParser
@@ -46,10 +46,10 @@ def register(ip, own_pub):
         serv = sock.Server(0, lambda: 0)
         serv.alive = False
         ip = serv.ip
-        u = name.User( get_config['user']['name']
+        u = name.User( get_conf()['user']['name']
                      , own_pub
                      , ip
-                     , c['user']['status'])
+                     , get_conf()['user']['status'])
         s.sendall(u.to_bytes())
     c = sock.Client(ip=ip, port=port.NAMESERVER, func=func)
 
@@ -225,7 +225,7 @@ if __name__ == '__main__':
     elif sys.argv[1] == 'serve':
         serve()
     elif sys.argv[1] == 'register':
-        _, own_pub = crypto.read_keypair(keypath)
+        _, own_pub = crypto.read_keypair(get_conf()['user']['keypath'])
         register(sys.argv[2], own_pub)
     elif sys.argv[1] == 'ask':
         if len(sys.argv) >= 4:
@@ -235,7 +235,7 @@ if __name__ == '__main__':
     elif sys.argv[1] == 'listen':
         listen()
     elif sys.argv[1] == 'connect':
-        priv, pub = crypto.read_keypair(get_config()['user']['keypath'])
+        priv, pub = crypto.read_keypair(get_conf()['user']['keypath'])
         connect(sys.argv[2], priv, pub)
     elif sys.argv[1] == 'test':
         test()
