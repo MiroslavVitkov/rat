@@ -9,6 +9,9 @@ import rat
 
 import random
 
+# synonims of villain:
+# miscreant blackguard criminal lawbreaker outlaw offender felon convict jailbird malefactor wrongdoer black hat supervillain transgressor sinner gangster gunman bandit brigand desperado thief robber mugger swindler fraudster racketeer terrorist pirate rogue scoundrel wretch heel reprobate charlatan evil-doer ruffian hoodlum hooligan thug delinquent ne'er-do-well good-for-nothing malfeasant misfeasor infractor cad knave rake crook con baddie shark rat snake snake in the grass dog hound louse swine scumbag wrong 'un crim rotter bounder bad egg stinker
+
 
 def curse():
     adj = ( 'abnormal', 'brainwashed', 'insufferable', 'propostorous'
@@ -24,6 +27,14 @@ def curse():
             )
 
     return insult
+
+
+def relay():
+    pass
+
+
+def log():
+    pass
 
 
 if __name__ == '__main__':
