@@ -97,12 +97,13 @@ def handle_input( s: sock.socket.socket
                 ) -> None:
     '''
     We need 2 threads to do simultaneous input and output.
-    So let's use the current thread for listening and span an input one.
+    So let's use the current thread for listening and spin an input one.
     '''
     def inp():
-        pr = prompt.get('miro', 'ot_selo')
-        text = input(pr)
+        c = get_conf()['user']
+        pr = prompt.get(c['name'], c['group'])
         while True:
+            text = input(pr)
             send(text, s, own_priv, remote_pub)
 
     Thread(target=inp).start()
@@ -129,6 +130,7 @@ def listen():
             while True:
                 data = s.recv(1024)
                 if data:
+                    assert(len(data) < 1024)
                     packet = pack.Packet.from_bytes(data)
                     text = crypto.decrypt(packet.encrypted, own_priv)
                     crypto.verify(text, packet.signature, remote_user.pub)
@@ -161,6 +163,7 @@ def connect(ip: str, own_priv, own_pub):
         while True:
             data = s.recv(1024)
             if data:
+                assert(len(data) < 1024)
                 packet = pack.Packet.from_bytes(data)
                 text = crypto.decrypt(packet.encrypted, own_priv)
                 crypto.verify(text, packet.signature, remote_user.pub)
