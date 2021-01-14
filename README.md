@@ -1,16 +1,23 @@
 # rat
 RAm-only chaT. Inspectable code and industry standard encryption.
 
+How to use
+---
+rat/python/rat.py --help
+
+
 Inspectable code
 ---
 Linux is open source yet have YOU read all the 21109354LOC (as of date of writing this)?
 Has anyone you know?
 Although this project relies on many libraries, the project-exclusive code strives to be concise and readable even to a beginner.
 
+
 Encription
 ---
 Asymetric criptography is provenly uncrackeble by brute force.
 All messages are transmited encrypted and are secure if the two endpoints are not compromised.
+
 
 Privacy
 ---
