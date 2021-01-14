@@ -67,7 +67,7 @@ def ask(regex, ip, timeout=5):
             except:
                 # Probably timed out.
                 return
-    c = sock.Client(ip='localhost', port=port.NAMESERVER, func=func)
+    c = sock.Client(ip[0], port=port.NAMESERVER, func=func)
 
 
 def handshake(s: sock.socket.socket, own_pub: crypto.Pub) -> crypto.Pub:
@@ -222,19 +222,24 @@ if __name__ == '__main__':
 
     if len(sys.argv) < 2 or sys.argv[1] == 'help':
         print_help()
+
     elif sys.argv[1] == 'generate':
         priv, pub = crypto.generate_keypair()
         crypto.write_keypair(priv, pub, keypath)
+
     elif sys.argv[1] == 'serve':
         serve()
+
     elif sys.argv[1] == 'register':
         _, own_pub = crypto.read_keypair(get_conf()['user']['keypath'])
         register(sys.argv[2], own_pub)
+
     elif sys.argv[1] == 'ask':
         if len(sys.argv) >= 4:
             ask(sys.argv[2], sys.argv[3:len(sys.argv)])
         else:
-            print('To query a namserverve please provide your regex and it`s IP.')
+            print('To query namserververs please provide your regex and their IPs.')
+
     elif sys.argv[1] == 'listen':
         listen()
     elif sys.argv[1] == 'connect':
