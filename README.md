@@ -17,6 +17,8 @@ Encription
 ---
 Asymetric criptography is provenly uncrackeble by brute force.
 All messages are transmited encrypted and are secure if the two endpoints are not compromised.
+Disclaimer: this application was not implemented by a cryptographer.
+Disclaimer: unlike WhatsApp, a compromise of a private key enables an attacker decrypt all past messages.
 
 
 Privacy
