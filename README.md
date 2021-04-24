@@ -32,7 +32,7 @@ Adhering to the linux design guidelines, the program output is easily parsable b
 
 Usage example
 ---
-miro@general-> hi
+miro@general-> hi    
 ruzhka@lqlq<- heya
 
 
