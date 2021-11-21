@@ -224,6 +224,8 @@ if __name__ == '__main__':
         print_help()
 
     elif sys.argv[1] == 'generate':
+        assert(len(sys.argv) == 3)
+        keypath = sys.argv[2]
         priv, pub = crypto.generate_keypair()
         crypto.write_keypair(priv, pub, keypath)
 
