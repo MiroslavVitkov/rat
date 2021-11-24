@@ -32,7 +32,7 @@ Adhering to the linux design guidelines, the program output is easily parsable b
 
 Usage example
 ---
-miro@general-> hi    
+miro@general-> hi
 ruzhka@lqlq<- heya
 
 
@@ -41,3 +41,12 @@ Scripting
 The client is interactive (the binary keeps on running between commands).
 However, it is intended to be machine understandable.
 Just capture stdout and stderr and parse them; synthetyse commands for stdin.
+
+
+Tested On
+---
+- arch
+- debian
+- raspbian
+- mint
+- ububtu
