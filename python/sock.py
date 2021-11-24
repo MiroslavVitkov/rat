@@ -27,7 +27,7 @@ import time
 
 class Server:
     '''
-    Anticipate connections forever. Mind your firewall.                         
+    Anticipate connections forever. Mind your firewall.
 
     A server TCP socket is always meant to negotiate connections, not content.  
     Each returned connection is a content socket with a client.
@@ -109,7 +109,7 @@ class Client:
 def test():
     port = 42666
 
-    # Thread handlers are hard to write.
+    # Thread handlers are difficult to write.
     # It would be nice to incorporate most of the complexity into the class.
     def listen(s):
         timeout = 20

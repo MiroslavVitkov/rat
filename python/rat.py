@@ -41,6 +41,7 @@ def serve():
     '''
     s = name.Server()
 
+
 def register(ip, own_pub):
     def func(s: sock.socket.socket):
         serv = sock.Server(0, lambda: 0)
@@ -144,7 +145,7 @@ def connect(ip: str, own_priv, own_pub):
     # Every communication begins with exchanging user objects.
     def send_user(s: sock.socket.socket):
         u = name.User('my_nickname', own_pub, 'localhost', 'Hello World!')
-        # TODO: encrypt this to prove it's really you taht are updating your info.
+        # TODO: encrypt this to prove it's really you that is updating your info.
         s.sendall(u.to_bytes())
 
     def func(s: sock.socket.socket):
