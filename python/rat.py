@@ -92,9 +92,9 @@ def send( text: str
     s.sendall(msg)
 
 
-def handle_input( s: sock.socket.socket
+def handle_input( s: [sock.socket.socket]
                 , own_priv: crypto.Priv
-                , remote_pub: crypto.Pub
+                , remote_pub: [crypto.Pub]
                 ) -> None:
     '''
     We need 2 threads to do simultaneous input and output.
@@ -105,13 +105,16 @@ def handle_input( s: sock.socket.socket
         pr = prompt.get(c['name'], c['group'])
         while True:
             text = input(pr)
-            send(text, s, own_priv, remote_pub)
+            for ip, pub in zip(s, remote_pub):
+                send(text, ip, own_priv, pub)
 
     Thread(target=inp).start()
 
 
 def listen():
         own_priv, own_pub = crypto.generate_keypair()
+        remote_sockets = []
+        remote_keys = []
 
         def forever(s):
             # Handshake.
@@ -119,13 +122,13 @@ def listen():
                 data = s.recv(1024)
                 if data:
                     remote_user = name.User.from_bytes(data)
+                    remote_sockets.append( 1 )
+                    remote.keys.append( 1 )
                     ip = sock.Server(0, '')
                     ip = ip.ip
                     us = name.User('a chat server', own_pub, ip, 'wellcome')
                     s.sendall(us.to_bytes())
                     break
-
-            handle_input(s, own_priv, remote_user.pub)
 
             # Accept text messages.
             while True:
@@ -137,6 +140,8 @@ def listen():
                     crypto.verify(text, packet.signature, remote_user.pub)
                     print(text)
                 time.sleep(0.1)
+
+        handle_input(remote_sockets, own_priv, remote_keys)
 
         server = sock.Server(port.CHATSERVER, forever)
 
@@ -158,7 +163,7 @@ def connect(ip: str, own_priv, own_pub):
                 print('The server identifies as', remote_user)
                 break
 
-        handle_input(s, own_priv, remote_user.pub)
+        handle_input((s,), own_priv, (remote_user.pub,))
 
         # Accept text messages.
         while True:
