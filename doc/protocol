@@ -1,5 +1,5 @@
-A client waits for connections on port 24666.
-A nameserver waits for connections on port 24667.
+A client waits for connections on port 42666.
+A nameserver waits for connections on port 42667.
 
 The connecting client always first transmits their public key in plaintext.
 Then expects the same from the other side.
