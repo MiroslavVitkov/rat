@@ -122,8 +122,8 @@ def listen():
                 data = s.recv(1024)
                 if data:
                     remote_user = name.User.from_bytes(data)
-                    remote_sockets.append( 1 )
-                    remote.keys.append( 1 )
+                    remote_sockets.append(s)
+                    remote_keys.append(remote_user.pub)
                     ip = sock.Server(0, '')
                     ip = ip.ip
                     us = name.User('a chat server', own_pub, ip, 'wellcome')
