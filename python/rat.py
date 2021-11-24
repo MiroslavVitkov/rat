@@ -146,7 +146,10 @@ def listen():
         server = sock.Server(port.CHATSERVER, forever)
 
 
-def connect(ip: str, own_priv, own_pub):
+def connect(ip: str
+           , own_priv: crypto.Priv
+           , own_pub: crypto.Pub
+           ):
     # Every communication begins with exchanging user objects.
     def send_user(s: sock.socket.socket):
         u = name.User('my_nickname', own_pub, 'localhost', 'Hello World!')
