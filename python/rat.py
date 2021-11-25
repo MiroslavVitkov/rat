@@ -197,9 +197,12 @@ def test():
 
     Thread(target=listen).start()
     time.sleep(1)
-    Thread(target=connect, args=['localhost']).start()
+    priv, pub = crypto.generate_keypair()
+    Thread(target=connect, args=['localhost', priv, pub]).start()
+    time.sleep(2)
     print('INTEGRATION TEST PASSED')
     print()
+    sys.exit()
 
 
 def print_help():
