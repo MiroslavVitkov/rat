@@ -89,8 +89,8 @@ class Server:
         me.users[u.pub] = u
 
 
-    def _handle(me, s: socket.socket):
-        while True:
+    def _handle(me, s: socket.socket, alive: bool=True):
+        while alive:
             try:
                 data = s.recv(1024)
             except:
@@ -159,7 +159,7 @@ def func(s: sock.socket.socket) -> crypto.Pub:
 
 
 def test():
-    s = Server(rat.PORT+1, func)
+    s = Server(func)
     u = User('miro', own_pub,'localhost','suffering')
     s.add(u)
     print(s)

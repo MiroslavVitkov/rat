@@ -95,6 +95,7 @@ def send( text: str
 def handle_input( s: [sock.socket.socket]
                 , own_priv: crypto.Priv
                 , remote_pub: [crypto.Pub]
+                , alive: bool=True
                 ) -> None:
     '''
     We need 2 threads to do simultaneous input and output.
@@ -103,7 +104,7 @@ def handle_input( s: [sock.socket.socket]
     def inp():
         c = get_conf()['user']
         pr = prompt.get(c['name'], c['group'])
-        while True:
+        while alive:
             text = input(pr)
             for ip, pub in zip(s, remote_pub):
                 send(text, ip, own_priv, pub)
@@ -142,13 +143,15 @@ def listen():
                 time.sleep(0.1)
 
         handle_input(remote_sockets, own_priv, remote_keys)
-
         server = sock.Server(port.CHATSERVER, forever)
+        time.sleep(10)
+        server.alive = False
 
 
 def connect(ip: str
            , own_priv: crypto.Priv
            , own_pub: crypto.Pub
+           , allive: bool=True
            ):
     # Every communication begins with exchanging user objects.
     def send_user(s: sock.socket.socket):
@@ -159,7 +162,7 @@ def connect(ip: str
     def func(s: sock.socket.socket):
         send_user(s)
         # Receive server public key.
-        while True:
+        while alive:
             data = s.recv(1024)
             if data:
                 remote_user = name.User.from_bytes(data)
@@ -169,7 +172,7 @@ def connect(ip: str
         handle_input((s,), own_priv, (remote_user.pub,))
 
         # Accept text messages.
-        while True:
+        while alive:
             data = s.recv(1024)
             if data:
                 assert(len(data) < 1024)
