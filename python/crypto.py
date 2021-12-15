@@ -14,14 +14,13 @@ from pathlib import Path
 import random
 import rsa
 
+import conf
+
 
 Priv = rsa.key.PrivateKey
 Pub = rsa.key.PublicKey
 Keypair = (Priv, Pub)
 
-
-# Location to first look for a private key.
-DEFAULT_PRIV = Path(Path.home() / '.ssh/id_rsa')
 
 # 'MD5', 'SHA-1', 'SHA-224', 'SHA-256', 'SHA-384' or 'SHA-512'
 HASH = 'SHA-256'
@@ -32,9 +31,9 @@ def generate_keypair(bits: int=1024) -> Keypair:
     return priv, pub
 
 
-def write_keypair(priv: rsa.key.PrivateKey
+def write_keypair( priv: rsa.key.PrivateKey
                  , pub: rsa.key.PublicKey=None
-                 , p: Path=DEFAULT_PRIV):
+                 , p: Path=conf.get()['user']['keypath']):
     '''Obviously this function violates the RAM-only constraint.'''
     p = Path(p)
     if p.exists():
@@ -47,12 +46,12 @@ def write_keypair(priv: rsa.key.PrivateKey
             f.write(pub.save_pkcs1())
 
 
-def regenerate_pub(path_priv: Path=DEFAULT_PRIV):
+def regenerate_pub(path_priv: Path=conf.get()['user']['keypath']):
     os.run('ssh-keygen -y -f ' + path_priv
           + ' > ' + path_priv + '.pub')
 
 
-def read_keypair(p: Path=DEFAULT_PRIV) -> Keypair:
+def read_keypair(p: Path=conf.get()['user']['keypath']) -> Keypair:
     print('Reading', p)
     with open(p, mode='rb') as priv_file:
         key_data = priv_file.read()
@@ -128,6 +127,8 @@ def test():
 
     signature = sign(msg, priv)
     verify(msg, signature, pub)
+
+    print('crypto.py: ALL TESTS PASSED')
 
 
 if __name__ == '__main__':
