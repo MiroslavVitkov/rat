@@ -69,7 +69,6 @@ def handshake(s: socket.socket) -> User:
     while True:
         data = s.recv(1024)
         if data:
-            assert(len(data) < 1024)
             remote_user = pickle.loads(data)
             assert(type(remote_user) == type(User))
             return remote_user
@@ -80,15 +79,13 @@ def handshake(s: socket.socket) -> User:
 class Server:
     '''
     The client has obtained the nameserver's ip and public key via another medium.
-    
-    
     '''
     def __init__(me):
         me.users = dict()
         me.server = sock.Server(port.NAMESERVER, me._handle)
 
 
-    def register(me, u:User):
+    def register(me, u: User):
         me.users[u.pub] = u
 
 
@@ -100,8 +97,6 @@ class Server:
                 # Perhaps the user disconnected.
                 pass
             if data:
-                assert(len(data) < 1024)
-
                 # This could be an `ask` or a `register` request.
                 try:
                     remote_user = User.from_bytes(data)
