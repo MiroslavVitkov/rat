@@ -135,6 +135,7 @@ def test():
     c = Client('localhost', port, yell)
     time.sleep(1)
     s.alive = False
+    print('sock.py: ALL TESTS PASSED')
 
 
 if __name__ == '__main__':
