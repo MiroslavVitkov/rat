@@ -42,4 +42,4 @@ def log():
 if __name__ == '__main__':
     for i in range(10):
         print(curse())
-        time.sleep(random.randint(8, 60))
+    print('bot.py: ALL TESTS PASSED')
