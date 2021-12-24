@@ -17,6 +17,7 @@ import re
 import socket
 import time
 
+import conf
 import crypto
 import port
 import sock
@@ -81,16 +82,19 @@ class Server:
     The client has obtained the nameserver's ip and public key via another medium.
     '''
     def __init__(me):
-        me.users = dict()
+        me.users = {}
         me.server = sock.Server(port.NAMESERVER, me._handle)
+        me.server.alive = True
 
 
     def register(me, u: User):
+        assert(type(u) == User)
         me.users[u.pub] = u
 
 
-    def _handle(me, s: socket.socket, alive: bool=True):
-        while alive:
+    def _handle(me, s: socket.socket):
+        while me.alive:
+            me.server.alive = me.alive
             try:
                 data = s.recv(1024)
             except:
@@ -120,49 +124,17 @@ class Server:
                     continue
 
 
-
-
-
-import pack
-import rat
-import sock
-
-
-            #remote_pub = crypto.Pub.load_pkcs1(data)
-            #s.sendall(own_pub.save_pkcs1())
-
-own_priv, own_pub = crypto.generate_keypair()
-
-
-
-
-
-
-
-def anticipate(s: sock.socket.socket, remote_pub: crypto.Pub) -> None:
-    while True:                                                         
-        data = s.recv(1024)                                             
-        if data:                                                        
-            packet = pack.Packet.from_bytes(data)                       
-            text = crypto.decrypt(packet.encrypted, own_priv)
-            crypto.verify(text, packet.signature, remote_pub)           
-            print(text)                                                 
-        time.sleep(0.1)
-
-
-
-
-def func(s: sock.socket.socket) -> crypto.Pub:
-    remote_pub = rat.handshake(s, own_pub)
-    rat.handle_input(s, own_priv, remote_pub)
-    anticipate(s, remote_pub)
-
-
 def test():
-    s = Server(func)
-    u = User('miro', own_pub,'localhost','suffering')
-    s.add(u)
-    print(s)
+    s = Server()
+    u = User( conf.get()['user']['name']
+            , crypto.read_keypair()[1]
+            , sock.Server(port.NAMESERVER+4, None).ip
+            , conf.get()['user']['status'])
+    s.register(u)
+    print(s.users)
+    s.alive = False
+    s.server.alive = False
+    print('crypto.py: ALL TESTS PASSED')
 
 
 if __name__ == "__main__":
