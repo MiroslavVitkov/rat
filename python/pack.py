@@ -13,13 +13,13 @@ But for now the binary layout is hardcoded in the client.
 class Packet:
     '''
     Public iface:
-        __init__() - create a packet from en encrypted text message
-        to_bytes() - create a binary blob from a packet  
+        __init__() - create a packet from an encrypted text message
+        to_bytes() - create a binary blob from a packet
         from_bytes() - create a packet from a binary blob
 
     '''
-    INT_WIDTH = 4
-    ENDIANNESS = 'little'
+    INT_WIDTH = 4  # TODO: wtf!?!
+    ENDIANNESS = 'little'  # also wtf?
 
 
     def __init__(me, encrypted: bytes, signature: bytes):
@@ -87,14 +87,15 @@ class Packet:
 
 
 def test():
-    '''Let`s limit ourselves to ASCII text smaller than 4MB.'''
-    msg = b'super!!!!secreT!!*&%#!!.' * int(1e8)
+    '''Let`s limit ourselves to ASCII text shorter than 24MB.'''
+    msg = b'super!!!!secreT!!*&%#!!.' * int(1e6)
     sign = b'DUMMY_SiGnaTure?!'
     pack = Packet(msg, sign)
     b = pack.to_bytes()
     # Now the binary blob gets transmitted hopefully unchanged.
     newpack = Packet.from_bytes(b)
     assert(newpack == pack)
+    print('pack.py: ALL TESTS PASSED')
 
 
 if __name__ == '__main__':

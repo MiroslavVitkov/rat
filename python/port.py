@@ -13,3 +13,4 @@ NAMESERVER = CHATSERVER + 1
 if __name__ == '__main__':
     print('rat listens for peers on', CHATSERVER,
           'and provides names on', NAMESERVER)
+    print('port.py: ALL TESTS PASSED')
