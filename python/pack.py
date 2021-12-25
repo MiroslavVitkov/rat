@@ -18,8 +18,9 @@ class Packet:
         from_bytes() - create a packet from a binary blob
 
     '''
-    INT_WIDTH = 4  # TODO: wtf!?!
-    ENDIANNESS = 'little'  # also wtf?
+    # System width and endianness don't matter, those constants refer to the protocol.
+    INT_WIDTH = 4
+    ENDIANNESS = 'little'
 
 
     def __init__(me, encrypted: bytes, signature: bytes):
