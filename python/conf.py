@@ -23,10 +23,14 @@ def get(path: str='../conf.ini', c: list=[]):
 
 
 def test():
+    '''
+    Ensure fields exist and are non-empty.
+    '''
     assert(get()['user']['name'])
     assert(get()['user']['group'])
     assert(get()['user']['status'])
     assert(get()['user']['keypath'])
+    # ['user']['bots'] is empty by default.
     print('conf.py: ALL TESTS PASSED')
 
 
