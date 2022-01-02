@@ -89,15 +89,16 @@ def decrypt(encrypted: bytes, priv: Priv) -> str:
 
 
 def sign(msg: str, priv: Priv) -> bytes:
-    '''Prove you wrote the message.
+    '''
+    Prove you wrote the message.
 
     It is debatable should signing be performed on the plaintext
     or on the encrypted bytes.
 
     The former has been chosen because it is not vulnerable to the following.
-    Tim sends an encrypted and then sign packet to a server containing a password.
-    Joe intercepts the packet, strips the signature, signs it with his own key
-    and gets access on the server ever though he doesn't know Tim's password.
+    Alice sends an encrypted and then signed packet to a server containing a password.
+    Eve intercepts the packet, strips the signature, signs it with her own key
+    and gets access on the server ever though she doesn't know Alice's password.
 
     Furthermore it increases privacy.
     Only the recepient can validatet the sender instead of anyone intercepting.
