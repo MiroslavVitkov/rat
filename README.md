@@ -3,7 +3,10 @@ RAm-only chaT. Inspectable code and industry standard encryption.
 
 How to use
 ---
-rat/python/rat.py --help
+git clone git@github.com:MiroslavVitkov/rat.git
+pip install -r rat/requirements.txt
+alias rat="$PWD/rat/python/rat.py"
+rat --help
 
 
 Inspectable code
