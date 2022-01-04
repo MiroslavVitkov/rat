@@ -64,7 +64,11 @@ def log():
     pass
 
 
-if __name__ == '__main__':
+def test():
     for i in range(10):
-        print(curse())
+        assert(len(curse()))
     print('bot.py: ALL TESTS PASSED')
+
+
+if __name__ == '__main__':
+    test()
