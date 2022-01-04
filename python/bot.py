@@ -46,21 +46,12 @@ def interactive(input_queue):
         but should generally block on input_queue.empty().
     We don't pop() from it as there are probably other readers.
     '''
-    for line in sys.stdin:
-        # The problem is we are blocking on it.
-        pass
-
-    while input_queue.empty():
-        # sleep around
-        pass
-    remote = input()
-
-
-
-    def say():
-        time.sleep(5)
-        out = 'saying something'
-        yield out
+    while(imput_queue.empty()):
+        pass  # sleep around
+    assert(len(input_queue) == 1)
+    msg = input_queue[0]
+    #remote = input()
+    return curse()
 
 
 def relay():
