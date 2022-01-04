@@ -37,6 +37,32 @@ def curse():
     return insult
 
 
+def interactive(input_queue):
+    '''
+    Interactive (classical chat) operation.
+    Input is passed via a blocking queue.Queue() of size 1 for thread safety.
+    Output is produced in blocking mode via the yield keyword.
+    We are running in our dedicated thread
+        but should generally block on input_queue.empty().
+    We don't pop() from it as there are probably other readers.
+    '''
+    for line in sys.stdin:
+        # The problem is we are blocking on it.
+        pass
+
+    while input_queue.empty():
+        # sleep around
+        pass
+    remote = input()
+
+
+
+    def say():
+        time.sleep(5)
+        out = 'saying something'
+        yield out
+
+
 def relay():
     '''A chatroom.'''
     pass
