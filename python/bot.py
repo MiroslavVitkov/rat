@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 '''
-A demo of how to script the client.
+This file defines behaviour.
+The whole rest of the program marely defines a protocol.
 '''
 
 
@@ -9,14 +10,21 @@ import random
 import time
 
 
-# synonims of villain:
-# miscreant blackguard criminal lawbreaker outlaw offender felon convict jailbird malefactor wrongdoer black hat supervillain transgressor sinner gangster gunman bandit brigand desperado thief robber mugger swindler fraudster racketeer terrorist pirate rogue scoundrel wretch heel reprobate charlatan evil-doer ruffian hoodlum hooligan thug delinquent ne'er-do-well good-for-nothing malfeasant misfeasor infractor cad knave rake crook con baddie shark rat snake snake in the grass dog hound louse swine scumbag wrong 'un crim rotter bounder bad egg stinker
-
-
 def curse():
     adj = ( 'abnormal', 'brainwashed', 'insufferable', 'propostorous'
           , 'silly', 'smelly', 'stupid')
-    noun = ('dog', 'cretin', 'evil-doer', 'fool', 'zombie')
+    noun = ('miscreant', 'blackguard', 'criminal', 'lawbreaker', 'outlaw',
+            'offender', 'felon', 'convict', 'jailbird', 'malefactor',
+            'wrongdoer', 'black hat', 'supervillain', 'transgressor',  'sinner',
+            'gangster', 'gunman', 'bandit', 'brigand', 'desperado', 'thief',
+            'robber', 'mugger', 'swindler', 'fraudster', 'racketeer', 'zombie,'
+            'terrorist', 'pirate', 'rogue', 'scoundrel', 'wretch heel',
+            'reprobate', 'charlatan', 'evil-doer', 'ruffian', 'hoodlum',
+            'hooligan', 'thug', 'delinquent', 'never-do-well', 'good-for-nothing',
+            'malfeasant', 'misfeasor', 'infractor', 'knave', 'rake', 'crook',
+            'con baddie', 'shark', 'rat', 'snake', 'snake in the grass'
+            'dog', 'hound', 'louse', 'swine', 'scumbag', 'cretin', 'fool',
+            'wrong and crim rotter', 'bounder', 'bad egg', 'stinker')
 
     insult = ( 'You '
             + random.choice(adj) + ' '
