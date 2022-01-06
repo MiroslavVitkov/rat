@@ -55,7 +55,7 @@ def interactive(input_queue):
 
 
 def relay():
-    '''A chatroom.'''
+    '''A chatroom - broadcasts any message it receives.'''
     pass
 
 

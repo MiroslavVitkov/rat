@@ -7,6 +7,7 @@ Refer to the README for dessign goals and usage.
 '''
 
 
+from multiprocessing import Queue
 from threading import Thread
 import time
 
@@ -125,8 +126,7 @@ def listen():
                     remote_user = name.User.from_bytes(data)
                     remote_sockets.append(s)
                     remote_keys.append(remote_user.pub)
-                    ip = sock.Server(0, '')
-                    ip = ip.ip
+                    ip = sock.Server(0, '').ip
                     us = name.User('a chat server', own_pub, ip, 'wellcome')
                     s.sendall(us.to_bytes())
                     break
@@ -151,13 +151,19 @@ def listen():
 def connect(ip: str
            , own_priv: crypto.Priv
            , own_pub: crypto.Pub
-           , allive: bool=True
+           , alive: bool=True
            ):
+
     # Every communication begins with exchanging user objects.
     def send_user(s: sock.socket.socket):
-        u = name.User('my_nickname', own_pub, 'localhost', 'Hello World!')
+        u = get_conf()['user']
+        ip = sock.Server(0, '').ip
+        user = name.User( u['name']
+                         , own_pub
+                         , ip
+                         , u['status'])
         # TODO: encrypt this to prove it's really you that is updating your info.
-        s.sendall(u.to_bytes())
+        s.sendall(user.to_bytes())
 
     def func(s: sock.socket.socket):
         send_user(s)
