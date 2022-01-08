@@ -188,6 +188,13 @@ def connect(ip: str
                 print(text)
             time.sleep(0.1)
 
+            # TODO: mirror bot logic into serve()
+            bot_threads = []
+            for b in conf.get['user']['bots'].split(','):
+                bot_func = getattr(bot, b)
+                t = Thread(target=bot_func, args=[]).start()
+                bot_threads.append(t)
+
         while False:
              insult = bot.curse()
              send(insult, s, own_priv, remote_pub)
