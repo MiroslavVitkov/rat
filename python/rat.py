@@ -179,9 +179,8 @@ def connect(ip: str
 
         # Accept text messages.
         while alive:
-            data = s.recv(1024)
+            data = s.recv(1024)  # TODO: handle longer packets
             if data:
-                assert(len(data) < 1024)
                 packet = pack.Packet.from_bytes(data)
                 text = crypto.decrypt(packet.encrypted, own_priv)
                 crypto.verify(text, packet.signature, remote_user.pub)
