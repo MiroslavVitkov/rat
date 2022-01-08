@@ -189,7 +189,8 @@ def connect(ip: str
 
             # TODO: mirror bot logic into serve()
             bot_threads = []
-            for b in conf.get['user']['bots'].split(','):
+            for b in conf.get()['user']['bots'].split(','):
+                b = b.strip()
                 bot_func = getattr(bot, b)
                 t = Thread(target=bot_func, args=[]).start()
                 bot_threads.append(t)
