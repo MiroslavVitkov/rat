@@ -148,14 +148,25 @@ def listen():
         server.alive = False
 
 
-def connect(ip: str
-           , own_priv: crypto.Priv
-           , own_pub: crypto.Pub
-           , alive: bool=True
-           ):
+def spawn_bots() -> [Thread]:
+    '''
+    Invoke all bots requested in conf.ini.
+    '''
 
-    # Every communication begins with exchanging user objects.
-    def send_user(s: sock.socket.socket):
+    bot_threads = []
+    for b in conf.get()['user']['bots'].split(','):
+        b = b.strip() # remove whitespaces
+        bot_func = getattr(bot, b)
+        t = Thread(target=bot_func, args=[]).start() # TODO: pass q
+        bot_threads.append(t)
+    return bot_threads
+
+
+def send_user( s: sock.socket.socket
+             , own_pub: crypto.Pub ):
+    '''
+    Every communication begins with exchanging User objects.
+    '''
         u = get_conf()['user']
         ip = sock.Server(0, '').ip
         user = name.User( u['name']
@@ -165,12 +176,18 @@ def connect(ip: str
         # TODO: encrypt this to prove it's really you that is updating your info.
         s.sendall(user.to_bytes())
 
+
+def connect( ip: str
+           , own_priv: crypto.Priv
+           , own_pub: crypto.Pub
+           , alive: bool=True
+           ):
     def func(s: sock.socket.socket):
-        send_user(s)
+        send_user(s, own_pub)
         # Receive server public key.
         while alive:
             data = s.recv(1024)
-            if data:
+            if data:  # ??!
                 remote_user = name.User.from_bytes(data)
                 print('The server identifies as', remote_user)
                 break
@@ -178,22 +195,22 @@ def connect(ip: str
         handle_input((s,), own_priv, (remote_user.pub,))
 
         # Accept text messages.
+        q = Queue(maxsize=1)
         while alive:
             data = s.recv(1024)  # TODO: handle longer packets
             if data:
                 packet = pack.Packet.from_bytes(data)
                 text = crypto.decrypt(packet.encrypted, own_priv)
                 crypto.verify(text, packet.signature, remote_user.pub)
-                print(text)
+                assert(q.empty())
+                q.put(text)
+                #print(text)
             time.sleep(0.1)
 
             # TODO: mirror bot logic into serve()
-            bot_threads = []
-            for b in conf.get()['user']['bots'].split(','):
-                b = b.strip()
-                bot_func = getattr(bot, b)
-                t = Thread(target=bot_func, args=[]).start()
-                bot_threads.append(t)
+            bot_threads = spawn_bots(q)
+            assert(q.full())
+            q.get()  # drop()
 
         while False:
              insult = bot.curse()
