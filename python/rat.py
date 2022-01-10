@@ -277,6 +277,10 @@ if __name__ == '__main__':
         connect(sys.argv[2], priv, pub)
     elif sys.argv[1] == 'test':
         test()
+    elif sys.argv[1] == 'send':
+        pass  # send argv2 some message
+    elif sys.argv[1] == 'get':
+        pass  # pop all accumulated messages from the reveice buffer
     else:
         print(sys.argv[1], '- command not recognised')
         print_help()
