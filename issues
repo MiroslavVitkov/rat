@@ -1,0 +1,69 @@
+ utf-8 ebcoding arbitrary binary data can fail #1 
+---
+Exception in thread Thread-1:
+Traceback (most recent call last):
+  File "/usr/lib/python3.8/threading.py", line 932, in _bootstrap_inner
+    self.run()
+  File "/usr/lib/python3.8/threading.py", line 870, in run
+    self._target(*self._args, **self._kwargs)
+  File "rat/python/rat.py", line 61, in inp
+    send(text, s, own_priv, remote_pub)
+  File "rat/python/rat.py", line 44, in send
+    signature = crypto.sign(text, own_priv)
+  File "/rat/python/crypto.py", line 103, in sign
+    signature = rsa.sign(msg.encode('utf8'), priv, HASH)
+UnicodeEncodeError: 'utf-8' codec can't encode character '\udcd0' in position 3: surrogates not allowed
+
+
+% is a special character in ini files #2 
+---
+Including a % in the status field of conf.ini crashes with '% must be followed by % or ('.
+
+
+rat ask is too permissive #3 
+---
+The username search was supposed to be a regex search while this is the current state.
+
+true username | search term | outcome
+miro | miro | found
+miro | mi | found!!
+miro | gsgse | not found
+
+
+Dropped clients not detected #4 
+---
+A dropped server is automatically detected but not a client. Perhaps a 1s hearthbeat signal?
+
+
+Host resolution #5 
+---
+Currently IPs passed from the command line are not cross-checked with /etc/hosts.
+
+
+Erratic prompt #6 
+---
+The prompt should represent who are you chatting with. Not only does it not do that, it also does not draw at the correct time. The threading model needs to be reconsidered.
+
+
+Create chatroom and logger bots #7 
+---
+And integrate them in the system.
+
+
+rat serve is inefficient #8 
+---
+./rat.py serve takes nearly 2 cores to just listen.
+
+
+A simple ping breaks ./rat.py listen #9 
+---
+With nmap -sn. The serve process survives though.
+
+
+Print info on new members or when someone leaves.
+
+
+Phonebook section in conf.ini with names and ip-s.
+
+
+When a client goes online or changes IP it multicasts it's friends.
