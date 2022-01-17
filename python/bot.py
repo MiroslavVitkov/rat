@@ -22,17 +22,17 @@ def curse():
             'reprobate', 'charlatan', 'evil-doer', 'ruffian', 'hoodlum',
             'hooligan', 'thug', 'delinquent', 'never-do-well', 'good-for-nothing',
             'malfeasant', 'misfeasor', 'infractor', 'knave', 'rake', 'crook',
-            'con baddie', 'shark', 'rat', 'snake', 'snake in the grass'
+            'con baddie', 'shark', 'rat', 'snake', 'snake in the grass',
             'dog', 'hound', 'louse', 'swine', 'scumbag', 'cretin', 'fool',
             'wrong and crim rotter', 'bounder', 'bad egg', 'stinker')
 
     insult = ( 'You '
-            + random.choice(adj) + ' '
-            + random.choice(adj) + ' '
-            + random.choice(adj) + ' '
-            + random.choice(noun)
-            + '!'
-            )
+             + random.choice(adj) + ' '
+             + random.choice(adj) + ' '
+             + random.choice(adj) + ' '
+             + random.choice(noun)
+             + '!'
+             )
 
     return insult
 
@@ -56,6 +56,20 @@ def interactive(input_queue):
 
 def relay():
     '''A chatroom - broadcasts any message it receives.'''
+    pass
+
+
+def recv_buff():
+    '''
+    File that records incoming but yet unread messages.
+    '''
+    pass
+
+
+def send_buff():
+    '''
+    File that records sent messages to people that were offline.
+    '''
     pass
 
 
