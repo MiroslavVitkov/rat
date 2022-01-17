@@ -40,16 +40,18 @@ def curse():
 def interactive(input_queue):
     '''
     Interactive (classical chat) operation.
-    Input is passed via a blocking queue.Queue() of size 1 for thread safety.
+    Input is passed via a blocking `multiprocessing.Queue`
+        of size 1, for thread safety.
     Output is produced in blocking mode via the yield keyword.
     We are running in our dedicated thread
         but should generally block on input_queue.empty().
     We don't pop() from it as there are probably other readers.
     '''
-    while(imput_queue.empty()):
+    while(input_queue.empty()):
         pass  # sleep around
-    assert(len(input_queue) == 1)
-    msg = input_queue[0]
+    assert(input_queue.qsize() == 1)
+    msg = input_queue.get()
+    input_queue.put(msg)  # not allowed to modify it
     #remote = input()
     return curse()
 
