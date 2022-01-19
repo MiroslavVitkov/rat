@@ -11,6 +11,9 @@ import time
 
 
 def curse():
+    '''
+    Random funny curses.
+    '''
     adj = ( 'abnormal', 'brainwashed', 'insufferable', 'propostorous'
           , 'silly', 'smelly', 'stupid')
     noun = ('miscreant', 'blackguard', 'criminal', 'lawbreaker', 'outlaw',
