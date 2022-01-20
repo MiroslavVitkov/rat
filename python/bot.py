@@ -13,6 +13,9 @@ import time
 def curse():
     '''
     Random funny curses.
+
+    in - none
+    out - return
     '''
     adj = ( 'abnormal', 'brainwashed', 'insufferable', 'propostorous'
           , 'silly', 'smelly', 'stupid')
@@ -49,6 +52,9 @@ def interactive(input_queue):
     We are running in our dedicated thread
         but should generally block on input_queue.empty().
     We don't pop() from it as there are probably other readers.
+
+    in - async(in Q)
+    out - async(out Q)
     '''
     while(input_queue.empty()):
         pass  # sleep around
@@ -59,14 +65,41 @@ def interactive(input_queue):
     return curse()
 
 
+def non_interactive():
+    '''
+    Example operation:
+    rat send <username> <some text>
+    rat get
+
+    Recommended to be used witha send and especially recv buffers.
+
+    in - param
+    out - return
+    '''
+
+
 def relay():
-    '''A chatroom - broadcasts any message it receives.'''
+    '''
+    A chatroom - broadcasts any message it receives.
+
+    in - async(in Q)
+    out - async(out Q)  !!!! how do we send to everyone?!?!
+    '''
     pass
 
 
 def recv_buff():
     '''
     File that records incoming but yet unread messages.
+
+    in - param
+    out - ?!??!?!?
+    '''
+    pass
+
+
+def recv_rambuff():
+    '''
     '''
     pass
 
@@ -79,7 +112,12 @@ def send_buff():
 
 
 def log():
-    '''A chat history logging utility.'''
+    '''
+    A chat history logging utility.
+
+    in - param
+    out - none (just appends a file)
+    '''
     pass
 
 
