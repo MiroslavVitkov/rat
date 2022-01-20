@@ -7,7 +7,8 @@ Refer to the README for dessign goals and usage.
 '''
 
 
-from multiprocessing import Queue
+# Thread safe; there's also multiprocessing.Queue for ... processes.
+from queue import Queue
 from threading import Thread
 import time
 
