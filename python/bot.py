@@ -9,18 +9,18 @@ because it could produce output(==send to remote peer) at any time.
 
 This module deals only with strings; they are passed/received via rat.py.
 
-Now how do we input(== receive from the remote peer) data?
+Overview of python synchronization primitives.
 - from queue import Queue as Q; q = Q(maxsize=1); q.put(); q.get(); q.qempty()
     Is thread safe but can't peek().
     Yet all bots expect to see the same message without pop()-ing.
 - from threading import Lock as L; l = L(); l.acquire(); l.release()
-    Is supposed to be crazy efficient but somewhat verbose.
-- from threading import Condition as C; c = C(); with c:; c.notify_all()
-    Too complex for input.
+    A semaphore of seize 1.
+- from threading import Condition as C; c = C(); c.wait(); c.notify_all()
+    wait() releases the lock and waits for a notify() to get it back.
 - from threading import Event as E; e = E(); e.set(); e.clear(); e.wait()
-    Because only rat.py should control the primitive this looks best.
+    Event gets fired continously.
 
-How do we output?
+Let's use queues for both input and output as simplest solution.
 '''
 
 
