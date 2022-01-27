@@ -61,6 +61,27 @@ def curse():
     return insult
 
 
+def handle_input( s: [sock.socket.socket]
+                 , own_priv: crypto.Priv
+                 , remote_pub: [crypto.Pub]
+                 , alive: bool=True
+                 ) -> None:
+    '''
+    Not a bot!
+    We need 2 threads to do simultaneous input and output.
+    So let's use the current thread for listening and spin an input one.
+    '''
+    def inp():
+        c = get_conf()['user']
+        pr = prompt.get(c['name'], c['group'])
+        while alive:
+            text = input(pr)
+            for ip, pub in zip(s, remote_pub):
+                send(text, ip, own_priv, pub)
+
+    return Thread(target=inp).start()
+
+
 def interactive(input_queue):
     '''
     Interactive (classical chat) operation.
@@ -79,7 +100,11 @@ def interactive(input_queue):
     assert(input_queue.qsize() == 1)
     msg = input_queue.get()
     input_queue.put(msg)  # not allowed to modify it
-    #remote = input()
+
+    prompt = '->'
+
+    # TODO: print text
+    out_thread = handle_input()
     return curse()
 
 
