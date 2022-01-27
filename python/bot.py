@@ -13,14 +13,14 @@ Overview of python synchronization primitives.
 - from queue import Queue as Q; q = Q(maxsize=1); q.put(); q.get(); q.qempty()
     Is thread safe but can't peek().
     Yet all bots expect to see the same message without pop()-ing.
+    Furthermore polling qempty() takes up a whole CPU core.
 - from threading import Lock as L; l = L(); l.acquire(); l.release()
     A semaphore of seize 1.
+    Implemented in low level module _thread.
 - from threading import Condition as C; c = C(); c.wait(); c.notify_all()
     wait() releases the lock and waits for a notify() to get it back.
 - from threading import Event as E; e = E(); e.set(); e.clear(); e.wait()
     Event gets fired continously.
-
-Let's use queues for both input and output as simplest solution.
 '''
 
 
