@@ -25,7 +25,25 @@ Overview of python synchronization primitives.
 
 
 import random
+from queue import Queue
+from threading import Conditional
 import time
+
+
+class InOut:
+    '''
+    Thread synchronised input and output to bots(from rat.py).
+    # TODO: write tests
+    '''
+    def __init__( in_cond: Conditional
+                , in_msg: str
+                , out_cond : Conditional
+                , out_msg_q: Queue
+                ):
+        me.in_cond = in_cond
+        me.in_msg - in_msg
+        me.out_cond = out_cond
+        me.out_msg_q = out_msg_q
 
 
 def curse():
