@@ -153,7 +153,6 @@ def spawn_bots() -> [Thread]:
     '''
     Invoke all bots requested in conf.ini.
     '''
-
     bot_threads = []
     for b in conf.get()['user']['bots'].split(','):
         b = b.strip() # remove whitespaces
@@ -168,14 +167,14 @@ def send_user( s: sock.socket.socket
     '''
     Every communication begins with exchanging User objects.
     '''
-        u = get_conf()['user']
-        ip = sock.Server(0, '').ip
-        user = name.User( u['name']
-                         , own_pub
-                         , ip
-                         , u['status'])
-        # TODO: encrypt this to prove it's really you that is updating your info.
-        s.sendall(user.to_bytes())
+    u = get_conf()['user']
+    ip = sock.Server(0, '').ip
+    user = name.User( u['name']
+                    , own_pub
+                    , ip
+                    , u['status'])
+    # TODO: encrypt this to prove it's really you that is updating your info.
+    s.sendall(user.to_bytes())
 
 
 def connect( ip: str
@@ -194,6 +193,22 @@ def connect( ip: str
                 break
 
         handle_input((s,), own_priv, (remote_user.pub,))
+
+        # TEST: spawn an interactive bot that only listens
+        inout = bot.InOut()
+        t = Thread(target=bot.interactive, args=[inout]).start()
+        while alive:
+            data = s.recv(1024)
+            packet = pack.Packet.from_bytes(data)
+            text = crypto.decrypt(packet.encrypted, own_priv)
+            crypto.verify(text, packet.signature, remote_user.pub)
+            inout.in_msg = text
+            with inout.in_cond:
+                inout.in_cond.notify_all()
+        return
+
+
+
 
         # Accept text messages.
         q = Queue(maxsize=1)

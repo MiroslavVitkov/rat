@@ -26,9 +26,11 @@ Overview of python synchronization primitives.
 
 
 import random
-from queue import Queue
+#from queue import Queue
 from threading import Condition, Thread
 import time
+
+from name import User
 
 
 class InOut:
@@ -36,10 +38,16 @@ class InOut:
     Thread synchronised input and output to bots(from rat.py).
     '''
     def __init__(me):
+        # Input from zero or one users.
+        me.sender = User(None, None, None)
         me.in_cond = Condition()
         me.in_msg = ''
+
+        # Output to zero or several users.
+        # Let's figure out the input and then we'll refine this mapping here.
+        me.recepients = [User(None, None, None)]
         me.out_cond = Condition()
-        me.out_msg_q = Queue()
+        me.out_msg = ['']
 
 
 def curse():
@@ -96,28 +104,18 @@ def handle_input( s#: [sock.socket.socket]
     return Thread(target=inp).start()
 
 
-def interactive(input_queue):
+def interactive(inout: InOut):
     '''
     Interactive (classical chat) operation.
-    Input is passed via a blocking `multiprocessing.Queue`
-        of size 1, for thread safety.
-    Output is produced in blocking mode via the yield keyword.
-    We are running in our dedicated thread
-        but should generally block on input_queue.empty().
-    We don't pop() from it as there are probably other readers.
-
-    in - async(in Q)
-    out - async(out Q)
+    We are running in our dedicated thread.
     '''
-    while(input_queue.empty()):
-        pass  # sleep around
-    assert(input_queue.qsize() == 1)
-    msg = input_queue.get()
-    input_queue.put(msg)  # not allowed to modify it
+    # Print the input we have just received.
+    with inout.in_cond:
+        inout.in_cond.wait()
+        print(inout.in_msg)
 
+    # Generate output message, todo.
     prompt = '->'
-
-    # TODO: print text
     out_thread = handle_input()
     return curse()
 
