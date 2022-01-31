@@ -19,6 +19,7 @@ Overview of python synchronization primitives.
     Implemented in low level module _thread.
 - from threading import Condition as C; c = C(); c.wait(); c.notify_all()
     wait() releases the lock and waits for a notify() to get it back.
+    Difference from Lock is both notify() and releasing the lock are needed.
 - from threading import Event as E; e = E(); e.set(); e.clear(); e.wait()
     Event gets fired continously.
 '''
@@ -26,24 +27,19 @@ Overview of python synchronization primitives.
 
 import random
 from queue import Queue
-from threading import Conditional
+from threading import Condition, Thread
 import time
 
 
 class InOut:
     '''
     Thread synchronised input and output to bots(from rat.py).
-    # TODO: write tests
     '''
-    def __init__( in_cond: Conditional
-                , in_msg: str
-                , out_cond : Conditional
-                , out_msg_q: Queue
-                ):
-        me.in_cond = in_cond
-        me.in_msg - in_msg
-        me.out_cond = out_cond
-        me.out_msg_q = out_msg_q
+    def __init__(me):
+        me.in_cond = Condition()
+        me.in_msg = ''
+        me.out_cond = Condition()
+        me.out_msg_q = Queue()
 
 
 def curse():
@@ -79,11 +75,11 @@ def curse():
     return insult
 
 
-def handle_input( s: [sock.socket.socket]
-                 , own_priv: crypto.Priv
-                 , remote_pub: [crypto.Pub]
-                 , alive: bool=True
-                 ) -> None:
+def handle_input( s#: [sock.socket.socket]
+                , own_priv#: crypto.Priv
+                , remote_pub#: [crypto.Pub]
+                , alive: bool=True
+                ) -> None:
     '''
     Not a bot!
     We need 2 threads to do simultaneous input and output.
@@ -183,9 +179,25 @@ def log():
 
 
 def test():
+    # Test curse() bot.
     for i in range(10):
         assert(len(curse()))
-    print('bot.py: ALL TESTS PASSED')
+
+    # Test InOut class.
+    inout = InOut()
+    def foo():
+        with inout.in_cond:
+            inout.in_cond.wait()
+            print(inout.in_msg)
+    t = Thread(target=foo)
+    t.start()
+    inout.in_msg = 'Some input message from the remote peer.'
+    with inout.in_cond:
+        inout.in_cond.notify_all()
+    t.join()
+
+    # We're done.
+    print('bot.py: ALL UNIT TESTS PASSED')
 
 
 if __name__ == '__main__':
