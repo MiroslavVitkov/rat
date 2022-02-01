@@ -136,19 +136,6 @@ def listen():
         server.alive = False
 
 
-def spawn_bots() -> [Thread]:
-    '''
-    Invoke all bots requested in conf.ini.
-    '''
-    bot_threads = []
-    for b in conf.get()['user']['bots'].split(','):
-        b = b.strip() # remove whitespaces
-        bot_func = getattr(bot, b)
-        t = Thread(target=bot_func, args=[]).start() # TODO: pass q
-        bot_threads.append(t)
-    return bot_threads
-
-
 def send_user( s: sock.socket.socket
              , own_pub: crypto.Pub ):
     '''
@@ -211,7 +198,7 @@ def connect( ip: str
             time.sleep(0.1)
 
             # TODO: mirror bot logic into serve()
-            bot_threads = spawn_bots(q)
+            bot_threads = bot.spawn_bots(q)
             assert(q.full())
             q.get()  # drop()
 

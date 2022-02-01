@@ -10,6 +10,7 @@ from configparser import ConfigParser
 
 
 def get(path: str='../conf.ini', c: list=[]):
+    # PROBLEM: fails if invoked from not rat/python!!!
     '''
     Use like:
         get_conf()['section_name']['setting_name']
