@@ -13,26 +13,13 @@ from threading import Thread
 import time
 
 import bot
+import conf
 import crypto
 import name
 import pack
 import prompt
 import port
 import sock
-
-
-def get_conf(path: str='../conf.ini', c: list=[]):
-    '''
-    Use like:
-        get_conf()['section_name']['setting_name']
-    '''
-    if not len(c):
-        from configparser import ConfigParser
-        c_ = ConfigParser()
-        c_.read(path)
-        c.append(c_)
-
-    return c[0]
 
 
 def serve():
@@ -104,7 +91,7 @@ def handle_input( s: [sock.socket.socket]
     So let's use the current thread for listening and spin an input one.
     '''
     def inp():
-        c = get_conf()['user']
+        c = conf.get()['user']
         pr = prompt.get(c['name'], c['group'])
         while alive:
             text = input(pr)
@@ -167,7 +154,7 @@ def send_user( s: sock.socket.socket
     '''
     Every communication begins with exchanging User objects.
     '''
-    u = get_conf()['user']
+    u = conf.get()['user']
     ip = sock.Server(0, '').ip
     user = name.User( u['name']
                     , own_pub
