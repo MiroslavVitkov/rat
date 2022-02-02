@@ -95,10 +95,10 @@ def register(ip, own_pub):
         serv = sock.Server(0, lambda: 0)
         serv.alive = False
         ip = serv.ip
-        u = name.User( get_conf()['user']['name']
+        u = name.User( conf.get()['user']['name']
                      , own_pub
                      , ip
-                     , get_conf()['user']['status'])
+                     , conf.get()['user']['status'])
         s.sendall(u.to_bytes())
     c = sock.Client(ip=ip, port=port.NAMESERVER, func=func)
 
@@ -274,7 +274,7 @@ if __name__ == '__main__':
 
     elif sys.argv[1] == 'register':
         if len(sys.argv) >= 3:
-            _, own_pub = crypto.read_keypair(get_conf()['user']['keypath'])
+            _, own_pub = crypto.read_keypair(conf.get()['user']['keypath'])
             register(sys.argv[2], own_pub)  # TODO: allow multiple server IPs
         else:
             print('Provide the IP of the nameserver!')
@@ -290,7 +290,7 @@ if __name__ == '__main__':
 
     elif sys.argv[1] == 'connect':
         if len(sys.argv) == 3:
-            priv, pub = crypto.read_keypair(get_conf()['user']['keypath'])
+            priv, pub = crypto.read_keypair(conf.get()['user']['keypath'])
             connect(sys.argv[2], priv, pub)
         else:
             print('Provide the IP to connect to, it must be listening!')
