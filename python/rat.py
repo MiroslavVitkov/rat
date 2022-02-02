@@ -23,6 +23,64 @@ import port
 import sock
 
 
+### Helpers.
+def handshake(s: sock.socket.socket, own_pub: crypto.Pub) -> crypto.Pub:
+    '''Exchange public keys in cleartext!'''
+    while True:
+        data = s.recv(1024)
+        if data:
+            remote_pub = crypto.Pub.load_pkcs1(data)
+            s.sendall(own_pub.save_pkcs1())
+            return remote_pub
+
+
+def send_( text: str
+        , s: sock.socket.socket
+        , own_priv: crypto.Priv
+        , remote_pub: crypto.Pub
+        ) -> None:
+    signature = crypto.sign(text, own_priv)
+    encrypted = crypto.encrypt(text, remote_pub)
+    msg = pack.Packet(encrypted, signature).to_bytes()
+    s.sendall(msg)
+
+
+def handle_input( s: [sock.socket.socket]
+                , own_priv: crypto.Priv
+                , remote_pub: [crypto.Pub]
+                , alive: bool=True
+                ) -> None:
+    '''
+    We need 2 threads to do simultaneous input and output.
+    So let's use the current thread for listening and spin an input one.
+    '''
+    def inp():
+        c = conf.get()['user']
+        pr = prompt.get(c['name'], c['group'])
+        while alive:
+            text = input(pr)
+            for ip, pub in zip(s, remote_pub):
+                send_(text, ip, own_priv, pub)
+
+    Thread(target=inp).start()
+
+
+def send_user( s: sock.socket.socket
+             , own_pub: crypto.Pub ):
+    '''
+    Every communication begins with exchanging User objects.
+    '''
+    u = conf.get()['user']
+    ip = sock.Server(0, '').ip
+    user = name.User( u['name']
+                    , own_pub
+                    , ip
+                    , u['status'])
+    # TODO: encrypt this to prove it's really you that is updating your info.
+    s.sendall(user.to_bytes())
+
+
+### Command handlers.
 def serve():
     '''
     Run a nameserver forever.
@@ -61,47 +119,6 @@ def ask(regex, ip, timeout=5):
     c = sock.Client(ip[0], port=port.NAMESERVER, func=func)
 
 
-def handshake(s: sock.socket.socket, own_pub: crypto.Pub) -> crypto.Pub:
-    '''Exchange public keys in cleartext!'''
-    while True:
-        data = s.recv(1024)
-        if data:
-            remote_pub = crypto.Pub.load_pkcs1(data)
-            s.sendall(own_pub.save_pkcs1())
-            return remote_pub
-
-
-def send( text: str
-        , s: sock.socket.socket
-        , own_priv: crypto.Priv
-        , remote_pub: crypto.Pub
-        ) -> None:
-    signature = crypto.sign(text, own_priv)
-    encrypted = crypto.encrypt(text, remote_pub)
-    msg = pack.Packet(encrypted, signature).to_bytes()
-    s.sendall(msg)
-
-
-def handle_input( s: [sock.socket.socket]
-                , own_priv: crypto.Priv
-                , remote_pub: [crypto.Pub]
-                , alive: bool=True
-                ) -> None:
-    '''
-    We need 2 threads to do simultaneous input and output.
-    So let's use the current thread for listening and spin an input one.
-    '''
-    def inp():
-        c = conf.get()['user']
-        pr = prompt.get(c['name'], c['group'])
-        while alive:
-            text = input(pr)
-            for ip, pub in zip(s, remote_pub):
-                send(text, ip, own_priv, pub)
-
-    Thread(target=inp).start()
-
-
 def listen():
         own_priv, own_pub = crypto.generate_keypair()
         remote_sockets = []
@@ -135,21 +152,6 @@ def listen():
         server = sock.Server(port.CHATSERVER, forever)
         time.sleep(10)
         server.alive = False
-
-
-def send_user( s: sock.socket.socket
-             , own_pub: crypto.Pub ):
-    '''
-    Every communication begins with exchanging User objects.
-    '''
-    u = conf.get()['user']
-    ip = sock.Server(0, '').ip
-    user = name.User( u['name']
-                    , own_pub
-                    , ip
-                    , u['status'])
-    # TODO: encrypt this to prove it's really you that is updating your info.
-    s.sendall(user.to_bytes())
 
 
 def connect( ip: str
@@ -205,10 +207,18 @@ def connect( ip: str
 
         while False:
              insult = bot.curse()
-             send(insult, s, own_priv, remote_pub)
+             send_(insult, s, own_priv, remote_pub)
              time.sleep(bot.random.randint(1,8))
 
     client = sock.Client(ip, port.CHATSERVER, func)
+
+
+def send():
+    pass
+
+
+def get():
+    pass
 
 
 def test():
