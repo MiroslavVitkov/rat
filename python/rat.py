@@ -10,6 +10,7 @@ Refer to the README for dessign goals and usage.
 # Thread safe; there's also multiprocessing.Queue for ... processes.
 from queue import Queue
 from threading import Thread
+import sys
 import time
 
 import bot
@@ -240,8 +241,10 @@ def print_help():
 
         chatting
         ---
-            rat listen - accept incoming chats
-            rat connect <ip> - start chatting if they are listening
+            rat listen - accept incoming chats, interactively
+            rat connect <ip> - start chatting if they are listening, interactively
+            rat send <ip> <msg> - send a message and shut down
+            rat get [<ip>] - read accumulated messages and shut down
 
         miscellaneous
         ---
@@ -253,41 +256,55 @@ def print_help():
 
 
 if __name__ == '__main__':
-    import sys
-
-    if len(sys.argv) < 2 or sys.argv[1] == 'help':
+    if len(sys.argv) < 2 or sys.argv[1] == 'help' or sys.argv[1] == '?':
         print_help()
-
-    elif sys.argv[1] == 'generate':
-        assert(len(sys.argv) == 3)
-        keypath = sys.argv[2]
-        priv, pub = crypto.generate_keypair()
-        crypto.write_keypair(priv, pub, keypath)
 
     elif sys.argv[1] == 'serve':
         serve()
 
     elif sys.argv[1] == 'register':
-        _, own_pub = crypto.read_keypair(get_conf()['user']['keypath'])
-        register(sys.argv[2], own_pub)
+        if len(sys.argv) >= 3:
+            _, own_pub = crypto.read_keypair(get_conf()['user']['keypath'])
+            register(sys.argv[2], own_pub)  # TODO: allow multiple server IPs
+        else:
+            print('Provide the IP of the nameserver!')
 
     elif sys.argv[1] == 'ask':
         if len(sys.argv) >= 4:
             ask(sys.argv[2], sys.argv[3:len(sys.argv)])
         else:
-            print('To query namserververs please provide your regex and their IPs.')
+            print('Provide your regex followed by nameserver IPs!')
 
     elif sys.argv[1] == 'listen':
         listen()
+
     elif sys.argv[1] == 'connect':
-        priv, pub = crypto.read_keypair(get_conf()['user']['keypath'])
-        connect(sys.argv[2], priv, pub)
-    elif sys.argv[1] == 'test':
-        test()
+        if len(sys.argv) == 3:
+            priv, pub = crypto.read_keypair(get_conf()['user']['keypath'])
+            connect(sys.argv[2], priv, pub)
+        else:
+            print('Provide the IP to connect to, it must be listening!')
+
     elif sys.argv[1] == 'send':
-        pass  # send argv2 some message
+        if len(sys.argv) >= 3:
+            pass  # send argv2 some message
+        else:
+            print('Provide a destination IP and a message!')
+
     elif sys.argv[1] == 'get':
         pass  # pop all accumulated messages from the reveice buffer
+
+    elif sys.argv[1] == 'generate':
+        if len(sys.argv) == 3:
+            keypath = sys.argv[2]
+            priv, pub = crypto.generate_keypair()
+            crypto.write_keypair(priv, pub, keypath)
+        else:
+            print('Provide path for the generated key!')
+
+    elif sys.argv[1] == 'test':
+        test()
+
     else:
         print(sys.argv[1], '- command not recognised')
         print_help()
