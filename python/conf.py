@@ -7,10 +7,21 @@ Config file perser.
 
 
 from configparser import ConfigParser
+import os
 
 
-def get(path: str='../conf.ini', c: list=[]):
-    # PROBLEM: fails if invoked from not rat/python!!!
+def where_are_we():
+    '''
+    Return path to the dir containing this file.
+    Otherwise relative paths are relative to the working dir
+    and that is the dir the script was invoked from.
+    '''
+    file_path = os.path.realpath(__file__)
+    dir_path = os.path.dirname(file_path)
+    return dir_path
+
+
+def get(path: str=where_are_we()+'/../conf.ini', c: list=[]):
     '''
     Use like:
         get_conf()['section_name']['setting_name']
