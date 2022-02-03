@@ -300,7 +300,11 @@ if __name__ == '__main__':
             print('Provide a destination IP and a message!')
 
     elif sys.argv[1] == 'get':
-        pass  # pop all accumulated messages from the reveice buffer
+        if 'recv_buff' in conf.get()['user']['bots']:
+            pass
+        else:
+            print('To enable this command you must both enable recv_buff bot'
+                  'and keep a running `rat listen` instance.')
 
     elif sys.argv[1] == 'generate':
         if len(sys.argv) == 3:
