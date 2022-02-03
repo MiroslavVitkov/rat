@@ -150,8 +150,6 @@ def listen():
 
         handle_input(remote_sockets, own_priv, remote_keys)
         server = sock.Server(port.CHATSERVER, forever)
-        time.sleep(10)
-        server.alive = False
 
 
 def connect( ip: str
