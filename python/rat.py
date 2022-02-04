@@ -182,6 +182,7 @@ def connect( ip: str
 
 
         # TEST: spawn an interactive bot that only listens
+        return
         inout = bot.InOut()
         t = Thread(target=bot.interactive, args=[inout]).start()
         while alive:
@@ -193,27 +194,6 @@ def connect( ip: str
             with inout.in_cond:
                 inout.in_cond.notify_all()
         return
-
-
-
-
-        # Accept text messages.
-        q = Queue(maxsize=1)
-        while alive:
-            data = s.recv(MAX_MSG_BYTES)  # TODO: handle longer packets
-            if data:
-                packet = Packet.from_bytes(data)
-                text = crypto.decrypt(packet.encrypted, own_priv)
-                crypto.verify(text, packet.signature, remote_user.pub)
-                assert(q.empty())
-                q.put(text)
-                #print(text)
-            time.sleep(0.1)
-
-            # TODO: mirror bot logic into serve()
-            bot_threads = bot.spawn_bots(q)
-            assert(q.full())
-            q.get()  # drop()
 
         while False:
              insult = bot.curse()

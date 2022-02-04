@@ -131,7 +131,7 @@ def interactive(inout: InOut):
 
     # Generate output message, todo.
     prompt = '->'
-    out_thread = handle_input()
+    #out_thread = handle_input()
     return curse()
 
 
