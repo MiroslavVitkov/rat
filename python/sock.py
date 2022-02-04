@@ -25,6 +25,10 @@ import threading
 import time
 
 
+# Stiching of multi-part messages has not been implemented.
+MAX_MSG_BYTES = 1024
+
+
 class Server:
     '''
     Anticipate connections forever. Mind your firewall.
@@ -115,7 +119,7 @@ def test():
         timeout = 20
         while True:
             time.sleep(0.1)
-            d = s.recv(1024)
+            d = s.recv(MAX_MSG_BYTES)
             if d:
                 print('received', len(d), 'bytes:', d)
                 timeout += 20

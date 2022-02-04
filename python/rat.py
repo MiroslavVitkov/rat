@@ -18,6 +18,7 @@ import conf
 import crypto
 import name
 import pack
+import pack import Packet, MAX_MSG_BYTES
 import prompt
 import port
 import sock
@@ -27,7 +28,7 @@ import sock
 def handshake(s: sock.socket.socket, own_pub: crypto.Pub) -> crypto.Pub:
     '''Exchange public keys in cleartext!'''
     while True:
-        data = s.recv(1024)
+        data = s.recv(MAX_MSG_BYTES)
         if data:  # Prevent zero-length packets.
             remote_pub = crypto.Pub.load_pkcs1(data)
             s.sendall(own_pub.save_pkcs1())
@@ -110,7 +111,7 @@ def ask(regex, ip, timeout=5):
         s.settimeout(timeout)
         while True:
             try:
-                data = s.recv(1024)
+                data = s.recv(MAX_MSG_BYTES)
                 print(name.User.from_bytes(data))
                 return
             except:
@@ -127,7 +128,7 @@ def listen():
         def forever(s):
             # Handshake.
             while True:
-                data = s.recv(1024)
+                data = s.recv(MAX_MSG_BYTES)
                 if data:
                     remote_user = name.User.from_bytes(data)
                     remote_sockets.append(s)
@@ -139,10 +140,10 @@ def listen():
 
             # Accept text messages.
             while True:
-                data = s.recv(1024)
+                data = s.recv(MAX_MSG_BYTES)
                 if data:
-                    assert(len(data) < 1024)
-                    packet = pack.Packet.from_bytes(data)
+                    assert(len(data) < MAX_MSG_BYTES)
+                    packet = Packet.from_bytes(data)
                     text = crypto.decrypt(packet.encrypted, own_priv)
                     crypto.verify(text, packet.signature, remote_user.pub)
                     print(text)
@@ -161,7 +162,7 @@ def connect( ip: str
         # Exchange public keys.
         send_user(s, own_pub)
         while alive:
-            data = s.recv(1024)
+            data = s.recv(MAX_MSG_BYTES)
             if data:
                 remote_user = name.User.from_bytes(data)
                 print('The server identifies as', remote_user)
@@ -171,7 +172,7 @@ def connect( ip: str
 
         # TEST: let's abandon interactive as a bot and just do it here
         while alive:
-            data = s.recv(1024)  # TODO: handle longer packets
+            data = s.recv(MAX_MSG_BYTES)  # TODO: handle longer packets
             if data:
                 packet = pack.Packet.from_bytes(data)
                 text = crypto.decrypt(packet.encrypted, own_priv)

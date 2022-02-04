@@ -19,6 +19,7 @@ import time
 
 import conf
 import crypto
+from pack import MAX_MSG_BYTES
 import port
 import sock
 
@@ -47,7 +48,7 @@ class User:
 
     def to_bytes(me) -> bytes:
         b = pickle.dumps(me)
-        assert(len(b) < 1024)
+        assert(len(b) < MAX_MSG_BYTES)
         return b
 
 
