@@ -19,8 +19,8 @@ import time
 
 import conf
 import crypto
-from pack import MAX_MSG_BYTES
 import port
+from sock import MAX_MSG_BYTES
 import sock
 
 

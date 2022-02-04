@@ -7,8 +7,6 @@ Refer to the README for dessign goals and usage.
 '''
 
 
-# Thread safe; there's also multiprocessing.Queue for ... processes.
-from queue import Queue
 from threading import Thread
 import sys
 import time
@@ -18,10 +16,11 @@ import conf
 import crypto
 import name
 import pack
-import pack import Packet, MAX_MSG_BYTES
+from pack import Packet
 import prompt
 import port
 import sock
+from sock import MAX_MSG_BYTES
 
 
 ### Helpers.
@@ -42,7 +41,7 @@ def send_( text: str
         ) -> None:
     signature = crypto.sign(text, own_priv)
     encrypted = crypto.encrypt(text, remote_pub)
-    msg = pack.Packet(encrypted, signature).to_bytes()
+    msg = Packet(encrypted, signature).to_bytes()
     s.sendall(msg)
 
 
@@ -168,13 +167,14 @@ def connect( ip: str
                 print('The server identifies as', remote_user)
                 break
 
+        # Send messages to the remote peer.
         handle_input((s,), own_priv, (remote_user.pub,))
 
-        # TEST: let's abandon interactive as a bot and just do it here
+        # Receive messages from the remote peer.
         while alive:
-            data = s.recv(MAX_MSG_BYTES)  # TODO: handle longer packets
+            data = s.recv(MAX_MSG_BYTES)
             if data:
-                packet = pack.Packet.from_bytes(data)
+                packet = Packet.from_bytes(data)
                 text = crypto.decrypt(packet.encrypted, own_priv)
                 crypto.verify(text, packet.signature, remote_user.pub)
                 print(text)
@@ -185,8 +185,8 @@ def connect( ip: str
         inout = bot.InOut()
         t = Thread(target=bot.interactive, args=[inout]).start()
         while alive:
-            data = s.recv(1024)
-            packet = pack.Packet.from_bytes(data)
+            data = s.recv(MAX_MSG_BYTES)
+            packet = Packet.from_bytes(data)
             text = crypto.decrypt(packet.encrypted, own_priv)
             crypto.verify(text, packet.signature, remote_user.pub)
             inout.in_msg = text
@@ -200,9 +200,9 @@ def connect( ip: str
         # Accept text messages.
         q = Queue(maxsize=1)
         while alive:
-            data = s.recv(1024)  # TODO: handle longer packets
+            data = s.recv(MAX_MSG_BYTES)  # TODO: handle longer packets
             if data:
-                packet = pack.Packet.from_bytes(data)
+                packet = Packet.from_bytes(data)
                 text = crypto.decrypt(packet.encrypted, own_priv)
                 crypto.verify(text, packet.signature, remote_user.pub)
                 assert(q.empty())
