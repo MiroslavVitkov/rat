@@ -48,7 +48,7 @@ class Packet:
         start = end
         end = end + len_signature
         signature = b[start:end]
-        assert(end == len(b))
+        assert end == len(b), (end, len(b))
 
         return cls(encrypted, signature)
 
@@ -75,7 +75,7 @@ class Packet:
 
     @classmethod
     def _bytes_to_int(cls, b: bytes):
-        assert(len(b) == cls.INT_WIDTH)
+        assert len(b) == cls.INT_WIDTH, (len(b), cls.INT_WIDTH)
         i = int.from_bytes(b, byteorder=cls.ENDIANNESS, signed=False)
         return i
 
@@ -95,7 +95,7 @@ def test():
     b = pack.to_bytes()
     # Now the binary blob gets transmitted hopefully unchanged.
     newpack = Packet.from_bytes(b)
-    assert(newpack == pack)
+    assert newpack == pack
     print('pack.py: ALL TESTS PASSED')
 
 

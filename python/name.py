@@ -42,13 +42,13 @@ class User:
     @classmethod
     def from_bytes(cls, b: bytes):
         obj = pickle.loads(b)
-        assert(type(obj) == cls)
+        assert type(obj) == cls, (type(obj), cls)
         return obj
 
 
     def to_bytes(me) -> bytes:
         b = pickle.dumps(me)
-        assert(len(b) < MAX_MSG_BYTES)
+        assert len(b) < MAX_MSG_BYTES, (len(b), MAX_MSG_BYTES)
         return b
 
 
@@ -72,7 +72,7 @@ def handshake(s: socket.socket) -> User:
         data = s.recv(1024)
         if data:
             remote_user = pickle.loads(data)
-            assert(type(remote_user) == type(User))
+            assert type(remote_user) == User, type(remote_user)
             return remote_user
         else:
             time.sleep(0.2)
@@ -89,7 +89,7 @@ class Server:
 
 
     def register(me, u: User):
-        assert(type(u) == User)
+        assert type(u) == User, type(u)
         me.users[u.pub] = u
 
 
@@ -105,7 +105,7 @@ class Server:
                 # This could be an `ask` or a `register` request.
                 try:
                     remote_user = User.from_bytes(data)
-                    assert(type(remote_user) == User)
+                    assert type(remote_user) == User, type(remote_user)
                     me.register(remote_user)
                     print('New user registered:', remote_user)
                     print('Now there are', len(me.users), 'registered users.\n')

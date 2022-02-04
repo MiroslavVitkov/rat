@@ -57,7 +57,7 @@ class Server:
 
 
     def _listen(me, port: int, func: callable):
-        assert(port >= 0 and port <= 2**16-1)
+        assert port >= 0 and port <= 2**16-1, port
 
         try:
             # Requires python > 3.7. Same for the client below.

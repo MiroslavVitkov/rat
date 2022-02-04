@@ -140,8 +140,9 @@ def listen():
             # Accept text messages.
             while True:
                 data = s.recv(MAX_MSG_BYTES)
+                print('PUTKA', len(data))
                 if data:
-                    assert(len(data) < MAX_MSG_BYTES)
+                    assert len(data) < MAX_MSG_BYTES, (len(data), MAX_MSG_BYTES)
                     packet = Packet.from_bytes(data)
                     text = crypto.decrypt(packet.encrypted, own_priv)
                     crypto.verify(text, packet.signature, remote_user.pub)
