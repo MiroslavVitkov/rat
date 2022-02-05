@@ -88,34 +88,28 @@ class Server:
 
 
     def _handle(me, s: socket.socket):
-        while me.alive:
+        for data in sock.recv(s, me.alive):
+        # This could be an `ask` or a `register` request.
             try:
-                data = s.recv(1024)  # TODO: use sock.recv()
+                remote_user = User.from_bytes(data)
+                assert type(remote_user) == User, type(remote_user)
+                me.register(remote_user)
+                print('New user registered:', remote_user)
+                print('Now there are', len(me.users), 'registered users.\n')
             except:
-                # Perhaps the user disconnected.
-                pass
-            if data:
-                # This could be an `ask` or a `register` request.
-                try:
-                    remote_user = User.from_bytes(data)
-                    assert type(remote_user) == User, type(remote_user)
-                    me.register(remote_user)
-                    print('New user registered:', remote_user)
-                    print('Now there are', len(me.users), 'registered users.\n')
-                except:
-                    regex = data.decode('utf-8')
-                    print(s.getsockname(), 'is asking for', regex)
-                    r = re.compile(regex)
-                    matches = [me.users[u] for u in me.users
-                               if r.match(me.users[u].name)]
-                    for u in matches:
-                        try:
-                            bytes = pickle.dumps(u)
-                            s.sendall(bytes)
-                        except:
-                            # Perhaps the user disconnected?
-                            continue
-                    continue
+                regex = data.decode('utf-8')
+                print(s.getsockname(), 'is asking for', regex)
+                r = re.compile(regex)
+                matches = [me.users[u] for u in me.users
+                           if r.match(me.users[u].name)]
+                for u in matches:
+                    try:
+                        bytes = pickle.dumps(u)
+                        s.sendall(bytes)
+                    except:
+                        # Perhaps the user disconnected? TODO: kill the socket then
+                        continue
+
         me.server.alive = me.alive  # Kill the parent server.
 
 
