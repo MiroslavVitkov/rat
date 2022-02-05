@@ -28,7 +28,7 @@ import time
 MAX_MSG_BYTES = 1024
 
 
-def send( s: socket.Socket
+def send( s: socket.socket
         , bytes: bytes ):
     '''
     '''
@@ -38,12 +38,12 @@ def send( s: socket.Socket
     s.sendall(bytes)
 
 
-def recv( s: socket.Socket
+def recv( s: socket.socket
         , alive: bool=True ) -> str:
     '''
     Accepts packets on a socket until retminated.
     '''
-    while(alive)
+    while(alive):
         data = s.recv(MAX_MSG_BYTES)
         assert len(bytes) < MAX_MSG_BYTES, ( 'Stitching of multi-part messages '
                                              'has not been implemented.' )
@@ -52,9 +52,9 @@ def recv( s: socket.Socket
             yield data
 
 
-def recv_one(s: socket.Socket):
+def recv_one(s: socket.socket):
     alive = True
-    data = s.recv()
+    data = s.recv(MAX_MSG_BYTES)
     alive = False
     return data
 

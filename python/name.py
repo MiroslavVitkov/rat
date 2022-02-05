@@ -47,7 +47,7 @@ class User:
 
     def to_bytes(me) -> bytes:
         b = pickle.dumps(me)
-        assert len(b) < MAX_MSG_BYTES, (len(b), MAX_MSG_BYTES)
+        assert len(b) < sock.MAX_MSG_BYTES, len(b)
         return b
 
 
@@ -90,7 +90,7 @@ class Server:
     def _handle(me, s: socket.socket):
         while me.alive:
             try:
-                data = s.recv(1024)
+                data = s.recv(1024)  # TODO: use sock.recv()
             except:
                 # Perhaps the user disconnected.
                 pass

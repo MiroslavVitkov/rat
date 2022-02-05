@@ -123,7 +123,7 @@ def listen():
 
         def forever(s):
             # Handshake.
-            data = sock.recv_one()
+            data = sock.recv_one(s)
             remote_user = name.User.from_bytes(data)
             remote_sockets.append(s)
             remote_keys.append(remote_user.pub)
@@ -132,8 +132,7 @@ def listen():
             s.sendall(us.to_bytes())
 
             # Accept text messages.
-            for data in sock.recv():
-                assert len(data) < MAX_MSG_BYTES, (len(data), MAX_MSG_BYTES)
+            for data in sock.recv(s):
                 packet = Packet.from_bytes(data)
                 text = crypto.decrypt(packet.encrypted, own_priv)
                 crypto.verify(text, packet.signature, remote_user.pub)
@@ -151,25 +150,20 @@ def connect( ip: str
     def func(s: sock.socket.socket):
         # Exchange public keys.
         send_user(s, own_pub)
-        while alive:
-            data = s.recv(MAX_MSG_BYTES)
-            if data:
-                remote_user = name.User.from_bytes(data)
-                print('The server identifies as', remote_user)
-                break
+
+        data = sock.recv_one(s)
+        remote_user = name.User.from_bytes(data)
+        print('The server identifies as', remote_user)
 
         # Send messages to the remote peer.
         handle_input((s,), own_priv, (remote_user.pub,))
 
         # Receive messages from the remote peer.
-        while alive:
-            data = s.recv(MAX_MSG_BYTES)
-            if data:
-                packet = Packet.from_bytes(data)
-                text = crypto.decrypt(packet.encrypted, own_priv)
-                crypto.verify(text, packet.signature, remote_user.pub)
-                print(text)
-            time.sleep(0.1)
+        for data in sock.recv(s):
+            packet = Packet.from_bytes(data)
+            text = crypto.decrypt(packet.encrypted, own_priv)
+            crypto.verify(text, packet.signature, remote_user.pub)
+            print(text)
 
 
         # TEST: spawn an interactive bot that only listens
