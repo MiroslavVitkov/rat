@@ -45,8 +45,8 @@ def recv( s: socket.socket
     '''
     while(alive):
         data = s.recv(MAX_MSG_BYTES)
-        assert len(bytes) < MAX_MSG_BYTES, ( 'Stitching of multi-part messages '
-                                             'has not been implemented.' )
+        assert len(data) < MAX_MSG_BYTES, ( 'Stitching of multi-part messages '
+                                            'has not been implemented.' )
         # Ignore empty packets.
         if data:
             yield data
