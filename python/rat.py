@@ -123,14 +123,13 @@ def listen():
 
         def forever(s):
             # Handshake.
-            data = sock.recv_one():
+            data = sock.recv_one()
             remote_user = name.User.from_bytes(data)
             remote_sockets.append(s)
             remote_keys.append(remote_user.pub)
             ip = sock.Server(0, '').ip
             us = name.User('a chat server', own_pub, ip, 'wellcome')  # TODO: read conf
             s.sendall(us.to_bytes())
-            break
 
             # Accept text messages.
             for data in sock.recv():

@@ -80,7 +80,6 @@ class Server:
     def __init__(me):
         me.users = {}
         me.server = sock.Server(port.NAMESERVER, me._handle)
-        me.server.alive = True
 
 
     def register(me, u: User):
@@ -90,7 +89,6 @@ class Server:
 
     def _handle(me, s: socket.socket):
         while me.alive:
-            me.server.alive = me.alive
             try:
                 data = s.recv(1024)
             except:
@@ -118,6 +116,7 @@ class Server:
                             # Perhaps the user disconnected?
                             continue
                     continue
+        me.server.alive = me.alive  # Kill the parent server.
 
 
 def test():
@@ -129,7 +128,6 @@ def test():
     s.register(u)
     print(s.users)
     s.alive = False
-    s.server.alive = False
     print('crypto.py: ALL TESTS PASSED')
 
 
