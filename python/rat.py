@@ -20,18 +20,15 @@ from pack import Packet
 import prompt
 import port
 import sock
-from sock import MAX_MSG_BYTES
 
 
 ### Helpers.
 def handshake(s: sock.socket.socket, own_pub: crypto.Pub) -> crypto.Pub:
     '''Exchange public keys in cleartext!'''
-    while True:
-        data = s.recv(MAX_MSG_BYTES)
-        if data:  # Prevent zero-length packets.
-            remote_pub = crypto.Pub.load_pkcs1(data)
-            s.sendall(own_pub.save_pkcs1())
-            return remote_pub
+    data = sock.recv_one()
+    remote_pub = crypto.Pub.load_pkcs1(data)
+    s.sendall(own_pub.save_pkcs1())
+    return remote_pub
 
 
 def send_( text: str
@@ -110,7 +107,7 @@ def ask(regex, ip, timeout=5):
         s.settimeout(timeout)
         while True:
             try:
-                data = s.recv(MAX_MSG_BYTES)
+                data = s.recv(4296)  # TODO
                 print(name.User.from_bytes(data))
                 return
             except:
@@ -126,28 +123,22 @@ def listen():
 
         def forever(s):
             # Handshake.
-            while True:
-                data = s.recv(MAX_MSG_BYTES)
-                if data:
-                    remote_user = name.User.from_bytes(data)
-                    remote_sockets.append(s)
-                    remote_keys.append(remote_user.pub)
-                    ip = sock.Server(0, '').ip
-                    us = name.User('a chat server', own_pub, ip, 'wellcome')
-                    s.sendall(us.to_bytes())
-                    break
+            data = sock.recv_one():
+            remote_user = name.User.from_bytes(data)
+            remote_sockets.append(s)
+            remote_keys.append(remote_user.pub)
+            ip = sock.Server(0, '').ip
+            us = name.User('a chat server', own_pub, ip, 'wellcome')  # TODO: read conf
+            s.sendall(us.to_bytes())
+            break
 
             # Accept text messages.
-            while True:
-                data = s.recv(MAX_MSG_BYTES)
-                print('PUTKA', len(data))
-                if data:
-                    assert len(data) < MAX_MSG_BYTES, (len(data), MAX_MSG_BYTES)
-                    packet = Packet.from_bytes(data)
-                    text = crypto.decrypt(packet.encrypted, own_priv)
-                    crypto.verify(text, packet.signature, remote_user.pub)
-                    print(text)
-                time.sleep(0.1)
+            for data in sock.recv():
+                assert len(data) < MAX_MSG_BYTES, (len(data), MAX_MSG_BYTES)
+                packet = Packet.from_bytes(data)
+                text = crypto.decrypt(packet.encrypted, own_priv)
+                crypto.verify(text, packet.signature, remote_user.pub)
+                print(text)
 
         handle_input(remote_sockets, own_priv, remote_keys)
         server = sock.Server(port.CHATSERVER, forever)

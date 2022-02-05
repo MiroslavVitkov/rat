@@ -20,7 +20,6 @@ import time
 import conf
 import crypto
 import port
-from sock import MAX_MSG_BYTES
 import sock
 
 
@@ -68,14 +67,10 @@ def handshake(s: socket.socket) -> User:
     The server and the client open a socket each.
     Those last until closed by one side.
     '''
-    while True:
-        data = s.recv(1024)
-        if data:
-            remote_user = pickle.loads(data)
-            assert type(remote_user) == User, type(remote_user)
-            return remote_user
-        else:
-            time.sleep(0.2)
+    data = sock.recv_one(s)
+    remote_user = pickle.loads(data)
+    assert type(remote_user) == User, type(remote_user)
+    return remote_user
 
 
 class Server:
