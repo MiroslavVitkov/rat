@@ -25,8 +25,38 @@ import threading
 import time
 
 
-# Stiching of multi-part messages has not been implemented.
 MAX_MSG_BYTES = 1024
+
+
+def send( s: socket.Socket
+        , bytes: bytes ):
+    '''
+    '''
+    # Reserve the top value for a "or longer" flag.
+    assert len(bytes) < MAX_MAS_BYTES, ( 'Stitching of multi-part messages '
+                                         'has not been implemented.' )
+    s.sendall(bytes)
+
+
+def recv( s: socket.Socket
+        , alive: bool=True ) -> str:
+    '''
+    Accepts packets on a socket until retminated.
+    '''
+    while(alive)
+        data = s.recv(MAX_MSG_BYTES)
+        assert len(bytes) < MAX_MSG_BYTES, ( 'Stitching of multi-part messages '
+                                             'has not been implemented.' )
+        # Ignore empty packets.
+        if data:
+            yield data
+
+
+def recv_one(s: socket.Socket):
+    alive = True
+    data = s.recv()
+    alive = False
+    return data
 
 
 class Server:
