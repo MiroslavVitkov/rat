@@ -103,12 +103,15 @@ class Server:
                 try:
                     r = re.compile(regex)
                 except:
-                    err_msg = b'Invalid regular expression!'
-                    s.sendall(err_msg)
+                    s.sendall(b'Invalid regular expression!')
                     continue
 
                 matches = [me.users[u] for u in me.users
                            if r.match(me.users[u].name)]
+                if not len(matches):
+                    s.sendall(b'No matches!')
+                    continue
+
                 for u in matches:
                     try:
                         bytes = pickle.dumps(u)

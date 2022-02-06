@@ -100,19 +100,17 @@ def register(ip, own_pub):
     c = sock.Client(ip=ip, port=port.NAMESERVER, func=func)
 
 
-def ask(regex, ip, timeout=5):
+def ask(regex, ip):
     '''Request a list of matching userames from a nameserver.'''
     def func(s: sock.socket.socket):
         s.sendall(regex.encode('utf-8', regex))
-        s.settimeout(timeout)
-        while True:
-            try:
-                data = s.recv(4296)  # TODO
-                print(name.User.from_bytes(data))
-                return
-            except:
-                # Probably timed out.
-                return
+        data = sock.recv_one(s)
+        try:
+            print(name.User.from_bytes(data))
+        except:
+            # The server reported an error.
+            print(data)
+
     c = sock.Client(ip[0], port=port.NAMESERVER, func=func)
 
 
