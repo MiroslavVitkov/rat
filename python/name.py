@@ -100,7 +100,13 @@ class Server:
             except:
                 regex = data.decode('utf-8')
                 print(s.getsockname(), 'is asking for', regex)
-                r = re.compile(regex)
+                try:
+                    r = re.compile(regex)
+                except:
+                    err_msg = b'Invalid regular expression!'
+                    s.sendall(err_msg)
+                    continue
+
                 matches = [me.users[u] for u in me.users
                            if r.match(me.users[u].name)]
                 for u in matches:
