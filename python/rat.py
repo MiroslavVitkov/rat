@@ -163,26 +163,6 @@ def connect( ip: str
             crypto.verify(text, packet.signature, remote_user.pub)
             print(text)
 
-
-        # TEST: spawn an interactive bot that only listens
-        return
-        inout = bot.InOut()
-        t = Thread(target=bot.interactive, args=[inout]).start()
-        while alive:
-            data = s.recv(MAX_MSG_BYTES)
-            packet = Packet.from_bytes(data)
-            text = crypto.decrypt(packet.encrypted, own_priv)
-            crypto.verify(text, packet.signature, remote_user.pub)
-            inout.in_msg = text
-            with inout.in_cond:
-                inout.in_cond.notify_all()
-        return
-
-        while False:
-             insult = bot.curse()
-             send_(insult, s, own_priv, remote_pub)
-             time.sleep(bot.random.randint(1,8))
-
     client = sock.Client(ip, port.CHATSERVER, func)
 
 
