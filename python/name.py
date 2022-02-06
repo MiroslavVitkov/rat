@@ -80,6 +80,7 @@ class Server:
     def __init__(me):
         me.users = {}
         me.server = sock.Server(port.NAMESERVER, me._handle)
+        me.alive = True
 
 
     def register(me, u: User):
