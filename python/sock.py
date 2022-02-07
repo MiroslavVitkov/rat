@@ -61,9 +61,9 @@ def recv( s: socket.socket
 
 def recv_one(s: socket.socket):
     alive = True
-    data = s.recv(MAX_MSG_BYTES)
-    alive = False
-    return data
+    for data in recv(s, alive):
+        alive = False
+        return data
 
 
 def get_extern_ip() -> str:
