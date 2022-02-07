@@ -66,6 +66,11 @@ def recv_one(s: socket.socket):
     return data
 
 
+def get_extern_ip() -> str:
+    ip = requests.get('https://api.ipify.org').text
+    return ip
+
+
 class Server:
     '''
     Anticipate connections forever. Mind your firewall.
@@ -83,7 +88,7 @@ class Server:
 
 
     def __init__(me, port: int=0, func: callable=None):
-        me.ip = me._get_extern_ip()
+        me.ip = get_extern_ip()
         me.port = port
         me.alive = True
         threading.Thread( target=me._listen
@@ -128,11 +133,6 @@ class Server:
                 yield conn, addr
             except socket.timeout as e:
                 pass
-
-
-    def _get_extern_ip(me):
-        ip = requests.get('https://api.ipify.org').text
-        return ip
 
 
 class Client:

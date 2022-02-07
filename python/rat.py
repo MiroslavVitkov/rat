@@ -68,10 +68,9 @@ def send_user( s: sock.socket.socket
     Every communication begins with exchanging User objects.
     '''
     u = conf.get()['user']
-    ip = sock.Server(0, '').ip
     user = name.User( u['name']
                     , own_pub
-                    , ip
+                    , sock.get_extern_ip()
                     , u['status'])
     # TODO: encrypt this to prove it's really you that is updating your info.
     s.sendall(user.to_bytes())
@@ -125,7 +124,7 @@ def listen():
             remote_user = name.User.from_bytes(data)
             remote_sockets.append(s)
             remote_keys.append(remote_user.pub)
-            ip = sock.Server(0, '').ip
+            ip = sock.get_extern_ip()
             us = name.User('a chat server', own_pub, ip, 'wellcome')  # TODO: read conf
             s.sendall(us.to_bytes())
 

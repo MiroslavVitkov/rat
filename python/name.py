@@ -114,7 +114,7 @@ def test():
     s = Server()
     u = User( conf.get()['user']['name']
             , crypto.read_keypair()[1]
-            , sock.Server().ip
+            , sock.get_extern_ip()
             , conf.get()['user']['status'])
     s.register(u)
     print(s.users)
