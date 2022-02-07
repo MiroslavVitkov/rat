@@ -117,10 +117,10 @@ def listen() -> None:
 
 
 def connect( ip: str
-           , own_priv: crypto.Priv
-           , own_pub: crypto.Pub
            , alive: bool=True
            ) -> None:
+    own_priv, own_pub = crypto.read_keypair(conf.get()['user']['keypath'])
+
     def func(s: sock.socket.socket):
         # Exchange public keys.
         send_user(s, own_pub)
@@ -219,8 +219,7 @@ if __name__ == '__main__':
 
     elif sys.argv[1] == 'connect':
         if len(sys.argv) == 3:
-            priv, pub = crypto.read_keypair(conf.get()['user']['keypath'])
-            connect(sys.argv[2], priv, pub)
+            connect(sys.argv[2])
         else:
             print('Provide the IP to connect to, it must be listening!')
 
