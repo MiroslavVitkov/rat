@@ -49,7 +49,7 @@ def handle_input( s: [sock.socket.socket]
 
 
 def send_user( s: sock.socket.socket
-             , own_pub: crypto.Pub ):
+             , own_pub: crypto.Pub ) -> None:
     '''
     Every communication begins with exchanging User objects.
     '''
@@ -63,7 +63,7 @@ def send_user( s: sock.socket.socket
 
 
 ### Command handlers.
-def serve():
+def serve() -> None:
     '''
     Run a nameserver forever.
     On the standard port.
@@ -72,13 +72,13 @@ def serve():
     s = name.Server()
 
 
-def register(ip, own_pub):
+def register(ip, own_pub) -> None:
     def func(s: sock.socket.socket):
         send_user(s, own_pub)
     c = sock.Client(ip=ip, port=port.NAMESERVER, func=func)
 
 
-def ask(regex, ip):
+def ask(regex, ip) -> None:
     '''Request a list of matching userames from a nameserver.'''
     def func(s: sock.socket.socket):
         s.sendall(regex.encode('utf-8', regex))
@@ -92,7 +92,7 @@ def ask(regex, ip):
     c = sock.Client(ip[0], port=port.NAMESERVER, func=func)
 
 
-def listen():
+def listen() -> None:
         own_priv, own_pub = crypto.generate_keypair()
         remote_sockets = []
         remote_keys = []
@@ -120,7 +120,7 @@ def connect( ip: str
            , own_priv: crypto.Priv
            , own_pub: crypto.Pub
            , alive: bool=True
-           ):
+           ) -> None:
     def func(s: sock.socket.socket):
         # Exchange public keys.
         send_user(s, own_pub)
@@ -142,15 +142,15 @@ def connect( ip: str
     client = sock.Client(ip, port.CHATSERVER, func)
 
 
-def send():
+def send() -> None:
     pass
 
 
-def get():
+def get() -> None:
     pass
 
 
-def test():
+def test() -> None:
     sock.test()
     crypto.test()
     pack.test()
@@ -168,7 +168,7 @@ def test():
     sys.exit()
 
 
-def print_help():
+def print_help() -> None:
     h = '''
         Usage:
 
