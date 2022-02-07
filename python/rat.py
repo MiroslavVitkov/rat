@@ -23,17 +23,6 @@ import sock
 
 
 ### Helpers.
-def send_( text: str
-        , s: sock.socket.socket
-        , own_priv: crypto.Priv
-        , remote_pub: crypto.Pub
-        ) -> None:
-    signature = crypto.sign(text, own_priv)
-    encrypted = crypto.encrypt(text, remote_pub)
-    msg = Packet(encrypted, signature).to_bytes()
-    s.sendall(msg)
-
-
 def handle_input( s: [sock.socket.socket]
                 , own_priv: crypto.Priv
                 , remote_pub: [crypto.Pub]
@@ -51,9 +40,10 @@ def handle_input( s: [sock.socket.socket]
             # Forbid sending empty messages because they DOS the remote peer
             # (the remote network buffer gets clogged).
             # Perhaps a better alternative is to insert a delay in send()?
+            # Because what we see on the screen is different from the peer's?
             if text:
                 for ip, pub in zip(s, remote_pub):
-                    send_(text, ip, own_priv, pub)
+                    sock.send(text, ip, own_priv, pub)
 
     Thread(target=inp).start()
 

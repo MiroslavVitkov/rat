@@ -18,24 +18,29 @@ time.sleep() is the current workaround.
 '''
 
 
-from concurrent.futures import ThreadPoolExecutor
 import requests
 import socket
 import threading
 import time
 
+import crypto
+
 
 MAX_MSG_BYTES = 1024
 
 
-def send( s: socket.socket
-        , bytes: bytes ):
-    '''
-    '''
+def send( text: str
+        , s: socket.socket
+        , own_priv: crypto.Priv
+        , remote_pub: crypto.Pub
+        ) -> None:
+    signature = crypto.sign(text, own_priv)
+    encrypted = crypto.encrypt(text, remote_pub)
+    msg = Packet(encrypted, signature).to_bytes()
     # Reserve the top value for a "or longer" flag.
-    assert len(bytes) < MAX_MAS_BYTES, ( 'Stitching of multi-part messages '
-                                         'has not been implemented.' )
-    s.sendall(bytes)
+    assert len(msg) < MAX_MSG_BYTES, ( 'Stitching of multi-part messages '
+                                       'has not been implemented.' )
+    s.sendall(msg)
 
 
 def recv( s: socket.socket
