@@ -33,7 +33,8 @@ def generate_keypair(bits: int=1024) -> Keypair:
 
 def write_keypair( priv: rsa.key.PrivateKey
                  , pub: rsa.key.PublicKey=None
-                 , p: Path=conf.get()['user']['keypath']):
+                 , p: Path=conf.get()['user']['keypath']
+                 ) -> None:
     '''Obviously this function violates the RAM-only constraint.'''
     p = Path(p)
     if p.exists():
@@ -46,7 +47,7 @@ def write_keypair( priv: rsa.key.PrivateKey
             f.write(pub.save_pkcs1())
 
 
-def regenerate_pub(path_priv: Path=conf.get()['user']['keypath']):
+def regenerate_pub(path_priv: Path=conf.get()['user']['keypath']) -> None:
     os.run('ssh-keygen -y -f ' + path_priv
           + ' > ' + path_priv + '.pub')
 
@@ -113,7 +114,7 @@ def verify(msg: str, signature: bytes, pub: Pub):
     rsa.verify(msg.encode('utf8'), signature, pub)
 
 
-def test():
+def test() -> None:
     priv, pub = generate_keypair()
     p = Path('/tmp/whatever' + str(random.randint(0, 1e6)))
     write_keypair(priv, pub, p)

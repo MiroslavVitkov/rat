@@ -31,7 +31,7 @@ class Packet:
 
 
     @classmethod
-    def from_bytes(cls, b: bytes):
+    def from_bytes(cls, b: bytes) -> 'Packet':
         '''Alternative ctor.'''
         start = 0
         end = Packet.INT_WIDTH
@@ -62,7 +62,7 @@ class Packet:
 
 
     @staticmethod
-    def _get_local_endianness():
+    def _get_local_endianness() -> str:
         import sys
         return sys.byteorder
 
@@ -74,20 +74,20 @@ class Packet:
 
 
     @classmethod
-    def _bytes_to_int(cls, b: bytes):
+    def _bytes_to_int(cls, b: bytes) -> int:
         assert len(b) == cls.INT_WIDTH, (len(b), cls.INT_WIDTH)
         i = int.from_bytes(b, byteorder=cls.ENDIANNESS, signed=False)
         return i
 
 
-    def __eq__(me, other):
+    def __eq__(me, other) -> bool:
         return (me.len_encrypted == other.len_encrypted
             and me.encrypted == other.encrypted
             and me.len_signature == other.len_signature
             and me.signature == other.signature)
 
 
-def test():
+def test() -> None:
     '''Let`s limit ourselves to ASCII text shorter than 24MB.'''
     msg = b'super!!!!secreT!!*&%#!!.' * int(1e6)
     sign = b'DUMMY_SiGnaTure?!'

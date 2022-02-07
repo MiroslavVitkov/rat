@@ -6,5 +6,5 @@ Provide an interactive but machine parsable experience.
 '''
 
 
-def get(name, group):
+def get(name, group) -> str:
         return (name + '@' + group + '-> ')

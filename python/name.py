@@ -39,7 +39,7 @@ class User:
 
 
     @classmethod
-    def from_bytes(cls, b: bytes):
+    def from_bytes(cls, b: bytes) -> 'User':
         obj = pickle.loads(b)
         assert type(obj) == cls, (type(obj), cls)
         return obj
@@ -51,7 +51,7 @@ class User:
         return b
 
 
-    def __repr__(me):
+    def __repr__(me) -> str:
         pub = str(me.pub.save_pkcs1())
         return ( '\n'
                + 'nickname: ' + me.name + '\n'
@@ -70,12 +70,12 @@ class Server:
         me.alive = True
 
 
-    def register(me, u: User):
+    def register(me, u: User) -> None:
         assert type(u) == User, type(u)
         me.users[u.pub] = u
 
 
-    def _handle(me, s: socket.socket):
+    def _handle(me, s: socket.socket) -> None:
         for data in sock.recv(s, me.alive):
         # This could be an `ask` or a `register` request.
             try:
@@ -110,7 +110,7 @@ class Server:
         me.server.alive = me.alive  # Kill the parent server.
 
 
-def test():
+def test() -> None:
     s = Server()
     u = User( conf.get()['user']['name']
             , crypto.read_keypair()[1]
