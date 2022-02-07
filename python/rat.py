@@ -142,8 +142,19 @@ def connect( ip: str
     client = sock.Client(ip, port.CHATSERVER, func)
 
 
-def send() -> None:
-    pass
+def send( ip: str, msg: str) -> None:
+    own_priv, own_pub = crypto.read_keypair(conf.get()['user']['keypath'])
+
+    def func(s: sock.socket.socket):
+        # Exchange public keys.
+        send_user(s, own_pub)
+        data = sock.recv_one(s)
+        remote = name.User.from_bytes(data)
+
+        # Transmit the message and die.
+        sock.send(text, remote.ip, own_priv, remote.pub)
+
+    client = sock.Client(ip, port.CHATSERVER, func)
 
 
 def get() -> None:
@@ -161,7 +172,7 @@ def test() -> None:
     Thread(target=listen).start()
     time.sleep(1)
     priv, pub = crypto.generate_keypair()
-    Thread(target=connect, args=['localhost', priv, pub]).start()
+    Thread(target=connect, args=['localhost']).start()
     time.sleep(2)
     print('INTEGRATION TEST PASSED')
     print()
@@ -225,7 +236,9 @@ if __name__ == '__main__':
 
     elif sys.argv[1] == 'send':
         if len(sys.argv) >= 3:
-            pass  # send argv2 some message
+            # No need for '' around the message.
+            msg = ' '.join(argv[3:])
+            send(argv[2], msg)
         else:
             print('Provide a destination IP and a message!')
 
