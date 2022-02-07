@@ -53,3 +53,10 @@ Tested On
 - raspbian
 - mint
 - ububtu
+
+
+Development Notes
+---
+To exclude conf.ini from staging run
+`echo 'conf.ini' >> .git/info/exclude`
+`git update-index --assume-unchanged conf.ini`
