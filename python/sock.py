@@ -51,6 +51,13 @@ def recv( s: socket.socket
         if data:
             yield data
 
+        # For some unfantomable reason
+        # after the first connection is established (e.g. rat register)
+        # CPU usage rises to 100% or even 200%.
+        # The reason is that .recv() returns zero-length packets.
+        # This is a workaround until the issue has been figured out.
+        time.sleep(0.1)
+
 
 def recv_one(s: socket.socket):
     alive = True
