@@ -154,12 +154,8 @@ def test():
     # It would be nice to incorporate most of the complexity into the class.
     def listen(s):
         timeout = 20
-        while True:
-            time.sleep(0.1)
-            d = s.recv(MAX_MSG_BYTES)
-            if d:
-                print('received', len(d), 'bytes:', d)
-                timeout += 20
+        for data in recv(s):
+            print('received', len(data), 'bytes:', data)
             timeout -= 1
             if timeout == 0:
                 return
@@ -171,7 +167,6 @@ def test():
 
     port = 42666
     s = Server(port, listen)
-    import time
     time.sleep(1)
     c = Client('localhost', port, yell)
     time.sleep(1)
