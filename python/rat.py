@@ -23,14 +23,6 @@ import sock
 
 
 ### Helpers.
-def handshake(s: sock.socket.socket, own_pub: crypto.Pub) -> crypto.Pub:
-    '''Exchange public keys in cleartext!'''
-    data = sock.recv_one()
-    remote_pub = crypto.Pub.load_pkcs1(data)
-    s.sendall(own_pub.save_pkcs1())
-    return remote_pub
-
-
 def send_( text: str
         , s: sock.socket.socket
         , own_priv: crypto.Priv
