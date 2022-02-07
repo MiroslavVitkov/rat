@@ -89,13 +89,13 @@ def serve():
 
 def register(ip, own_pub):
     def func(s: sock.socket.socket):
-        serv = sock.Server(0, lambda: 0)
+        serv = sock.Server()
         serv.alive = False
         ip = serv.ip
         u = name.User( conf.get()['user']['name']
                      , own_pub
                      , ip
-                     , conf.get()['user']['status'])
+                     , conf.get()['user']['status'] )
         s.sendall(u.to_bytes())
     c = sock.Client(ip=ip, port=port.NAMESERVER, func=func)
 

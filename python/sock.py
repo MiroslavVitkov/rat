@@ -75,7 +75,7 @@ class Server:
     MAX_THREADS = 20
 
 
-    def __init__(me, port: int, func: callable):
+    def __init__(me, port: int=0, func: callable=None):
         me.ip = me._get_extern_ip()
         me.port = port
         me.alive = True
