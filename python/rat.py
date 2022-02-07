@@ -48,8 +48,12 @@ def handle_input( s: [sock.socket.socket]
         pr = prompt.get(c['name'], c['group'])
         while alive:
             text = input(pr)
-            for ip, pub in zip(s, remote_pub):
-                send_(text, ip, own_priv, pub)
+            # Forbid sending empty messages because they DOS the remote peer
+            # (the remote network buffer gets clogged).
+            # Perhaps a better alternative is to insert a delay in send()?
+            if text:
+                for ip, pub in zip(s, remote_pub):
+                    send_(text, ip, own_priv, pub)
 
     Thread(target=inp).start()
 
