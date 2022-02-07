@@ -60,19 +60,6 @@ class User:
                + 'status: ' + me.status)
 
 
-def handshake(s: socket.socket) -> User:
-    '''
-    The client has obtained the server's ip and public key via another medium.
-    They initiate a connection on port.CHATSERVER.
-    The server and the client open a socket each.
-    Those last until closed by one side.
-    '''
-    data = sock.recv_one(s)
-    remote_user = pickle.loads(data)
-    assert type(remote_user) == User, type(remote_user)
-    return remote_user
-
-
 class Server:
     '''
     The client has obtained the nameserver's ip and public key via another medium.
