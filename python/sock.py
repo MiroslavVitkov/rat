@@ -24,6 +24,7 @@ import threading
 import time
 
 import crypto
+import port
 
 
 MAX_MSG_BYTES = 1024
@@ -64,7 +65,7 @@ def recv( s: socket.socket
         time.sleep(0.1)
 
 
-def recv_one(s: socket.socket):
+def recv_one(s: socket.socket) -> bytes:
     alive = True
     for data in recv(s, alive):
         alive = False
@@ -103,7 +104,7 @@ class Server:
         print('Server listening on ip', me.ip, 'port', me.port)
 
 
-    def _listen(me, port: int, func: callable):
+    def _listen(me, port: int, func: callable) -> None:
         assert port >= 0 and port <= 2**16-1, port
 
         try:
@@ -152,11 +153,7 @@ class Client:
         func(s)
 
 
-def test():
-    port = 42666
-
-    # Thread handlers are difficult to write.
-    # It would be nice to incorporate most of the complexity into the class.
+def test() -> None:
     def listen(s):
         timeout = 20
         for data in recv(s):
@@ -170,10 +167,9 @@ def test():
             msg = 'This is the' + str(i) + 'th message!'
             s.sendall(msg.encode('utf8'))
 
-    port = 42666
-    s = Server(port, listen)
+    s = Server(port.CHATSERVER, listen)
     time.sleep(1)
-    c = Client('localhost', port, yell)
+    c = Client('localhost', port.CHATSERVER, yell)
     time.sleep(1)
     s.alive = False
     print('sock.py: ALL TESTS PASSED')
