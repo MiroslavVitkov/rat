@@ -24,6 +24,7 @@ import threading
 import time
 
 import crypto
+import pack
 import port
 
 
@@ -37,7 +38,7 @@ def send( text: str
         ) -> None:
     signature = crypto.sign(text, own_priv)
     encrypted = crypto.encrypt(text, remote_pub)
-    msg = Packet(encrypted, signature).to_bytes()
+    msg = pack.Packet(encrypted, signature).to_bytes()
     # Reserve the top value for a "or longer" flag.
     assert len(msg) < MAX_MSG_BYTES, ( 'Stitching of multi-part messages '
                                        'has not been implemented.' )

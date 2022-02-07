@@ -142,7 +142,7 @@ def connect( ip: str
     client = sock.Client(ip, port.CHATSERVER, func)
 
 
-def send( ip: str, msg: str) -> None:
+def send( ip: str, text: str) -> None:
     own_priv, own_pub = crypto.read_keypair(conf.get()['user']['keypath'])
 
     def func(s: sock.socket.socket):
@@ -152,7 +152,7 @@ def send( ip: str, msg: str) -> None:
         remote = name.User.from_bytes(data)
 
         # Transmit the message and die.
-        sock.send(text, remote.ip, own_priv, remote.pub)
+        sock.send(text, s, own_priv, remote.pub)
 
     client = sock.Client(ip, port.CHATSERVER, func)
 
@@ -237,8 +237,8 @@ if __name__ == '__main__':
     elif sys.argv[1] == 'send':
         if len(sys.argv) >= 3:
             # No need for '' around the message.
-            msg = ' '.join(argv[3:])
-            send(argv[2], msg)
+            msg = ' '.join(sys.argv[3:])
+            send(sys.argv[2], msg)
         else:
             print('Provide a destination IP and a message!')
 
