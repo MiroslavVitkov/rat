@@ -34,19 +34,6 @@ from name import User
 
 
 ### Helpers.
-def spawn_bots() -> [Thread]:
-    '''
-    Invoke all bots requested in conf.ini.
-    '''
-    bot_threads = []
-    for b in conf.get()['user']['bots'].split(','):
-        b = b.strip() # remove whitespaces
-        bot_func = getattr(bot, b)
-        t = Thread(target=bot_func, args=[]).start() # TODO: pass q
-        bot_threads.append(t)
-    return bot_threads
-
-
 class InOut:
     '''
     Thread synchronised input and output to bots(from rat.py).
@@ -62,6 +49,19 @@ class InOut:
         me.recepients = [User(None, None, None)]
         me.out_cond = Condition()
         me.out_msg = ['']
+
+
+def spawn_bots(inout: InOut) -> [Thread]:
+    '''
+    Invoke all bots requested in conf.ini.
+    '''
+    bot_threads = []
+    for b in conf.get()['user']['bots'].split(','):
+        b = b.strip()  # remove whitespaces
+        bot_func = getattr(bot, b)
+        t = Thread(target=bot_func, args=[inout]).start()
+        bot_threads.append(t)
+    return bot_threads
 
 
 ### Actual bots.
