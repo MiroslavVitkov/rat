@@ -98,27 +98,6 @@ def curse(inout: InOut):
     return insult
 
 
-def handle_input( s#: [sock.socket.socket]
-                , own_priv#: crypto.Priv
-                , remote_pub#: [crypto.Pub]
-                , alive: bool=True
-                ) -> None:
-    '''
-    Not a bot!
-    We need 2 threads to do simultaneous input and output.
-    So let's use the current thread for listening and spin an input one.
-    '''
-    def inp():
-        c = get_conf()['user']
-        pr = prompt.get(c['name'], c['group'])
-        while alive:
-            text = input(pr)
-            for ip, pub in zip(s, remote_pub):
-                send(text, ip, own_priv, pub)
-
-    return Thread(target=inp).start()
-
-
 def interactive(inout: InOut):
     '''
     Interactive (classical chat) operation.
