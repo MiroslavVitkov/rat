@@ -65,7 +65,7 @@ def spawn_bots(inout: InOut) -> [Thread]:
 
 
 ### Actual bots.
-def curse():
+def curse(inout: InOut):
     '''
     Random funny curses.
 
@@ -135,7 +135,7 @@ def interactive(inout: InOut):
     return curse()
 
 
-def non_interactive():
+def non_interactive(inout: InOut):
     '''
     Example operation:
     rat send <username> <some text>
@@ -148,7 +148,7 @@ def non_interactive():
     '''
 
 
-def relay():
+def relay(inout: InOut):
     '''
     A chatroom - broadcasts any message it receives.
 
@@ -158,7 +158,7 @@ def relay():
     pass
 
 
-def recv_buff():
+def recv_buff(inout: InOut):
     '''
     File that records incoming but yet unread messages.
 
@@ -168,20 +168,20 @@ def recv_buff():
     pass
 
 
-def recv_rambuff():
+def recv_rambuff(inout: InOut):
     '''
     '''
     pass
 
 
-def send_buff():
+def send_buff(inout: InOut):
     '''
     File that records sent messages to people that were offline.
     '''
     pass
 
 
-def log():
+def log(inout: InOut):
     '''
     A chat history logging utility.
 
