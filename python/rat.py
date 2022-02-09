@@ -106,10 +106,18 @@ def listen() -> None:
             send_user(s, own_pub)
 
             # Accept text messages.
+            inout = bot.InOut()
             for data in sock.recv(s):
                 packet = Packet.from_bytes(data)
                 text = crypto.decrypt(packet.encrypted, own_priv)
                 crypto.verify(text, packet.signature, remote_user.pub)
+
+                # Inform bots of the new input.
+                inout.in_msg = text
+                with inout.in_cond:
+                    inout.in_cond.notify_all()
+
+                # Show the text. Should this be a bot?
                 print(text)
 
         handle_input(remote_sockets, own_priv, remote_keys)
@@ -122,9 +130,8 @@ def connect( ip: str
     own_priv, own_pub = crypto.read_keypair(conf.get()['user']['keypath'])
 
     def func(s: sock.socket.socket):
-        # Exchange public keys.
+        # Exchange name.User() objects(basically public keys).
         send_user(s, own_pub)
-
         data = sock.recv_one(s)
         remote_user = name.User.from_bytes(data)
         print('The server identifies as', remote_user)

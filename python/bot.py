@@ -170,6 +170,7 @@ def log(inout: InOut):
     pass
 
 
+### Tests.
 def test():
     # Test curse() bot.
     for i in range(10):
