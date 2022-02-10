@@ -92,38 +92,7 @@ def ask(regex, ip) -> None:
     c = sock.Client(ip[0], port=port.NAMESERVER, func=func)
 
 
-def listen() -> None:
-        own_priv, own_pub = crypto.generate_keypair()
-        remote_sockets = []
-        remote_keys = []
-
-        def forever(s):
-            # Handshake.
-            data = sock.recv_one(s)
-            remote_user = name.User.from_bytes(data)
-            remote_sockets.append(s)
-            remote_keys.append(remote_user.pub)
-            send_user(s, own_pub)
-
-            # Accept text messages.
-            inout = bot.InOut()
-            for data in sock.recv(s):
-                packet = Packet.from_bytes(data)
-                text = crypto.decrypt(packet.encrypted, own_priv)
-                crypto.verify(text, packet.signature, remote_user.pub)
-
-                # Inform bots of the new input.
-                inout.in_msg = text
-                with inout.in_cond:
-                    inout.in_cond.notify_all()
-
-                # Show the text. Should this be a bot?
-                print(text)
-
-        handle_input(remote_sockets, own_priv, remote_keys)
-        server = sock.Server(port.CHATSERVER, forever)
-
-def relay() -> None:
+def listen(relay: bool=False) -> None:
         own_priv, own_pub = crypto.generate_keypair()
         remote_sockets = []
         remote_keys = []
@@ -152,9 +121,10 @@ def relay() -> None:
                 print(text)
 
                 # Relay operation.
-                for socket, key in zip(remote_sockets, remote_keys):
-                    if socket != s:
-                        sock.send(text, socket, own_priv, key)
+                if(relay):
+                    for socket, key in zip(remote_sockets, remote_keys):
+                        if socket != s:
+                            sock.send(text, socket, own_priv, key)
 
         handle_input(remote_sockets, own_priv, remote_keys)
         server = sock.Server(port.CHATSERVER, forever)
@@ -273,7 +243,7 @@ if __name__ == '__main__':
         listen()
 
     elif sys.argv[1] == 'relay':
-        relay()
+        listen(relay=True)
 
     elif sys.argv[1] == 'connect':
         if len(sys.argv) == 3:
