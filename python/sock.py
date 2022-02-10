@@ -158,7 +158,7 @@ def test() -> None:
     def listen(s):
         timeout = 20
         for data in recv(s):
-            print('received', len(data), 'bytes:', data)
+            assert data and len(data)
             timeout -= 1
             if timeout == 0:
                 return
