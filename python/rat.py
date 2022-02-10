@@ -96,6 +96,8 @@ def listen(relay: bool=False) -> None:
         own_priv, own_pub = crypto.generate_keypair()
         remote_sockets = []
         remote_keys = []
+        inout = bot.InOut()
+        bots = bot.spawn_bots(inout)
 
         def forever(s):
             # Handshake.
@@ -106,7 +108,6 @@ def listen(relay: bool=False) -> None:
             send_user(s, own_pub)
 
             # Accept text messages.
-            inout = bot.InOut()
             for data in sock.recv(s):
                 packet = Packet.from_bytes(data)
                 text = crypto.decrypt(packet.encrypted, own_priv)

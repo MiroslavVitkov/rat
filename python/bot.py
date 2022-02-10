@@ -26,10 +26,10 @@ Overview of python synchronization primitives.
 
 
 import random
-#from queue import Queue
 from threading import Condition, Thread
 import time
 
+import conf
 from name import User
 
 
@@ -58,10 +58,11 @@ def spawn_bots(inout: InOut) -> [Thread]:
     bot_threads = []
     for b in conf.get()['user']['bots'].split(','):
         b = b.strip()  # remove whitespaces
-        bot_func = getattr(bot, b)
+        bot_func = globals()[b]
         t = Thread(target=bot_func, args=[inout]).start()
         bot_threads.append(t)
     return bot_threads
+
 
 
 ### Actual bots.
@@ -137,14 +138,19 @@ def relay(inout: InOut):
     pass
 
 
-def recv_buff(inout: InOut):
+def recv_filebuf(inout: InOut):
     '''
     File that records incoming but yet unread messages.
 
     in - param
     out - ?!??!?!?
     '''
-    pass
+    path = '/tmp/recv_filebuff'
+    while True:
+        with open(path, 'a') as f:
+            with inout.in_cond:
+                inout.in_cond.wait()
+                f.write(inout.in_msg + '\n')
 
 
 def recv_rambuff(inout: InOut):
