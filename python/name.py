@@ -90,13 +90,15 @@ class Server:
                 try:
                     r = re.compile(regex)
                 except:
-                    s.sendall(b'Invalid regular expression!')
+                    sock.send( b'Invalid regular expression!'
+                             , s, own_priv, remote_pub )
                     continue
 
                 matches = [me.users[u] for u in me.users
                            if r.match(me.users[u].name)]
                 if not len(matches):
-                    s.sendall(b'No matches!')
+                    sock.send( b'No matches!', s
+                             , s, own_priv, remote_pub )
                     continue
 
                 for u in matches:
