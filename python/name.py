@@ -28,11 +28,13 @@ class User:
     '''
     def __init__( me
                 , name: str
+                , group: str
                 , pub: crypto.Pub
                 , ip: [str]
                 , status: str=''
                 ):
         me.name = name
+        me.group = group
         me.pub = pub
         me.ip = ip
         me.status = status
@@ -55,6 +57,7 @@ class User:
         pub = str(me.pub.save_pkcs1())
         return ( '\n'
                + 'nickname: ' + me.name + '\n'
+               + 'group: ' + me.group + '\n'
                + 'public key: ' + pub + '\n'
                + 'IP: ' + me.ip + '\n'
                + 'status: ' + me.status)
@@ -115,6 +118,7 @@ class Server:
 def test() -> None:
     s = Server()
     u = User( conf.get()['user']['name']
+            , conf.get()['user']['group']
             , crypto.read_keypair()[1]
             , sock.get_extern_ip()
             , conf.get()['user']['status'])

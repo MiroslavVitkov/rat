@@ -55,6 +55,7 @@ def send_user( s: sock.socket.socket
     '''
     u = conf.get()['user']
     user = name.User( u['name']
+                    , u['group']
                     , own_pub
                     , sock.get_extern_ip()
                     , u['status'])
@@ -119,7 +120,9 @@ def listen(relay: bool=False) -> None:
                     inout.in_cond.notify_all()
 
                 # Show the text. Should this be a bot?
-                print(text)
+                print(prompt.get( remote_user.name
+                                , remote_user.group)
+                     + text)
 
                 # Relay operation.
                 if(relay):

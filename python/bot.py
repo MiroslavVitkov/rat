@@ -40,13 +40,13 @@ class InOut:
     '''
     def __init__(me):
         # Input from zero or one users.
-        me.sender = User(None, None, None)
+        me.sender = User(None, None, None, None, None)
         me.in_cond = Condition()
         me.in_msg = ''
 
         # Output to zero or several users.
         # Let's figure out the input and then we'll refine this mapping here.
-        me.recepients = [User(None, None, None)]
+        me.recepients = [User(None, None, None, None, None)]
         me.out_cond = Condition()
         me.out_msg = ['']
 
