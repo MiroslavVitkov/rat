@@ -120,7 +120,6 @@ def listen(relay: bool=False) -> None:
                 inout.in_cond.notify_all()
 
             # Show the text. Should this be a bot?
-            print('DEBUG', remote_user)
             print( prompt.get( remote_user.name
                              , remote_user.group)
                  + text)

@@ -53,6 +53,7 @@ def regenerate_pub(path_priv: Path=conf.get()['user']['keypath']) -> None:
 
 
 def read_keypair(p: Path=conf.get()['user']['keypath']) -> Keypair:
+    # TODO: perhaps cache the result in a []?
     print('Reading', p)
     with open(p, mode='rb') as priv_file:
         key_data = priv_file.read()
