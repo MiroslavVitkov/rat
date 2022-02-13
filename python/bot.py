@@ -51,12 +51,21 @@ class InOut:
         me.out_msg = ['']
 
 
+def list_bots() -> [str]:
+    '''
+    Return a list of bot names or an empty list if bot count is zero.
+    '''
+    return [ b.strip() for
+             b in conf.get()['user']['bots'].split(',')
+             if len(b) ]
+
+
 def spawn_bots(inout: InOut) -> [Thread]:
     '''
     Invoke all bots requested in conf.ini.
     '''
     bot_threads = []
-    for b in conf.get()['user']['bots'].split(','):
+    for b in list_bots():
         b = b.strip()  # remove whitespaces
         bot_func = globals()[b]
         t = Thread(target=bot_func, args=[inout]).start()
