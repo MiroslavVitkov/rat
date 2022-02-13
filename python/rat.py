@@ -70,13 +70,13 @@ def serve() -> None:
     On the standard port.
     Acept all requests from everyone.
     '''
-    s = name.Server()
+    name.Server()
 
 
 def register(ip, own_pub) -> None:
     def func(s: sock.socket.socket):
         send_user(s, own_pub)
-    c = sock.Client(ip=ip, port=port.NAMESERVER, func=func)
+    sock.Client(ip=ip, port=port.NAMESERVER, func=func)
 
 
 def ask(regex, ip) -> None:
@@ -94,50 +94,49 @@ def ask(regex, ip) -> None:
 
 
 def listen(relay: bool=False) -> None:
-        own_priv, own_pub = crypto.generate_keypair()
-        remote_sockets = []
-        remote_keys = []
-        inout = bot.InOut()
-        bots = bot.spawn_bots(inout)
+    own_priv, own_pub = crypto.generate_keypair()
+    remote_sockets = []
+    remote_keys = []
+    inout = bot.InOut()
+    bot.spawn_bots(inout)
 
-        def forever(s):
-            # Handshake.
-            data = sock.recv_one(s)
-            remote_user = name.User.from_bytes(data)
-            remote_sockets.append(s)
-            remote_keys.append(remote_user.pub)
-            send_user(s, own_pub)
+    def forever(s):
+        # Handshake.
+        data = sock.recv_one(s)
+        remote_user = name.User.from_bytes(data)
+        remote_sockets.append(s)
+        remote_keys.append(remote_user.pub)
+        send_user(s, own_pub)
 
-            # Accept text messages.
-            for data in sock.recv(s):
-                packet = Packet.from_bytes(data)
-                text = crypto.decrypt(packet.encrypted, own_priv)
-                crypto.verify(text, packet.signature, remote_user.pub)
+        # Accept text messages.
+        for data in sock.recv(s):
+            packet = Packet.from_bytes(data)
+            text = crypto.decrypt(packet.encrypted, own_priv)
+            crypto.verify(text, packet.signature, remote_user.pub)
 
-                # Inform bots of the new input.
-                inout.in_msg = text
-                with inout.in_cond:
-                    inout.in_cond.notify_all()
+            # Inform bots of the new input.
+            inout.in_msg = text
+            with inout.in_cond:
+                inout.in_cond.notify_all()
 
-                # Show the text. Should this be a bot?
-                print(prompt.get( remote_user.name
-                                , remote_user.group)
-                     + text)
+            # Show the text. Should this be a bot?
+            print('DEBUG', remote_user)
+            print( prompt.get( remote_user.name
+                             , remote_user.group)
+                 + text)
 
-                # Relay operation.
-                if(relay):
-                    for socket, key in zip(remote_sockets, remote_keys):
-                        if socket != s:
-                            sock.send(text, socket, own_priv, key)
+            # Relay operation.
+            if relay:
+                for socket, key in zip(remote_sockets, remote_keys):
+                    if socket != s:
+                        sock.send(text, socket, own_priv, key)
 
-        handle_input(remote_sockets, own_priv, remote_keys)
-        server = sock.Server(port.CHATSERVER, forever)
+    handle_input(remote_sockets, own_priv, remote_keys)
+    sock.Server(port.CHATSERVER, forever)
 
 
-def connect( ip: str
-           , alive: bool=True
-           ) -> None:
-    own_priv, own_pub = crypto.read_keypair(conf.get()['user']['keypath'])
+def connect(ip: str) -> None:
+    own_priv, own_pub = crypto.read_keypair()
 
     def func(s: sock.socket.socket):
         # Exchange name.User() objects(basically public keys).
@@ -186,6 +185,7 @@ def test() -> None:
     print('UNIT TESTS PASSED')
     print()
 
+    # TODO: this needs rewriting
     Thread(target=listen).start()
     time.sleep(1)
     priv, pub = crypto.generate_keypair()

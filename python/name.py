@@ -15,7 +15,6 @@ Encryption is cool but no authentication mechanism has been implemented yet!
 import pickle
 import re
 import socket
-import time
 
 import conf
 import crypto
@@ -26,12 +25,15 @@ import sock
 class User:
     '''
     '''
+    U = conf.get()['user']
+
+
     def __init__( me
-                , name: str
-                , group: str
-                , pub: crypto.Pub
-                , ip: [str]
-                , status: str=''
+                , name: str=U['name']
+                , group: str=U['group']
+                , pub: crypto.Pub=crypto.read_keypair()[1]
+                , ip: [str]=[sock.get_extern_ip(),]
+                , status: str=U['status']
                 ):
         me.name = name
         me.group = group
@@ -79,6 +81,8 @@ class Server:
 
 
     def _handle(me, s: socket.socket) -> None:
+        own_priv, _ = crypto.generate_keypair()
+        # remote_pub = ??, 'ask' should be preceeded by exchanging User objects!!!
         for data in sock.recv(s, me.alive):
         # This could be an `ask` or a `register` request.
             try:
@@ -99,8 +103,8 @@ class Server:
 
                 matches = [me.users[u] for u in me.users
                            if r.match(me.users[u].name)]
-                if not len(matches):
-                    sock.send( b'No matches!', s
+                if not matches:
+                    sock.send( b'No matches!'
                              , s, own_priv, remote_pub )
                     continue
 

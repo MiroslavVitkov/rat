@@ -7,4 +7,4 @@ Provide an interactive but machine parsable experience.
 
 
 def get(name, group) -> str:
-        return (name + '@' + group + '-> ')
+    return (name + '@' + group + '-> ')

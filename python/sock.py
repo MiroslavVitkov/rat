@@ -50,7 +50,7 @@ def recv( s: socket.socket
     '''
     Accepts packets on a socket until retminated.
     '''
-    while(alive):
+    while alive:
         data = s.recv(MAX_MSG_BYTES)
         assert len(data) < MAX_MSG_BYTES, ( 'Stitching of multi-part messages '
                                             'has not been implemented.' )
@@ -82,7 +82,7 @@ class Server:
     '''
     Anticipate connections forever. Mind your firewall.
 
-    A server TCP socket is always meant to negotiate connections, not content.  
+    A server TCP socket is always meant to negotiate connections, not content.
     Each returned connection is a content socket with a client.
 
     func(socket.socket) - communicate with one client until connection drops
@@ -106,7 +106,7 @@ class Server:
 
 
     def _listen(me, port: int, func: callable) -> None:
-        assert port >= 0 and port <= 2**16-1, port
+        assert 0 <= port <= 2**16-1, port
 
         try:
             # Requires python > 3.7. Same for the client below.
@@ -138,7 +138,7 @@ class Server:
             try:
                 conn, addr = s.accept()
                 yield conn, addr
-            except socket.timeout as e:
+            except socket.timeout:
                 pass
 
 
@@ -150,7 +150,7 @@ class Client:
             s = socket.socket()
             s.connect((ip, port))
 
-        assert(s)
+        assert s
         func(s)
 
 
@@ -170,7 +170,7 @@ def test() -> None:
 
     s = Server(port.CHATSERVER, listen)
     time.sleep(1)
-    c = Client('localhost', port.CHATSERVER, yell)
+    Client('localhost', port.CHATSERVER, yell)
     time.sleep(1)
     s.alive = False
     print('sock.py: ALL TESTS PASSED')

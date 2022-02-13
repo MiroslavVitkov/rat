@@ -48,15 +48,15 @@ def write_keypair( priv: rsa.key.PrivateKey
 
 
 def regenerate_pub(path_priv: Path=conf.get()['user']['keypath']) -> None:
-    os.run('ssh-keygen -y -f ' + path_priv
-          + ' > ' + path_priv + '.pub')
+    os.system('ssh-keygen -y -f ' + path_priv
+             + ' > ' + path_priv + '.pub')
 
 
 def read_keypair(p: Path=conf.get()['user']['keypath']) -> Keypair:
     print('Reading', p)
     with open(p, mode='rb') as priv_file:
         key_data = priv_file.read()
-        assert(key_data)
+        assert key_data
         priv = rsa.PrivateKey.load_pkcs1(key_data)
 
     pub = None
@@ -66,7 +66,7 @@ def read_keypair(p: Path=conf.get()['user']['keypath']) -> Keypair:
     with open(p.with_suffix('.pub'), 'rb') as f:
         key_data = f.read()
         pub = rsa.PublicKey.load_pkcs1(key_data)
-    assert(pub is not None)
+    assert pub is not None
 
     return priv, pub
 
@@ -125,7 +125,7 @@ def test() -> None:
     msg = "We come in peace!"
     bytes = encrypt(msg, pub)
     newmsg = decrypt(bytes, priv)
-    assert(msg == newmsg)
+    assert msg == newmsg
 
     signature = sign(msg, priv)
     verify(msg, signature, pub)

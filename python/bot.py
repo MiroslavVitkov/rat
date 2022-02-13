@@ -27,7 +27,6 @@ Overview of python synchronization primitives.
 
 import random
 from threading import Condition, Thread
-import time
 
 import conf
 from name import User
@@ -68,7 +67,8 @@ def spawn_bots(inout: InOut) -> [Thread]:
     for b in list_bots():
         b = b.strip()  # remove whitespaces
         bot_func = globals()[b]
-        t = Thread(target=bot_func, args=[inout]).start()
+        t = Thread(target=bot_func, args=[inout])
+        t.start()
         bot_threads.append(t)
     return bot_threads
 
@@ -121,7 +121,7 @@ def interactive(inout: InOut):
     # Generate output message, todo.
     prompt = '->'
     #out_thread = handle_input()
-    return curse()
+    return curse(InOut())
 
 
 def non_interactive(inout: InOut):
@@ -187,12 +187,13 @@ def log(inout: InOut):
 
 ### Tests.
 def test():
+    inout = InOut()
+
     # Test curse() bot.
-    for i in range(10):
-        assert(len(curse()))
+    for _ in range(10):
+        assert(len(curse(inout)))
 
     # Test InOut class.
-    inout = InOut()
     def foo():
         with inout.in_cond:
             inout.in_cond.wait()

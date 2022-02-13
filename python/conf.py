@@ -38,10 +38,10 @@ def test():
     '''
     Ensure fields exist and are non-empty.
     '''
-    assert(get()['user']['name'])
-    assert(get()['user']['group'])
-    assert(get()['user']['status'])
-    assert(get()['user']['keypath'])
+    assert len(get()['user']['name'])
+    assert len(get()['user']['group'])
+    assert len(get()['user']['status'])
+    assert len(get()['user']['keypath'])
     # ['user']['bots'] is empty by default.
     print('conf.py: ALL TESTS PASSED')
 

@@ -69,8 +69,8 @@ class Packet:
 
     @classmethod
     def _int_to_bytes(cls, i: int) -> bytes:
-         b = i.to_bytes(cls.INT_WIDTH, byteorder=cls.ENDIANNESS, signed=False)
-         return b
+        b = i.to_bytes(cls.INT_WIDTH, byteorder=cls.ENDIANNESS, signed=False)
+        return b
 
 
     @classmethod
