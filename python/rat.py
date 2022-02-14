@@ -59,8 +59,14 @@ def send_user( s: sock.socket.socket
                     , own_pub
                     , sock.get_extern_ip()
                     , u['status'])
-    # TODO: encrypt this to prove it's really you that is updating your info.
     s.sendall(user.to_bytes())
+
+
+def receive_user(s: sock.socket.socket) -> name.User:
+    data = sock.recv_one(s)
+    remote_user = name.User.from_bytes(data)
+    assert type(remote_user) == name.User, type(remote_user)
+    return remote_user
 
 
 ### Command handlers.
@@ -77,10 +83,7 @@ def register(ip) -> None:
     own_priv, own_pub = crypto.read_keypair()
     def func(s: sock.socket.socket):
         send_user(s, own_pub)
-
-        data = sock.recv_one(s)
-        remote_user = name.User.from_bytes(data)
-
+        remote_user = receive_user()
         sock.send(b'register', s, own_priv, remote_user.pub)
 
     sock.Client(ip=ip, port=port.NAMESERVER, func=func)
@@ -175,8 +178,7 @@ def send( ip: str, text: str) -> None:
     def func(s: sock.socket.socket):
         # Exchange public keys.
         send_user(s, own_pub)
-        data = sock.recv_one(s)
-        remote = name.User.from_bytes(data)
+        remote = receive_user()
 
         # Transmit the message and die.
         sock.send(text, s, own_priv, remote.pub)
