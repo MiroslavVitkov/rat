@@ -104,6 +104,7 @@ def listen(relay: bool=False) -> None:
         # Handshake.
         data = sock.recv_one(s)
         remote_user = name.User.from_bytes(data)
+        print('The remote user identifies as', remote_user)
         remote_sockets.append(s)
         remote_keys.append(remote_user.pub)
         send_user(s, own_pub)
