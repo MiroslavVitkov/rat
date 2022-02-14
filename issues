@@ -67,3 +67,7 @@ Phonebook section in conf.ini with names and ip-s.
 
 
 When a client goes online or changes IP it multicasts it's friends.
+
+Prompt printed at incorrect times.
+
+Add prompt to recv_filebuf.
