@@ -52,6 +52,9 @@ def send_user( s: sock.socket.socket
              , own_pub: crypto.Pub ) -> None:
     '''
     Every communication begins with exchanging User objects.
+    The client transmits their unencrypted User object because the server doesn't have it's key.
+    The server responds with their unencrypted User object.
+    TODO: encrypt all fields but for public key - too much complexity expected
     '''
     u = conf.get()['user']
     user = name.User( u['name']
@@ -92,6 +95,8 @@ def register(ip) -> None:
 def ask(regex, ip) -> None:
     '''Request a list of matching userames from a nameserver.'''
     def func(s: sock.socket.socket):
+        own_priv, own_pub = crypto.read_keypair()
+        # TODO: sock.send((regex.encode('utf-8', regex), s, own_priv, remote_user.pub)
         s.sendall(regex.encode('utf-8', regex))
         data = sock.recv_one(s)
         try:
