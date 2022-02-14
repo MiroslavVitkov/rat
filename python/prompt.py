@@ -6,5 +6,10 @@ Provide an interactive but machine parsable experience.
 '''
 
 
-def get(name, group) -> str:
+import conf
+
+
+def get( name: str=conf.get()['user']['name']
+       , group:str=conf.get()['user']['group']
+       ) -> str:
     return (name + '@' + group + '-> ')
