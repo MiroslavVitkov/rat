@@ -137,7 +137,7 @@ def listen(relay: bool=False) -> None:
 
 def connect(ip: str) -> None:
     own_priv, own_pub = crypto.read_keypair()
-
+    # TODO: spawn bots
     def func(s: sock.socket.socket):
         # Exchange name.User() objects(basically public keys).
         send_user(s, own_pub)
@@ -153,7 +153,11 @@ def connect(ip: str) -> None:
             packet = Packet.from_bytes(data)
             text = crypto.decrypt(packet.encrypted, own_priv)
             crypto.verify(text, packet.signature, remote_user.pub)
-            print(text)
+
+            # Show the text.
+            print( prompt.get( remote_user.name
+                             , remote_user.group)
+                 + text)
 
     client = sock.Client(ip, port.CHATSERVER, func)
 
