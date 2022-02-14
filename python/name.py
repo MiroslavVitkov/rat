@@ -81,21 +81,23 @@ class Server:
 
 
     def _handle(me, s: socket.socket) -> None:
-        own_priv, _ = crypto.generate_keypair()
-        # remote_pub = ??, 'ask' should be preceeded by exchanging User objects!!!
+        own_priv, _ = crypto.read_keypair()
+
         for data in sock.recv(s, me.alive):
-        # This could be an `ask` or a `register` request.
-            try:
-                remote_user = User.from_bytes(data)
-                assert type(remote_user) == User, type(remote_user)
+          # Accept remote User object.
+            remote_user = User.from_bytes(data)
+            assert type(remote_user) == User, type(remote_user)
+
+            # This could be an `ask` or a `register` request.
+            text = data.decode('utf-8')
+            if text == 'register':
                 me.register(remote_user)
                 print('New user registered:', remote_user)
                 print('Now there are', len(me.users), 'registered users.\n')
-            except:
-                regex = data.decode('utf-8')
-                print(s.getsockname(), 'is asking for', regex)
+            else:
+                print(s.getsockname(), 'is asking for', text)
                 try:
-                    r = re.compile(regex)
+                    r = re.compile(text)
                 except:
                     sock.send( b'Invalid regular expression!'
                              , s, own_priv, remote_pub )
@@ -105,18 +107,14 @@ class Server:
                            if r.match(me.users[u].name)]
                 if not matches:
                     sock.send( b'No matches!'
-                             , s, own_priv, remote_pub )
+                             , s, own_priv, remote_user.pub )
                     continue
 
                 for u in matches:
-                    try:
-                        bytes = pickle.dumps(u)
-                        s.sendall(bytes)
-                    except:
-                        # Perhaps the user disconnected? TODO: kill the socket then
-                        continue
+                    bytes = pickle.dumps(u)
+                    sock.send(bytes, s, own_priv, remote_user.pub)
 
-        me.server.alive = me.alive  # Kill the parent server.
+            me.server.alive = me.alive  # Kill the parent server.
 
 
 def test() -> None:

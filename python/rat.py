@@ -73,9 +73,16 @@ def serve() -> None:
     name.Server()
 
 
-def register(ip, own_pub) -> None:
+def register(ip) -> None:
+    own_priv, own_pub = crypto.read_keypair()
     def func(s: sock.socket.socket):
         send_user(s, own_pub)
+
+        data = sock.recv_one(s)
+        remote_user = name.User.from_bytes(data)
+
+        sock.send(b'register', s, own_priv, remote_user.pub)
+
     sock.Client(ip=ip, port=port.NAMESERVER, func=func)
 
 
@@ -94,7 +101,7 @@ def ask(regex, ip) -> None:
 
 
 def listen(relay: bool=False) -> None:
-    own_priv, own_pub = crypto.generate_keypair()
+    own_priv, own_pub = crypto.read_keypair()
     remote_sockets = []
     remote_keys = []
     inout = bot.InOut()
@@ -236,8 +243,7 @@ if __name__ == '__main__':
 
     elif sys.argv[1] == 'register':
         if len(sys.argv) >= 3:
-            _, own_pub = crypto.read_keypair(conf.get()['user']['keypath'])
-            register(sys.argv[2], own_pub)  # TODO: allow multiple server IPs
+            register(sys.argv[2])  # TODO: allow multiple server IPs
         else:
             print('Provide the IP of the nameserver!')
 
