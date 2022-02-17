@@ -86,7 +86,7 @@ def register(ip) -> None:
     own_priv, own_pub = crypto.read_keypair()
     def func(s: sock.socket.socket):
         send_user(s, own_pub)
-        remote_user = receive_user()
+        remote_user = receive_user(s)
         sock.send(b'register', s, own_priv, remote_user.pub)
 
     sock.Client(ip=ip, port=port.NAMESERVER, func=func)
@@ -183,7 +183,7 @@ def send( ip: str, text: str) -> None:
     def func(s: sock.socket.socket):
         # Exchange public keys.
         send_user(s, own_pub)
-        remote = receive_user()
+        remote = receive_user(s)
 
         # Transmit the message and die.
         sock.send(text, s, own_priv, remote.pub)
@@ -234,7 +234,7 @@ def print_help() -> None:
 
         miscellaneous
         ---
-            rat generate [<path>] - create a new RSA keypair and write it to disk
+            rat generate - create a new RSA keypair and write it to disk
             rat test - run all unnit and integration tests
             rat help - print this message
         '''
@@ -288,8 +288,8 @@ if __name__ == '__main__':
                   'and keep a running `rat listen` instance.')
 
     elif sys.argv[1] == 'generate':
-        if len(sys.argv) == 3:
-            keypath = sys.argv[2]
+        if len(sys.argv) == 2:
+            keypath = conf.get()['user']['keypath']
             priv, pub = crypto.generate_keypair()
             crypto.write_keypair(priv, pub, keypath)
         else:
