@@ -137,12 +137,13 @@ def listen(relay: bool=False) -> None:
             # Show the text. Should this be a bot?
             print( prompt.get( remote_user.name
                              , remote_user.group)
-                 + text + '\n' + prompt.get() )
+                 + text + '\n' )
 
             # Relay operation.
             if relay:
                 for socket, key in zip(remote_sockets, remote_keys):
                     if socket != s:
+                        # TODO: prepend recepiend prompt
                         sock.send(text, socket, own_priv, key)
 
     handle_input(remote_sockets, own_priv, remote_keys)
@@ -171,7 +172,7 @@ def connect(ip: str) -> None:
             # Show the text.
             print( prompt.get( remote_user.name
                              , remote_user.group)
-                 + text + '\n' + prompt.get() )
+                 + text + '\n' )
 
     client = sock.Client(ip, port.CHATSERVER, func)
 
