@@ -34,9 +34,8 @@ def handle_input( s: [sock.socket.socket]
     '''
     def inp():
         c = conf.get()['user']
-        pr = prompt.get(c['name'], c['group'])
         while alive:
-            text = input(pr)
+            text = input()
             # Forbid sending empty messages because they DOS the remote peer
             # (the remote network buffer gets clogged).
             # Perhaps a better alternative is to insert a delay in send()?
