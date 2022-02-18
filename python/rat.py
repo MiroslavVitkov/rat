@@ -144,7 +144,11 @@ def listen(relay: bool=False) -> None:
                 for socket, key in zip(remote_sockets, remote_keys):
                     if socket != s:
                         # TODO: prepend recepiend prompt
-                        sock.send(text, socket, own_priv, key)
+                        sock.send( prompt.get(remote_user.name
+                                             , remote_user.group
+                                             )
+                                             + text
+                                 , socket, own_priv, key )
 
     handle_input(remote_sockets, own_priv, remote_keys)
     sock.Server(port.CHATSERVER, forever)
