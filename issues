@@ -1,25 +1,3 @@
- utf-8 ebcoding arbitrary binary data can fail #1 
----
-Exception in thread Thread-1:
-Traceback (most recent call last):
-  File "/usr/lib/python3.8/threading.py", line 932, in _bootstrap_inner
-    self.run()
-  File "/usr/lib/python3.8/threading.py", line 870, in run
-    self._target(*self._args, **self._kwargs)
-  File "rat/python/rat.py", line 61, in inp
-    send(text, s, own_priv, remote_pub)
-  File "rat/python/rat.py", line 44, in send
-    signature = crypto.sign(text, own_priv)
-  File "/rat/python/crypto.py", line 103, in sign
-    signature = rsa.sign(msg.encode('utf8'), priv, HASH)
-UnicodeEncodeError: 'utf-8' codec can't encode character '\udcd0' in position 3: surrogates not allowed
-
-
-% is a special character in ini files #2 
----
-Including a % in the status field of conf.ini crashes with '% must be followed by % or ('.
-
-
 rat ask is too permissive #3 
 ---
 The username search was supposed to be a regex search while this is the current state.
@@ -71,3 +49,5 @@ When a client goes online or changes IP it multicasts it's friends.
 Prompt printed at incorrect times.
 
 Add prompt to recv_filebuf.
+
+Add a phone book!
