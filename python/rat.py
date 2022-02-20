@@ -182,7 +182,7 @@ def connect(ip: str) -> None:
 
 
 def send( ip: str, text: str) -> None:
-    own_priv, own_pub = crypto.read_keypair(conf.get()['user']['keypath'])
+    own_priv, own_pub = crypto.read_keypair(conf.get_keypath())
 
     def func(s: sock.socket.socket):
         # Exchange public keys.
@@ -293,7 +293,7 @@ if __name__ == '__main__':
 
     elif sys.argv[1] == 'generate':
         if len(sys.argv) == 2:
-            keypath = conf.get()['user']['keypath']
+            keypath = conf.get_keypath()
             priv, pub = crypto.generate_keypair()
             crypto.write_keypair(priv, pub, keypath)
         else:

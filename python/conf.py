@@ -33,6 +33,10 @@ def get(path: str=where_are_we()+'/../conf.ini', c: list=[]):
 
     return c[0]
 
+def get_keypath():
+    p = get()['user']['keypath']
+    return os.path.expanduser(p)
+
 
 def test():
     '''
