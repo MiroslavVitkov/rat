@@ -7,6 +7,7 @@ How to use
     pip install -r rat/requirements.txt
     alias rat="$PWD/rat/python/rat.py"
     rat --help
+    rat generate
     rat connect 87.121.47.253  # A chatroom that is supposed to be always up.
 
 
