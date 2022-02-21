@@ -55,13 +55,19 @@ def regenerate_pub(path_priv: Path=conf.get_keypath()) -> None:
 def read_keypair(p: Path=conf.get_keypath()) -> Keypair:
     # TODO: perhaps cache the result in a []?
     print('Reading', p)
+
+    p = Path(p)
+    if not p.is_file():
+        # This function gets called during static initialization
+        # of other modules.
+        return None, None
+
     with open(p, mode='rb') as priv_file:
         key_data = priv_file.read()
         assert key_data
         priv = rsa.PrivateKey.load_pkcs1(key_data)
 
     pub = None
-    p = Path(p)
     if not Path(p.with_suffix('.pub')).is_file():
         regenerate_pub()
     with open(p.with_suffix('.pub'), 'rb') as f:
