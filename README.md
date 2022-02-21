@@ -34,12 +34,6 @@ Scriptable
 Adhering to the linux design guidelines, the program output is easily parsable by command-line tools.
 
 
-Usage example
----
-miro@general-> hi  
-ruzhka@lqlq<- heya
-
-
 Scripting
 ---
 The client is interactive (the binary keeps on running between commands).
