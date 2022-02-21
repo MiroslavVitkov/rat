@@ -12,4 +12,4 @@ import conf
 def get( name: str=conf.get()['user']['name']
        , group:str=conf.get()['user']['group']
        ) -> str:
-    return (name + '@' + group + '<- ')
+    return (name + '@' + group + '<-')
