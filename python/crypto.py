@@ -52,9 +52,12 @@ def regenerate_pub(path_priv: Path=conf.get_keypath()) -> None:
              + ' > ' + path_priv + '.pub')
 
 
-def read_keypair(p: Path=conf.get_keypath()) -> Keypair:
-    # TODO: perhaps cache the result in a []?
-    print('Reading', p)
+def read_keypair( p: Path=conf.get_keypath()
+                , force: bool=False
+                , cache: [Keypair]=[]
+                ) -> Keypair:
+    if cache and not force:
+        return cache[0]
 
     p = Path(p)
     if not p.is_file():
@@ -75,7 +78,12 @@ def read_keypair(p: Path=conf.get_keypath()) -> Keypair:
         pub = rsa.PublicKey.load_pkcs1(key_data)
     assert pub is not None
 
-    return priv, pub
+    kp = (priv, pub)
+    if cache:
+        cache[0] = kp
+    else:
+        cache.append(kp)
+    return kp
 
 
 def encrypt(text: str, pub: Pub) -> bytes:
