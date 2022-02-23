@@ -133,9 +133,9 @@ def test() -> None:
     priv, pub = generate_keypair()
     p = Path('/tmp/whatever' + str(random.randint(0, 1e6)))
     write_keypair(priv, pub, p)
-    newpriv, newpub = read_keypair(p)
-    assert(priv == newpriv)
-    assert(pub == newpub)
+    newpriv, newpub = read_keypair(p, True)
+    assert priv == newpriv, (priv, newpriv)
+    assert pub == newpub, (pub, newpub)
 
     msg = "We come in peace!"
     bytes = encrypt(msg, pub)
