@@ -2,8 +2,7 @@
 
 
 '''
-A peer to peer chat client.
-Refer to the README for dessign goals and usage.
+A peer to peer chat client entry point.
 '''
 
 
