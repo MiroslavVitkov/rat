@@ -18,60 +18,12 @@ import name
 import pack
 from pack import Packet
 import prompt
+import protocol
 import port
 import sock
+from sock.socket import socket
 
 
-### Helpers.
-def handle_input( s: [sock.socket.socket]
-                , own_priv: crypto.Priv
-                , remote_pub: [crypto.Pub]
-                , alive: bool=True
-                ) -> None:
-    '''
-    We need 2 threads to do simultaneous input and output.
-    So let's use the current thread for listening and spin an input one.
-    '''
-    def inp():
-        c = conf.get()['user']
-        while alive:
-            text = input()
-            # Forbid sending empty messages because they DOS the remote peer
-            # (the remote network buffer gets clogged).
-            # Perhaps a better alternative is to insert a delay in send()?
-            # Because what we see on the screen is different from the peer's?
-            if text:
-                for ip, pub in zip(s, remote_pub):
-                    sock.send(text, ip, own_priv, pub)
-
-    Thread(target=inp).start()
-
-
-def send_user( s: sock.socket.socket
-             , own_pub: crypto.Pub ) -> None:
-    '''
-    Every communication begins with exchanging User objects.
-    The client transmits their unencrypted User object because the server doesn't have it's key.
-    The server responds with their unencrypted User object.
-    TODO: encrypt all fields but for public key - too much complexity expected
-    '''
-    u = conf.get()['user']
-    user = name.User( u['name']
-                    , u['group']
-                    , own_pub
-                    , sock.get_extern_ip()
-                    , u['status'])
-    s.sendall(user.to_bytes())
-
-
-def receive_user(s: sock.socket.socket) -> name.User:
-    data = sock.recv_one(s)
-    remote_user = name.User.from_bytes(data)
-    assert type(remote_user) == name.User, type(remote_user)
-    return remote_user
-
-
-### Command handlers.
 def serve() -> None:
     '''
     Run a nameserver forever.
@@ -197,6 +149,29 @@ def send( ip: str, text: str) -> None:
 
 def get() -> None:
     pass
+
+
+def handle_input( s: [sock.socket.socket]
+                , own_priv: crypto.Priv
+                , remote_pub: [crypto.Pub]
+                , alive: bool=True
+                ) -> None:
+    '''
+    We need 2 threads to do simultaneous input and output.
+    So let's use the current thread for listening and spin an input one.
+    '''
+    def inp():
+        while alive:
+            text = input()
+            # Forbid sending empty messages because they DOS the remote peer
+            # (the remote network buffer gets clogged).
+            # Perhaps a better alternative is to insert a delay in send()?
+            # Because what we see on the screen is different from the peer's?
+            if text:
+                for ip, pub in zip(s, remote_pub):
+                    sock.send(text, ip, own_priv, pub)
+
+    Thread(target=inp).start()
 
 
 def test() -> None:
