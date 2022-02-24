@@ -33,27 +33,24 @@ def serve() -> None:
 
 
 def register(ip) -> None:
-    own_priv, own_pub = crypto.read_keypair()
-    def func(s: sock.socket.socket):
-        send_user(s, own_pub)
-        remote_user = receive_user(s)
-        sock.send(b'register', s, own_priv, remote_user.pub)
+    '''
+    Register our User object(conf.ini + pub key) with nameserver(s).
+    '''
+    def func(s: socket):
+        server = protocol.handshake_as_client(s)
+        own_priv, _ = crypto.read_keypair()
+        sock.send(b'register', s, own_priv, server.pub)  # TODO: perhaps remove own_priv?
 
     sock.Client(ip=ip, port=port.NAMESERVER, func=func)
 
 
-def ask(regex, ip) -> None:
+def ask(regex: str, ip: str) -> None:
     '''Request a list of matching userames from a nameserver.'''
-    def func(s: sock.socket.socket):
-        own_priv, own_pub = crypto.read_keypair()
-        # TODO: sock.send((regex.encode('utf-8', regex), s, own_priv, remote_user.pub)
-        s.sendall(regex.encode('utf-8', regex))
+    def func(s: socket):
+        server = protocol.handshake_as_client(s)
+        sock.send('ask ' + regex, s, server.pub)
         data = sock.recv_one(s)
-        try:
-            print(name.User.from_bytes(data))
-        except:
-            # The server reported an error.
-            print(data)
+        print(data)
 
     c = sock.Client(ip[0], port=port.NAMESERVER, func=func)
 
@@ -67,12 +64,10 @@ def listen(relay: bool=False) -> None:
 
     def forever(s):
         # Handshake.
-        data = sock.recv_one(s)
-        remote_user = name.User.from_bytes(data)
-        print('The remote user identifies as', remote_user)
+        client = protocol.handshake_as_server(s)
+        print('The remote user identifies as', client)
         remote_sockets.append(s)
-        remote_keys.append(remote_user.pub)
-        send_user(s, own_pub)
+        remote_keys.append(client.pub)
 
         # Accept text messages.
         for data in sock.recv(s):
@@ -109,14 +104,11 @@ def connect(ip: str) -> None:
     own_priv, own_pub = crypto.read_keypair()
     # TODO: spawn bots
     def func(s: sock.socket.socket):
-        # Exchange name.User() objects(basically public keys).
-        send_user(s, own_pub)
-        data = sock.recv_one(s)
-        remote_user = name.User.from_bytes(data)
-        print('The server identifies as', remote_user)
+        server = protocol.handshake_as_client(s)
+        print('The server identifies as', server)
 
         # Send messages to the remote peer.
-        handle_input((s,), own_priv, (remote_user.pub,))
+        handle_input((s,), own_priv, (server.pub,))
 
         # Receive messages from the remote peer.
         for data in sock.recv(s):
@@ -136,11 +128,8 @@ def send( ip: str, text: str) -> None:
     own_priv, own_pub = crypto.read_keypair(conf.get_keypath())
 
     def func(s: sock.socket.socket):
-        # Exchange public keys.
-        send_user(s, own_pub)
-        remote = receive_user(s)
-
-        # Transmit the message and die.
+    '''Transmit a message and die.'''
+        protocol.handshake_as_client(s)
         sock.send(text, s, own_priv, remote.pub)
 
     client = sock.Client(ip, port.CHATSERVER, func)
