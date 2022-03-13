@@ -8,7 +8,7 @@ Communication sequences as to fufill top-level commands.
 
 import name
 import sock
-
+from sock.socket import socket
 
 def handshake_as_server( s: sock.socket.socket ) -> name.User:
     # After a client connects, send own pubkey unencrypted.
@@ -35,7 +35,7 @@ def handshake_as_client( s: sock.socket.socket ) -> name.User:
 
 
 def send_pubkey( s: sock.socket.socket ) -> None:
-   '''Transmit own public key unencrypted.'''
+    '''Transmit own public key unencrypted.'''
     _, pub = crypto.read_keypair()
     s.sendall(pub.save_pkcs1())
 
@@ -46,8 +46,8 @@ def recv_pubkey( s: sock.socket.socket ) -> crypto.Pub:
     return pub
 
 
- def send_user( s: sock.socket.socket
-              , remote_pub: crypto.Pub ) -> None:
+def send_user( s: socket
+             , remote_pub: crypto.Pub ) -> None:
     own_priv, _ = crypto.read_keypair()
     sock.send(name.User().to_bytes(), s, own_priv, remote_pub)
 

@@ -45,8 +45,7 @@ def send( text: str
     s.sendall(msg)
 
 
-def recv( s: socket.socket
-        , alive: bool=True ) -> str:
+def recv( s: socket.socket, alive: bool=True ) -> str:
     '''
     Accepts packets on a socket until retminated.
     '''

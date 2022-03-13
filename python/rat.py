@@ -69,6 +69,9 @@ def listen(relay: bool=False) -> None:
         remote_sockets.append(s)
         remote_keys.append(client.pub)
 
+        # TODO: report disconnects.
+        print('New user joined:', client)
+
         # Accept text messages.
         for data in sock.recv(s):
             packet = Packet.from_bytes(data)
@@ -89,10 +92,8 @@ def listen(relay: bool=False) -> None:
             if relay:
                 for socket, key in zip(remote_sockets, remote_keys):
                     if socket != s:
-                        # TODO: prepend recepiend prompt
-                        sock.send( prompt.get(remote_user.name
-                                             , remote_user.group
-                                             )
+                        sock.send( prompt.get( remote_user.name
+                                             , remote_user.group )
                                              + text
                                  , socket, own_priv, key )
 
@@ -128,7 +129,7 @@ def send( ip: str, text: str) -> None:
     own_priv, own_pub = crypto.read_keypair(conf.get_keypath())
 
     def func(s: sock.socket.socket):
-    '''Transmit a message and die.'''
+        '''Transmit a message and die.'''
         protocol.handshake_as_client(s)
         sock.send(text, s, own_priv, remote.pub)
 
