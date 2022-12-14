@@ -6,11 +6,13 @@ Communication sequences as to fufill top-level commands.
 '''
 
 
+import crypto
 import name
 import sock
 from sock.socket import socket
 
-def handshake_as_server( s: sock.socket.socket ) -> name.User:
+
+def handshake_as_server( s: socket ) -> name.User:
     # After a client connects, send own pubkey unencrypted.
     send_pubkey(s)
 
@@ -22,7 +24,7 @@ def handshake_as_server( s: sock.socket.socket ) -> name.User:
     return client
 
 
-def handshake_as_client( s: sock.socket.socket ) -> name.User:
+def handshake_as_client( s: socket ) -> name.User:
     # After connecting, receive server unencrypted pubkey.
     server_pub = recv_pubkey(s)
 
@@ -34,13 +36,13 @@ def handshake_as_client( s: sock.socket.socket ) -> name.User:
     return server
 
 
-def send_pubkey( s: sock.socket.socket ) -> None:
+def send_pubkey( s: socket ) -> None:
     '''Transmit own public key unencrypted.'''
     _, pub = crypto.read_keypair()
     s.sendall(pub.save_pkcs1())
 
 
-def recv_pubkey( s: sock.socket.socket ) -> crypto.Pub:
+def recv_pubkey( s: socket ) -> crypto.Pub:
     key_data = sock.recv_one(s)
     pub = crypto.rsa.PublicKey.load_pkcs1(key_data)
     return pub
@@ -52,7 +54,7 @@ def send_user( s: socket
     sock.send(name.User().to_bytes(), s, own_priv, remote_pub)
 
 
-def recv_user( s: sock.socket.socket ) -> name.User:
+def recv_user( s: socket ) -> name.User:
     data = sock.recv_one(s)
     remote_user = name.User.from_bytes(data)
     assert type(remote_user) == name.User, type(remote_user)
