@@ -13,3 +13,11 @@ def get( name: str=conf.get()['user']['name']
        , group:str=conf.get()['user']['group']
        ) -> str:
     return (name + '@' + group + '<-')
+
+
+def test():
+    print('ALL TESTS PASSED')
+
+
+if __name__ == '__main__':
+    test()

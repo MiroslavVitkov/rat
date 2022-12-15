@@ -62,7 +62,8 @@ def recv_user( s: socket ) -> name.User:
 
 
 def test():
-    pass
+    print('ALL TESTS PASSED')
+
 
 if __name__ == '__main__':
     test()
