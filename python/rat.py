@@ -9,6 +9,7 @@ A peer to peer chat client entry point.
 from threading import Thread
 import sys
 import time
+import socket
 
 import bot
 import conf
@@ -20,7 +21,6 @@ import prompt
 import protocol
 import port
 import sock
-from sock.socket import socket
 
 
 def serve() -> None:
@@ -104,7 +104,7 @@ def listen(relay: bool=False) -> None:
 def connect(ip: str) -> None:
     own_priv, own_pub = crypto.read_keypair()
     # TODO: spawn bots
-    def func(s: sock.socket.socket):
+    def func(s: socket):
         server = protocol.handshake_as_client(s)
         print('The server identifies as', server)
 
@@ -128,7 +128,7 @@ def connect(ip: str) -> None:
 def send( ip: str, text: str) -> None:
     own_priv, own_pub = crypto.read_keypair(conf.get_keypath())
 
-    def func(s: sock.socket.socket):
+    def func(s: socket):
         '''Transmit a message and die.'''
         protocol.handshake_as_client(s)
         sock.send(text, s, own_priv, remote.pub)
@@ -140,7 +140,7 @@ def get() -> None:
     pass
 
 
-def handle_input( s: [sock.socket.socket]
+def handle_input( s: [socket]
                 , own_priv: crypto.Priv
                 , remote_pub: [crypto.Pub]
                 , alive: bool=True

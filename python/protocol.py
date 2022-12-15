@@ -5,11 +5,11 @@
 Communication sequences as to fufill top-level commands.
 '''
 
+import socket
 
 import crypto
 import name
 import sock
-from sock.socket import socket
 
 
 def handshake_as_server( s: socket ) -> name.User:
