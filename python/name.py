@@ -56,6 +56,8 @@ class User:
 
 
     def __repr__(me) -> str:
+        assert(me)
+        assert(me.pub)
         pub = str(me.pub.save_pkcs1())
         return ( '\n'
                + 'nickname: ' + me.name + '\n'
@@ -121,7 +123,7 @@ def test() -> None:
     s = Server()
     u = User( conf.get()['user']['name']
             , conf.get()['user']['group']
-            , crypto.read_keypair()[1]
+            , crypto.generate_keypair()
             , sock.get_extern_ip()
             , conf.get()['user']['status'])
     s.register(u)
