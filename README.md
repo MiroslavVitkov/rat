@@ -4,7 +4,7 @@ RAm-only chaT. Inspectable code and industry standard encryption.
 How to use
 ---
     git clone git@github.com:MiroslavVitkov/rat.git
-    pip install -r rat/requirements.txt
+    pip install -r rat/python/requirements.txt
     alias rat="$PWD/rat/python/rat.py"
     rat --help
     rat generate
