@@ -39,7 +39,7 @@ def register(ip) -> None:
     def func(s: socket):
         server = protocol.handshake_as_client(s)
         own_priv, _ = crypto.read_keypair()
-        sock.send(b'register', s, own_priv, server.pub)  # TODO: perhaps remove own_priv?
+        sock.send(b'register', s, server.pub, own_priv)
 
     sock.Client(ip=ip, port=port.NAMESERVER, func=func)
 
@@ -95,7 +95,7 @@ def listen(relay: bool=False) -> None:
                         sock.send( prompt.get( remote_user.name
                                              , remote_user.group )
                                              + text
-                                 , socket, own_priv, key )
+                                 , socket, key, own_priv)
 
     handle_input(remote_sockets, own_priv, remote_keys)
     sock.Server(port.CHATSERVER, forever)

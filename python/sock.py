@@ -34,8 +34,8 @@ MAX_MSG_BYTES = 1024
 def send( text: str
         , s: socket.socket
         , remote_pub: crypto.Pub
+        , own_priv: crypto.Priv = crypto.read_keypair()[0]
         ) -> None:
-    own_priv, _ = crypto.read_keypair()
     signature = crypto.sign(text, own_priv)
     encrypted = crypto.encrypt(text, remote_pub)
     msg = pack.Packet(encrypted, signature).to_bytes()
