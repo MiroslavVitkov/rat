@@ -86,14 +86,18 @@ def read_keypair( p: Path=conf.get_keypath()
     return kp
 
 
-def encrypt(text: str, pub: Pub) -> bytes:
+def encrypt(text: str | bytes, pub: Pub) -> bytes:
     '''Encrypt a message so that only the owner of the private key can read it.'''
-    bytes = text.encode('utf8')
+    bytes = text
+#    if(not isinstance(text, str)):
+    if(type(text) == str):
+        bytes = text.encode('utf8')
+
     encrypted = rsa.encrypt(bytes, pub)
     return encrypted
 
 
-def decrypt(encrypted: bytes, priv: Priv) -> str:
+def decrypt(encrypted: str | bytes, priv: Priv) -> str:
     try:
         bytes = rsa.decrypt(encrypted, priv)
         string = bytes.decode('utf8')
@@ -117,9 +121,14 @@ def sign(msg: str, priv: Priv) -> bytes:
     and gets access on the server ever though she doesn't know Alice's password.
 
     Furthermore it increases privacy.
-    Only the recepient can validatet the sender instead of anyone intercepting.
+    Only the recepient can validate the sender instead of anyone intercepting.
     '''
-    signature = rsa.sign(msg.encode('utf8'), priv, HASH)
+    # Conert 'str' to 'bytes'.
+    payload = msg
+    if(type(msg) == str):
+        payload = msg.encode('utf8')
+
+    signature = rsa.sign(payload, priv, HASH)
     return signature
 
 
