@@ -88,19 +88,19 @@ def read_keypair( p: Path=conf.get_keypath()
 
 def encrypt(text: str | bytes, pub: Pub) -> bytes:
     '''Encrypt a message so that only the owner of the private key can read it.'''
-    bytes = text
-#    if(not isinstance(text, str)):
+    b = text
     if(type(text) == str):
-        bytes = text.encode('utf8')
+        b = text.encode('utf8')
+    assert(type(b) == bytes)
 
-    encrypted = rsa.encrypt(bytes, pub)
+    encrypted = rsa.encrypt(b, pub)
     return encrypted
 
 
 def decrypt(encrypted: str | bytes, priv: Priv) -> str:
     try:
-        bytes = rsa.decrypt(encrypted, priv)
-        string = bytes.decode('utf8')
+        b = rsa.decrypt(encrypted, priv)
+        string = b.decode('utf8')
     except rsa.pkcs1.DecryptionError:
         # Printing a stack trace leaks information about the key.
         print('ERROR: DecryptionError!')
