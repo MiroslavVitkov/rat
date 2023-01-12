@@ -24,6 +24,7 @@ import sock
 
 class User:
     '''
+        Gets transmitted around thus contains everything but the pruvate key.
     '''
     U = conf.get()['user']
 
@@ -123,7 +124,7 @@ def test() -> None:
     s = Server()
     u = User( conf.get()['user']['name']
             , conf.get()['user']['group']
-            , crypto.generate_keypair()
+            , crypto.generate_keypair()[1]
             , sock.get_extern_ip()
             , conf.get()['user']['status'])
     s.register(u)
