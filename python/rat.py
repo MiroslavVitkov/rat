@@ -64,7 +64,7 @@ def listen(relay: bool=False) -> None:
 
     def forever(s):
         # Handshake.
-        client = protocol.handshake_as_server(s)
+        client = protocol.handshake_as_client(s)
         print('The remote user identifies as', client)
         remote_sockets.append(s)
         remote_keys.append(client.pub)
