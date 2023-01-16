@@ -172,7 +172,7 @@ def test() -> None:
     Client('localhost', port.CHATSERVER, yell)
     time.sleep(1)
     s.alive = False
-    print('sock.py: ALL TESTS PASSED')
+    print('sock.py: UNIT TESTS PASSED')
 
 
 if __name__ == '__main__':

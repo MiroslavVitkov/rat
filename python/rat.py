@@ -164,12 +164,17 @@ def handle_input( s: [socket]
 
 
 def test() -> None:
-    sock.test()
+    bot.test()
+    conf.test()
     crypto.test()
+    name.test()
     pack.test()
-    time.sleep(2)
-    print('UNIT TESTS PASSED')
+    port.test()
+    prompt.test()
+    protocol.test()
+    sock.test()
     print()
+    time.sleep(2)
 
     # TODO: this needs rewriting
     Thread(target=listen).start()
@@ -177,7 +182,7 @@ def test() -> None:
     priv, pub = crypto.generate_keypair()
     Thread(target=connect, args=['localhost']).start()
     time.sleep(2)
-    print('INTEGRATION TEST PASSED')
+    print('SYSTEM TEST PASSED')
     print()
     sys.exit()
 

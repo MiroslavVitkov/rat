@@ -16,7 +16,8 @@ def get( name: str=conf.get()['user']['name']
 
 
 def test():
-    print('ALL TESTS PASSED')
+    print('Default prompt is', get())
+    print('prompt.py: UNIT TESTS PASSED')
 
 
 if __name__ == '__main__':

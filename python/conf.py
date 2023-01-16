@@ -47,7 +47,7 @@ def test():
     assert len(get()['user']['status'])
     assert len(get()['user']['keypath'])
     # ['user']['bots'] is empty by default.
-    print('conf.py: ALL TESTS PASSED')
+    print('conf.py: UNIT TESTS PASSED')
 
 
 if __name__ == '__main__':

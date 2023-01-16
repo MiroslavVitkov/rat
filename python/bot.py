@@ -206,7 +206,7 @@ def test():
     t.join()
 
     # We're done.
-    print('bot.py: ALL UNIT TESTS PASSED')
+    print('bot.py: UNIT TESTS PASSED')
 
 
 if __name__ == '__main__':

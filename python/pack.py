@@ -96,7 +96,7 @@ def test() -> None:
     # Now the binary blob gets transmitted hopefully unchanged.
     newpack = Packet.from_bytes(b)
     assert newpack == pack
-    print('pack.py: ALL TESTS PASSED')
+    print('pack.py: UNIT TESTS PASSED')
 
 
 if __name__ == '__main__':

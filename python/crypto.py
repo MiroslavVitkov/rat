@@ -154,7 +154,7 @@ def test() -> None:
     signature = sign(msg, priv)
     verify(msg, signature, pub)
 
-    print('crypto.py: ALL TESTS PASSED')
+    print('crypto.py: UNIT TESTS PASSED')
 
 
 if __name__ == '__main__':
