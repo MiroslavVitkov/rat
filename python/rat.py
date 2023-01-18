@@ -164,6 +164,7 @@ def handle_input( s: [socket]
 
 
 def test() -> None:
+    # Perhaps an `os.listdir('.')` would be better?
     bot.test()
     conf.test()
     crypto.test()
@@ -173,18 +174,23 @@ def test() -> None:
     prompt.test()
     protocol.test()
     sock.test()
+
+    # Give sockets time to close.
     print()
     time.sleep(2)
 
-    # TODO: this needs rewriting
-    Thread(target=listen).start()
-    time.sleep(1)
-    priv, pub = crypto.generate_keypair()
-    Thread(target=connect, args=['localhost']).start()
-    time.sleep(2)
-    print('SYSTEM TEST PASSED')
-    print()
-    sys.exit()
+    # System test.
+    try:
+        Thread(target=listen).start()
+        time.sleep(1)
+        priv, pub = crypto.generate_keypair()
+        Thread(target=connect, args=['localhost']).start()
+# TODO: actually send a mesage and validate it was received
+        time.sleep(2)
+        print('\nSYSTEM TEST PASSED')
+    except Exception as e:
+        print('SYSTEM TEST FAILED!')
+        print('Reason: ', e)
 
 
 def print_help() -> None:
