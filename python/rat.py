@@ -189,7 +189,7 @@ def test() -> None:
         time.sleep(2)
         print('\nSYSTEM TEST PASSED')
     except Exception as e:
-        print('SYSTEM TEST FAILED!')
+        print('\nSYSTEM TEST FAILED!')
         print('Reason: ', e)
 
 
