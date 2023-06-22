@@ -1,0 +1,1 @@
+route run_rat.sh messages to /var/log 
