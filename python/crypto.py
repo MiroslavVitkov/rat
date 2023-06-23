@@ -25,6 +25,11 @@ Keypair = (Priv, Pub)
 # 'MD5', 'SHA-1', 'SHA-224', 'SHA-256', 'SHA-384' or 'SHA-512'
 HASH = 'SHA-256'
 
+# No idea how to calculate that; using  the reported by python exception value.
+# Should be a function of HASH algo and key size.
+# But what function?
+MAX_MSG_BYTES = 117
+
 
 def generate_keypair(bits: int=1024) -> Keypair:
     pub, priv = rsa.newkeys(bits)
@@ -92,6 +97,7 @@ def encrypt(text: str | bytes, pub: Pub) -> bytes:
     if(type(text) == str):
         b = text.encode('utf8')
     assert(type(b) == bytes)
+    assert(len(b) <= MAX_MSG_BYTES)
 
     encrypted = rsa.encrypt(b, pub)
     return encrypted
