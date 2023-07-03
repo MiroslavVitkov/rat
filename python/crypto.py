@@ -9,6 +9,7 @@ Asymmetric criptography of chat messages.
 #TODO: protect aainst traffic analysis
 # Everything is peer to peer, which is cool, but the IP fetching needs to be anonymysed as well.
 
+
 import os
 from pathlib import Path
 import random

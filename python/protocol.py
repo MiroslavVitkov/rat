@@ -5,7 +5,8 @@
 Communication sequences as to fufill top-level commands.
 '''
 
-import socket
+
+from socket import socket
 
 import crypto
 import name
@@ -55,7 +56,10 @@ def send_user( s: socket
 
 
 def recv_user( s: socket ) -> name.User:
-    data = sock.recv_one(s)
+    '''Receive remote User object encrypted by our pubkey.'''
+    encrypted = sock.recv_one(s)
+    own_priv, _ = crypto.read_keypair()
+    data = crypto.decrypt(encrypted, our_priv)
     remote_user = name.User.from_bytes(data)
     assert type(remote_user) == name.User, type(remote_user)
     return remote_user

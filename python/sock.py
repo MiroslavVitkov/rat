@@ -47,7 +47,7 @@ def send( text: str
 
 def recv( s: socket.socket, alive: bool=True ) -> str:
     '''
-    Accepts packets on a socket until retminated.
+    Accepts packets on a socket until terminated.
     '''
     while alive:
         data = s.recv(MAX_MSG_BYTES)
