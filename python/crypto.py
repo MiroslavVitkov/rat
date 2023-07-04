@@ -94,13 +94,12 @@ def read_keypair( p: Path=conf.get_keypath()
 
 def encrypt(text: str | bytes, pub: Pub) -> bytes:
     '''Encrypt a message so that only the owner of the private key can read it.'''
-    b = text
-    if(type(text) == str):
-        b = text.encode('utf8')
-    assert type(b) == bytes
-    assert len(b) <= MAX_MSG_BYTES
+    if type(text) is not bytes:
+        text = text.encode('utf8')
+    assert type(text) == bytes, type(text)
+    assert len(text) <= MAX_MSG_BYTES, len(text)
 
-    encrypted = rsa.encrypt(b, pub)
+    encrypted = rsa.encrypt(text, pub)
     return encrypted
 
 
