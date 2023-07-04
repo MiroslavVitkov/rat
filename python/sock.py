@@ -28,12 +28,8 @@ import pack
 import port
 
 
-# TODO: wrong, remove
-MAX_MSG_BYTES = 1024
-
-
-def cut( b: bytes, max: int ) -> [bytes]:
-    '''Chop into pieces no longer than max bytes.'''
+def chop( b: bytes, max: int=crypto.MAX_MSG_BYTES ) -> [bytes]:
+    '''Split into pieces no longer than max bytes.'''
     return [b[i:i+max] for i in range(0, len(b), max)]
 
 
@@ -52,20 +48,17 @@ def send( text: str
     signature = crypto.sign(text, own_priv)
     encrypted = crypto.encrypt(text, remote_pub)
     msg = pack.Packet(encrypted, signature).to_bytes()
-    # Reserve the top value for a "or longer" flag.
-    assert len(msg) < MAX_MSG_BYTES, ( 'Stitching of multi-part messages '
-                                       'has not been implemented.' )
-    s.sendall(msg)
+    for m in chop(msg):
+        s.sendall(m)
 
 
-def recv( s: socket.socket, alive: bool=True ) -> str:
+def recv( s: socket.socket, alive: bool=True ) -> bytes:
     '''
     Accepts packets on a socket until terminated.
     '''
     while alive:
-        data = s.recv(MAX_MSG_BYTES)
-        assert len(data) < MAX_MSG_BYTES, ( 'Stitching of multi-part messages '
-                                            'has not been implemented.' )
+        data = s.recv(crypto.MAX_MSG_BYTES)
+
         # Ignore empty packets.
         if data:
             yield data
@@ -79,10 +72,14 @@ def recv( s: socket.socket, alive: bool=True ) -> str:
 
 
 def recv_one(s: socket.socket) -> bytes:
+    '''Stitch any maximum size packet to the next one.'''
     alive = True
+    ret = []
     for data in recv(s, alive):
-        alive = False
-        return data
+        ret.append(data)
+        if len(data) < crypto.MAX_MSG_BYTES:
+            alive = False
+            return stitch(ret)
 
 
 def get_extern_ip() -> str:
@@ -167,10 +164,10 @@ class Client:
 
 
 
-def test_cut_stitch():
+def test_chop_stitch():
     max = 42
     data = b'This is an extremely long text!' * 666
-    packets = cut(data, max)
+    packets = chop(data, max)
     assert stitch(packets) == data
 
 
@@ -196,7 +193,7 @@ def test_server_client() -> None:
 
 
 def test() -> None:
-    test_cut_stitch()
+    test_chop_stitch()
     test_server_client()
     print('sock.py: UNIT TESTS PASSED')
 
