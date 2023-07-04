@@ -28,7 +28,20 @@ import pack
 import port
 
 
+# TODO: wrong, remove
 MAX_MSG_BYTES = 1024
+
+
+def cut( b: bytes, max: int ) -> [bytes]:
+    '''Chop into pieces no longer than max bytes.'''
+    return [b[i:i+max] for i in range(0, len(b), max)]
+
+
+def stitch( bb: [bytes] ) -> bytes:
+    '''Collect all packets from one transmission.'''
+    ret = bytes()
+    [ret := ret + b for b in bb]
+    return ret
 
 
 def send( text: str
@@ -153,7 +166,15 @@ class Client:
         func(s)
 
 
-def test() -> None:
+
+def test_cut_stitch():
+    max = 42
+    data = b'This is an extremely long text!' * 666
+    packets = cut(data, max)
+    assert stitch(packets) == data
+
+
+def test_server_client() -> None:
     def listen(s):
         timeout = 20
         for data in recv(s):
@@ -172,6 +193,11 @@ def test() -> None:
     Client('localhost', port.CHATSERVER, yell)
     time.sleep(1)
     s.alive = False
+
+
+def test() -> None:
+    test_cut_stitch()
+    test_server_client()
     print('sock.py: UNIT TESTS PASSED')
 
 

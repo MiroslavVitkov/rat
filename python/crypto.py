@@ -97,8 +97,8 @@ def encrypt(text: str | bytes, pub: Pub) -> bytes:
     b = text
     if(type(text) == str):
         b = text.encode('utf8')
-    assert(type(b) == bytes)
-    assert(len(b) <= MAX_MSG_BYTES)
+    assert type(b) == bytes
+    assert len(b) <= MAX_MSG_BYTES
 
     encrypted = rsa.encrypt(b, pub)
     return encrypted
