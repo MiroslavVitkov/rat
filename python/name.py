@@ -51,9 +51,7 @@ class User:
 
 
     def to_bytes(me) -> bytes:
-        b = pickle.dumps(me)
-        assert len(b) < sock.MAX_MSG_BYTES, len(b)
-        return b
+        return pickle.dumps(me)
 
 
     def __repr__(me) -> str:

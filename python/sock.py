@@ -67,6 +67,7 @@ def recv_one(s: socket.socket) -> bytes:
     alive = True
     ret = []
     for data in recv(s, alive):
+        assert len(data) <= MAX_MSG_BYTES, len(data)
         ret.append(data)
         if len(data) < MAX_MSG_BYTES:
             alive = False
@@ -154,14 +155,6 @@ class Client:
         func(s)
 
 
-
-def test_chop_stitch():
-    max = 42
-    data = b'This is an extremely long text!' * 666
-    packets = chop(data, max)
-    assert stitch(packets) == data
-
-
 def test_server_client() -> None:
     def listen(s):
         timeout = 20
@@ -184,7 +177,6 @@ def test_server_client() -> None:
 
 
 def test() -> None:
-    test_chop_stitch()
     test_server_client()
     print('sock.py: UNIT TESTS PASSED')
 

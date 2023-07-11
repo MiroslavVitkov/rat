@@ -92,6 +92,18 @@ def read_keypair( p: Path=conf.get_keypath()
     return kp
 
 
+def chop( b: bytes, max: int=MAX_PLAINTEXT_BYTES ) -> [bytes]:
+    '''Split into pieces no longer than max bytes.'''
+    return [b[i:i+max] for i in range(0, len(b), max)]
+
+
+def stitch( bb: [bytes] ) -> bytes:
+    '''Collect all packets from one transmission.'''
+    ret = bytes()
+    [ret := ret + b for b in bb]
+    return ret
+
+
 def encrypt(text: str | bytes, pub: Pub) -> bytes:
     '''
     Encrypt a message so that only the owner of the private key can read it.
@@ -104,11 +116,7 @@ def encrypt(text: str | bytes, pub: Pub) -> bytes:
     '''
     if type(text) is not bytes:
         text = text.encode('utf8')
-    assert type(text) == bytes, type(text)
-    assert len(text) <= MAX_MSG_BYTES, len(text)
-
-    encrypted = rsa.encrypt(text, pub)
-    return encrypted
+    return stitch([rsa.encrypt(t, pub) for t in chop(text, MAX_PLAINTEXT_BYTES)])
 
 
 def decrypt(encrypted: str | bytes, priv: Priv) -> str:
@@ -152,7 +160,16 @@ def verify(msg: str, signature: bytes, pub: Pub):
     rsa.verify(msg.encode('utf8'), signature, pub)
 
 
+def test_chop_stitch():
+    max = 42
+    data = b'This is an extremely long text!' * 666
+    packets = chop(data, max)
+    assert stitch(packets) == data
+
+
 def test() -> None:
+    test_chop_stitch()
+
     priv, pub = generate_keypair()
     p = Path('/tmp/whatever' + str(random.randint(0, 1e6)))
     write_keypair(priv, pub, p)
