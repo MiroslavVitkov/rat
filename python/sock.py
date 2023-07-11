@@ -28,16 +28,7 @@ import pack
 import port
 
 
-def chop( b: bytes, max: int=crypto.MAX_MSG_BYTES ) -> [bytes]:
-    '''Split into pieces no longer than max bytes.'''
-    return [b[i:i+max] for i in range(0, len(b), max)]
-
-
-def stitch( bb: [bytes] ) -> bytes:
-    '''Collect all packets from one transmission.'''
-    ret = bytes()
-    [ret := ret + b for b in bb]
-    return ret
+MAX_MSG_BYTES=1024
 
 
 def send( text: str
@@ -57,7 +48,7 @@ def recv( s: socket.socket, alive: bool=True ) -> bytes:
     Accepts packets on a socket until terminated.
     '''
     while alive:
-        data = s.recv(crypto.MAX_MSG_BYTES)
+        data = s.recv(MAX_MSG_BYTES)
 
         # Ignore empty packets.
         if data:
@@ -77,7 +68,7 @@ def recv_one(s: socket.socket) -> bytes:
     ret = []
     for data in recv(s, alive):
         ret.append(data)
-        if len(data) < crypto.MAX_MSG_BYTES:
+        if len(data) < MAX_MSG_BYTES:
             alive = False
             return stitch(ret)
 

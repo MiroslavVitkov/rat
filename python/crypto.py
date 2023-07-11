@@ -29,7 +29,7 @@ HASH = 'SHA-256'
 # No idea how to calculate that; using  the reported by python exception value.
 # Should be a function of HASH algo and key size.
 # But what function?
-MAX_MSG_BYTES = 117
+MAX_PLAINTEXT_BYTES = 117
 
 
 def generate_keypair(bits: int=1024) -> Keypair:
@@ -93,7 +93,15 @@ def read_keypair( p: Path=conf.get_keypath()
 
 
 def encrypt(text: str | bytes, pub: Pub) -> bytes:
-    '''Encrypt a message so that only the owner of the private key can read it.'''
+    '''
+    Encrypt a message so that only the owner of the private key can read it.
+
+    In case it's too long:
+        - chop the plaintext up
+        - encrypt the chops
+        - concatinate them
+        - hope the remote side can reverse the procedure.
+    '''
     if type(text) is not bytes:
         text = text.encode('utf8')
     assert type(text) == bytes, type(text)
