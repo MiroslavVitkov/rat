@@ -1,15 +1,16 @@
+
 #!/usr/bin/env python3
 
 
 '''
-A peer to peer chat client entry point.
+A peer to peer chat client.
+Refer to the README for dessign goals and usage.
 '''
 
 
 from threading import Thread
 import sys
 import time
-import socket
 
 import bot
 import conf
@@ -18,11 +19,60 @@ import name
 import pack
 from pack import Packet
 import prompt
-import protocol
 import port
 import sock
 
 
+### Helpers.
+def handle_input( s: [sock.socket.socket]
+                , own_priv: crypto.Priv
+                , remote_pub: [crypto.Pub]
+                , alive: bool=True
+                ) -> None:
+    '''
+    We need 2 threads to do simultaneous input and output.
+    So let's use the current thread for listening and spin an input one.
+    '''
+    def inp():
+        c = conf.get()['user']
+        while alive:
+            text = input()
+            # Forbid sending empty messages because they DOS the remote peer
+            # (the remote network buffer gets clogged).
+            # Perhaps a better alternative is to insert a delay in send()?
+            # Because what we see on the screen is different from the peer's?
+            if text:
+                for ip, pub in zip(s, remote_pub):
+                    sock.send(text, ip, own_priv, pub)
+
+    Thread(target=inp).start()
+
+
+def send_user( s: sock.socket.socket
+             , own_pub: crypto.Pub ) -> None:
+    '''
+    Every communication begins with exchanging User objects.
+    The client transmits their unencrypted User object because the server doesn't have it's key.
+    The server responds with their unencrypted User object.
+    TODO: encrypt all fields but for public key - too much complexity expected
+    '''
+    u = conf.get()['user']
+    user = name.User( u['name']
+                    , u['group']
+                    , own_pub
+                    , sock.get_extern_ip()
+                    , u['status'])
+    s.sendall(user.to_bytes())
+
+
+def receive_user(s: sock.socket.socket) -> name.User:
+    data = sock.recv_one(s)
+    remote_user = name.User.from_bytes(data)
+    assert type(remote_user) == name.User, type(remote_user)
+    return remote_user
+
+
+### Command handlers.
 def serve() -> None:
     '''
     Run a nameserver forever.
@@ -33,24 +83,27 @@ def serve() -> None:
 
 
 def register(ip) -> None:
-    '''
-    Register our User object(conf.ini + pub key) with nameserver(s).
-    '''
-    def func(s: socket):
-        server = protocol.handshake_as_client(s)
-        own_priv, _ = crypto.read_keypair()
-        sock.send(b'register', s, server.pub, own_priv)
+    own_priv, own_pub = crypto.read_keypair()
+    def func(s: sock.socket.socket):
+        send_user(s, own_pub)
+        remote_user = receive_user(s)
+        sock.send(b'register', s, own_priv, remote_user.pub)
 
     sock.Client(ip=ip, port=port.NAMESERVER, func=func)
 
 
-def ask(regex: str, ip: str) -> None:
+def ask(regex, ip) -> None:
     '''Request a list of matching userames from a nameserver.'''
-    def func(s: socket):
-        server = protocol.handshake_as_client(s)
-        sock.send('ask ' + regex, s, server.pub)
+    def func(s: sock.socket.socket):
+        own_priv, own_pub = crypto.read_keypair()
+        # TODO: sock.send((regex.encode('utf-8', regex), s, own_priv, remote_user.pub)
+        s.sendall(regex.encode('utf-8', regex))
         data = sock.recv_one(s)
-        print(data)
+        try:
+            print(name.User.from_bytes(data))
+        except:
+            # The server reported an error.
+            print(data)
 
     c = sock.Client(ip[0], port=port.NAMESERVER, func=func)
 
@@ -64,13 +117,12 @@ def listen(relay: bool=False) -> None:
 
     def forever(s):
         # Handshake.
-        client = protocol.handshake_as_client(s)
-        print('The remote user identifies as', client)
+        data = sock.recv_one(s)
+        remote_user = name.User.from_bytes(data)
+        print('The remote user identifies as', remote_user)
         remote_sockets.append(s)
-        remote_keys.append(client.pub)
-
-        # TODO: report disconnects.
-        print('New user joined:', client)
+        remote_keys.append(remote_user.pub)
+        send_user(s, own_pub)
 
         # Accept text messages.
         for data in sock.recv(s):
@@ -92,10 +144,12 @@ def listen(relay: bool=False) -> None:
             if relay:
                 for socket, key in zip(remote_sockets, remote_keys):
                     if socket != s:
-                        sock.send( prompt.get( remote_user.name
-                                             , remote_user.group )
+                        # TODO: prepend recepiend prompt
+                        sock.send( prompt.get(remote_user.name
+                                             , remote_user.group
+                                             )
                                              + text
-                                 , socket, key, own_priv)
+                                 , socket, own_priv, key )
 
     handle_input(remote_sockets, own_priv, remote_keys)
     sock.Server(port.CHATSERVER, forever)
@@ -178,6 +232,8 @@ def test() -> None:
     # Give sockets time to close.
     print()
     time.sleep(2)
+    print('UNIT TESTS PASSED')
+    print()
 
     # System test.
     try:

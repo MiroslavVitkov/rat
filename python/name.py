@@ -84,7 +84,22 @@ class Server:
 
 
     def _handle(me, s: socket.socket) -> None:
+        '''Handle one `ask` or `register` request, then shut down.'''
         own_priv, _ = crypto.read_keypair()
+
+        # send_pub()
+
+        # Accept remote User object.
+        remote_user = User.from_bytes(sock.recv_one(s))
+        assert type(remote_user) == User, type(remote_user)
+
+        # Transmit own User object.
+
+        # Check command - ask, register.
+
+
+
+
 
         for data in sock.recv(s, me.alive):
           # Accept remote User object.

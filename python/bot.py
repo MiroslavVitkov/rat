@@ -147,6 +147,12 @@ def relay(inout: InOut):
     pass
 
 
+def history_file(inout: InOut):
+    pass
+def history_ram(inout: InOut):
+    pass
+
+
 def recv_filebuf(inout: InOut):
     '''
     File that records incoming but yet unread messages.
