@@ -44,6 +44,7 @@ def send_pubkey( s: socket ) -> None:
 
 
 def recv_pubkey( s: socket ) -> crypto.Pub:
+    '''Receive unencrypted remote public key.'''
     key_data = sock.recv_one(s)
     pub = crypto.rsa.PublicKey.load_pkcs1(key_data)
     return pub
