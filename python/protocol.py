@@ -37,16 +37,26 @@ def handshake_as_client( s: socket ) -> name.User:
     return server
 
 
+def emit_pubkey() -> bytes:
+    '''Return the pubkey in a form suitable to be transmitted.'''
+    _, pub = crypto.read_keypair()
+    return pub.save_pkcs1()
+
+
 def send_pubkey( s: socket ) -> None:
     '''Transmit own public key unencrypted.'''
-    _, pub = crypto.read_keypair()
-    s.sendall(pub.save_pkcs1())
+    s.sendall( emit_pubkey() )
+
+
+def parse_pubkey( b: bytes) -> crypto.Pub:
+    '''Parses whatever emit_pubkey() generated.'''
+    return crypto.rsa.PublicKey.load_pkcs1(b)
 
 
 def recv_pubkey( s: socket ) -> crypto.Pub:
     '''Receive unencrypted remote public key.'''
     key_data = sock.recv_one(s)
-    pub = crypto.rsa.PublicKey.load_pkcs1(key_data)
+    pub = parse_pubkey(key_data)
     return pub
 
 
@@ -67,6 +77,8 @@ def recv_user( s: socket ) -> name.User:
 
 
 def test():
+    assert emit_pubkey() == emit_pubkey()
+    assert emit_pubkey() == parse_pubkey( emit_pubkey() )
     print('UNIT TESTS PASSED')
 
 
