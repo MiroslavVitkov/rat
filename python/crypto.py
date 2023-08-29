@@ -100,7 +100,7 @@ def chop( b: bytes, max: int=MAX_PLAINTEXT_BYTES ) -> [bytes]:
 def stitch( bb: [bytes] ) -> bytes:
     '''Collect all packets from one transmission.'''
     ret = bytes()
-    [ret := ret + b for b in bb]
+    [ret := ret + b for b in bb]  # walrus operator updates ret for each b
     return ret
 
 

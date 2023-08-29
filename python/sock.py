@@ -64,6 +64,7 @@ def recv( s: socket.socket, alive: bool=True ) -> bytes:
 
 def recv_one(s: socket.socket) -> bytes:
     '''Stitch any maximum size packet to the next one.'''
+    # TODO: when sending, if message is maximum size, chop in two!
     alive = True
     ret = []
     for data in recv(s, alive):
@@ -71,7 +72,7 @@ def recv_one(s: socket.socket) -> bytes:
         ret.append(data)
         if len(data) < MAX_MSG_BYTES:
             alive = False
-            return stitch(ret)
+            return crypto.stitch(ret)
 
 
 def get_extern_ip() -> str:
