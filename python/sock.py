@@ -39,7 +39,7 @@ def send( text: str
     signature = crypto.sign(text, own_priv)
     encrypted = crypto.encrypt(text, remote_pub)
     msg = pack.Packet(encrypted, signature).to_bytes()
-    for m in chop(msg):
+    for m in crypto.chop(msg):
         s.sendall(m)
 
 
