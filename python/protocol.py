@@ -70,7 +70,7 @@ def recv_user( s: socket ) -> name.User:
     '''Receive remote User object encrypted by our pubkey.'''
     encrypted = sock.recv_one(s)
     own_priv, _ = crypto.read_keypair()
-    data = crypto.decrypt(encrypted, our_priv)
+    data = crypto.decrypt(encrypted, own_priv)
     remote_user = name.User.from_bytes(data)
     assert type(remote_user) == name.User, type(remote_user)
     return remote_user
