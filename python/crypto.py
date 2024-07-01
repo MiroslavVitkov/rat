@@ -171,7 +171,7 @@ def test() -> None:
     test_chop_stitch()
 
     priv, pub = generate_keypair()
-    p = Path('/tmp/whatever' + str(random.randint(0, 1e6)))
+    p = Path('/tmp/whatever' + str(random.randint(0, int(1e6))))
     write_keypair(priv, pub, p)
     newpriv, newpub = read_keypair(p, True)
     assert priv == newpriv, (priv, newpriv)
