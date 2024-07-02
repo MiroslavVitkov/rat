@@ -63,7 +63,8 @@ def recv_pubkey( s: socket ) -> crypto.Pub:
 def send_user( s: socket
              , remote_pub: crypto.Pub ) -> None:
     own_priv, _ = crypto.read_keypair()
-    sock.send(name.User().to_bytes(), s, remote_pub, own_priv)
+    u = name.User().to_bytes()
+    sock.send(u, s, remote_pub, own_priv)
 
 
 def recv_user( s: socket ) -> name.User:

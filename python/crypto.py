@@ -119,6 +119,7 @@ def encrypt(text: str | bytes, pub: Pub) -> bytes:
     return stitch([rsa.encrypt(t, pub) for t in chop(text, MAX_PLAINTEXT_BYTES)])
 
 
+# TODO - rsa.pkcs1.DecryptionError's stack trace is unsafe, ours isn't!
 def decrypt(encrypted: str | bytes, priv: Priv) -> str:
     try:
         b = rsa.decrypt(encrypted, priv)
