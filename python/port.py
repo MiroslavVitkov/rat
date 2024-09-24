@@ -8,6 +8,7 @@ Standard ports used by the program.
 
 CHATSERVER = 42666
 NAMESERVER = CHATSERVER + 1
+TEST = NAMESERVER + 1
 
 
 def test():

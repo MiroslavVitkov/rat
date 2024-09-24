@@ -43,23 +43,18 @@ def send( text: str
         s.sendall(m)
 
 
-def recv( s: socket.socket, alive: bool=True ) -> bytes:
+def recv( s: socket.socket, alive: [bool]=[True] ) -> bytes:
     '''
     Accepts packets on a socket until terminated.
     '''
-    while alive:
-        data = s.recv(MAX_MSG_BYTES)
-
-        # Ignore empty packets.
-        if data:
+    s.settimeout(1)  # 1 second
+    while alive[0]:
+        try:
+            data = s.recv(MAX_MSG_BYTES)
+            assert data  # Empty packets were a problem.
             yield data
-
-        # For some unfantomable reason
-        # after the first connection is established (e.g. rat register)
-        # CPU usage rises to 100% or even 200%.
-        # The reason is that .recv() returns zero-length packets.
-        # This is a workaround until the issue has been figured out.
-        time.sleep(0.1)
+        except TimeoutError:
+            pass  # expected error, any other is propagated up
 
 
 def recv_one(s: socket.socket) -> bytes:
@@ -156,6 +151,32 @@ class Client:
         func(s)
 
 
+def test_nonblocking_recv() -> None:
+    '''
+    Make sure recv() can be terminated while there's nothing to be read on the socket.
+    '''
+    # Create 3 sockets - sever administrative, server content and client content.
+    # Bind the latter and forget about the former.
+    server_s = socket.create_server(('', port.TEST))
+    server_s.listen()
+    client_s = socket.create_connection(('localhost', port.TEST))
+    content_s = next(iter(server_s.accept()))  # Accept 1 connection.
+
+    # client_s.sendall('If this is commented out, the server hangs.'.encode('utf8'))
+
+    alive = [True]
+    def read_one_message():
+        data = recv(content_s, alive)
+        # print(next(iter(data)))  # This fails if nothing was sent.
+
+    content_th = threading.Thread(target=read_one_message)
+    content_th.start()
+    time.sleep(2)
+    alive[0] = False
+    content_th.join()
+    assert threading.active_count() == 1
+
+
 def test_server_client() -> None:
     def listen(s):
         timeout = 20
@@ -178,7 +199,8 @@ def test_server_client() -> None:
 
 
 def test() -> None:
-    test_server_client()
+    test_nonblocking_recv()
+    #test_server_client()
     print('sock.py: UNIT TESTS PASSED')
 
 
