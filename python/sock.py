@@ -51,8 +51,9 @@ def recv( s: socket.socket, alive: [bool]=[True] ) -> bytes:
     while alive[0]:
         try:
             data = s.recv(MAX_MSG_BYTES)
-            assert data  # Empty packets were a problem.
-            yield data
+            # What do we do with empty packets e.g. on connect/disconnect?
+            if data:
+                yield data
         except TimeoutError:
             pass  # expected error, any other is propagated up
 
@@ -84,7 +85,7 @@ class Server:
 
     func(socket.socket) - communicate with one client until connection drops
 
-    Set `me.alive = False` to kill permanently.
+    Set `me.alive = False` to kill permanently but spawned children remain unaffected.
     '''
 
 
@@ -95,10 +96,12 @@ class Server:
         me.ip = get_extern_ip()
         me.port = port
         me.alive = True
-        threading.Thread( target=me._listen
-                        , args=[port, func]
-                        , name='server'
-                        ).start()
+        me.children = []
+        me.thread = threading.Thread( target=me._listen
+                                    , args=[port, func]
+                                    , name='server'
+                                    )
+        me.thread.start()
         print('Server listening on ip', me.ip, 'port', me.port)
 
 
@@ -116,18 +119,18 @@ class Server:
 
         for conn, addr in me._live(s):
             print('New client connected:', addr)
-            threading.Thread( target=func
-                    , args=[conn]
-                    , name='server'
-                    ).start()
+            me.children.append( threading.Thread( target=func
+                                                , args=[conn, [me.alive]]
+                                                , name='server_content_socket'
+                                                ) )
+            me.children[-1].start()
 
-        print('Shutting down server on ip', me.ip, 'port', me.port)
+        print('Server down on ip', me.ip, 'port', me.port)
 
 
     def _live(me, s: socket.socket) -> (socket.socket, tuple):
         '''
-        Listens on a server socket, when a client connects, returns a client socket.
-        Check every second for a server stop request.
+        Listen for new clients and return the newly allocated socket.
         '''
         s.settimeout(1.0)
 
@@ -140,6 +143,9 @@ class Server:
 
 
 class Client:
+    '''
+    Client-side view of the pipe to the Server over the assigned socket.
+    '''
     def __init__(me, ip: str, port: int, func: callable):
         try:
             s = socket.create_connection((ip, port))
@@ -178,29 +184,30 @@ def test_nonblocking_recv() -> None:
 
 
 def test_server_client() -> None:
-    def listen(s):
-        timeout = 20
-        for data in recv(s):
-            assert data and len(data)
-            timeout -= 1
-            if timeout == 0:
-                return
+    '''
+    This is the intended API of the module.
+    '''
+    def listen(s: socket, alive: [bool]=[True]):
+        '''Server echoes received strings, forever.'''
+        for msg in recv(s, alive):
+            print(msg)
+    def yell(s: socket):
+        '''Client transmits something and disconnects.'''
+        s.sendall('Something!'.encode('utf8'))
 
-    def yell(s):
-        for i in range(0, 20):
-            msg = 'This is the' + str(i) + 'th message!'
-            s.sendall(msg.encode('utf8'))
+    s = Server(port.TEST, listen)
+    Client('localhost', port.TEST, yell)
 
-    s = Server(port.CHATSERVER, listen)
-    time.sleep(1)
-    Client('localhost', port.CHATSERVER, yell)
-    time.sleep(1)
+    # Kill the server.
+    # The child connection notices that through it's bool parameter and commits suicide.
     s.alive = False
+    time.sleep(2)
+    assert threading.active_count() == 1
 
 
 def test() -> None:
     test_nonblocking_recv()
-    #test_server_client()
+    test_server_client()
     print('sock.py: UNIT TESTS PASSED')
 
 
