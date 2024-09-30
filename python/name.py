@@ -72,8 +72,11 @@ class Server:
     '''
     def __init__(me):
         me.users = {}
+        me.alive = [True]
+
         me.server = sock.Server(port.NAMESERVER, me._handle)
-        me.alive = True
+        me.server.alive = me.alive
+        me.priv, _ = crypto.read_keypair()
 
 
     def register(me, u: User) -> None:
@@ -82,10 +85,8 @@ class Server:
 
 
     def _handle(me, s: socket.socket) -> None:
-        own_priv, _ = crypto.read_keypair()
-
         for data in sock.recv(s, me.alive):
-          # Accept remote User object.
+            # Accept remote User object.
             remote_user = User.from_bytes(data)
             assert type(remote_user) == User, type(remote_user)
 
@@ -115,8 +116,6 @@ class Server:
                     bytes = pickle.dumps(u)
                     sock.send(bytes, s, own_priv, remote_user.pub)
 
-            me.server.alive = me.alive  # Kill the parent server.
-
 
 def test() -> None:
     s = Server()
@@ -126,9 +125,13 @@ def test() -> None:
             , sock.get_extern_ip()
             , conf.get()['user']['status'])
     s.register(u)
+    print(len(s.users), 'users registered:')
     print(s.users)
-    s.alive = False
-    print('crypto.py: ALL TESTS PASSED')
+    # TODO: test ask()
+    s.alive[0] = False
+    import time; time.sleep(1)
+    import threading as th; assert th.active_count() == 1
+    print('crypto.py: UNIT TESTS PASSED')
 
 
 if __name__ == "__main__":

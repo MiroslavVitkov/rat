@@ -47,7 +47,8 @@ def recv( s: socket.socket, alive: [bool]=[True] ) -> bytes:
     '''
     Accepts packets on a socket until terminated.
     '''
-    s.settimeout(1)  # 1 second
+    s.settimeout(.1)
+
     while alive[0]:
         try:
             data = s.recv(MAX_MSG_BYTES)
@@ -59,16 +60,14 @@ def recv( s: socket.socket, alive: [bool]=[True] ) -> bytes:
 
 
 def recv_one(s: socket.socket) -> bytes:
-    '''Stitch any maximum size packet to the next one.'''
-    # TODO: when sending, if message is maximum size, chop in two!
-    alive = True
-    ret = []
-    for data in recv(s, alive):
+    '''
+    Block until a single message has been received and read out.
+
+    Stitching long messages is a TODO.
+    '''
+    for data in recv(s):
         assert len(data) <= MAX_MSG_BYTES, len(data)
-        ret.append(data)
-        if len(data) < MAX_MSG_BYTES:
-            alive = False
-            return crypto.stitch(ret)
+        return data
 
 
 def get_extern_ip() -> str:
@@ -85,7 +84,7 @@ class Server:
 
     func(socket.socket) - communicate with one client until connection drops
 
-    Set `me.alive = False` to kill permanently but spawned children remain unaffected.
+    Set `me.alive[0] = False` to kill permanently but spawned children remain unaffected.
     '''
 
 
@@ -95,7 +94,7 @@ class Server:
     def __init__(me, port: int=0, func: callable=None):
         me.ip = get_extern_ip()
         me.port = port
-        me.alive = True
+        me.alive = [True]
         me.children = []
         me.thread = threading.Thread( target=me._listen
                                     , args=[port, func]
@@ -120,7 +119,7 @@ class Server:
         for conn, addr in me._live(s):
             print('New client connected:', addr)
             me.children.append( threading.Thread( target=func
-                                                , args=[conn, [me.alive]]
+                                                , args=[conn, me.alive]
                                                 , name='server_content_socket'
                                                 ) )
             me.children[-1].start()
@@ -132,9 +131,9 @@ class Server:
         '''
         Listen for new clients and return the newly allocated socket.
         '''
-        s.settimeout(1.0)
+        s.settimeout(.1)
 
-        while me.alive:
+        while me.alive[0]:
             try:
                 conn, addr = s.accept()
                 yield conn, addr
@@ -175,7 +174,7 @@ def test_nonblocking_recv() -> None:
         data = recv(content_s, alive)
         # print(next(iter(data)))  # This fails if nothing was sent.
 
-    content_th = threading.Thread(target=read_one_message)
+    content_th = threading.Thread(target=read_one_message, name='content_th')
     content_th.start()
     time.sleep(2)
     alive[0] = False
@@ -200,7 +199,7 @@ def test_server_client() -> None:
 
     # Kill the server.
     # The child connection notices that through it's bool parameter and commits suicide.
-    s.alive = False
+    s.alive[0] = False
     time.sleep(2)
     assert threading.active_count() == 1
 
