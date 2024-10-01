@@ -56,6 +56,9 @@ def ask(regex: str, ip: str) -> None:
 
 
 def listen(relay: bool=False) -> None:
+    '''
+    Create a socket and listen on in with a dedicated thread, forever.
+    '''
     own_priv, own_pub = crypto.read_keypair()
     remote_sockets = []
     remote_keys = []
@@ -97,7 +100,10 @@ def listen(relay: bool=False) -> None:
                                              + text
                                  , socket, key, own_priv)
 
-    handle_input(remote_sockets, own_priv, remote_keys)
+    # Comenting this out temporarily.
+    # It is responsible for a clissicle p2p chat.
+    # TODO After connectionless rat is done and thested this need to be un-broken!
+    # handle_input(remote_sockets, own_priv, remote_keys)
     sock.Server(port.CHATSERVER, forever)
 
 
@@ -175,18 +181,11 @@ def test() -> None:
     protocol.test()
     sock.test()
 
-    # Give sockets time to close.
-    print()
-    time.sleep(2)
-
     # System test.
     try:
-        Thread(target=listen).start()
-        time.sleep(1)
-        priv, pub = crypto.generate_keypair()
-        Thread(target=connect, args=['localhost']).start()
+        Thread(target=listen, daemon=True).start()
+        Thread(target=connect, args=['localhost'], daemon=True).start()
 # TODO: actually send a mesage and validate it was received
-        time.sleep(2)
         print('\nSYSTEM TEST PASSED')
     except Exception as e:
         print('\nSYSTEM TEST FAILED!')
