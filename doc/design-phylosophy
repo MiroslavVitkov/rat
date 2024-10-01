@@ -1,0 +1,10 @@
+++Design philosophy:
+++- open code - not like linux is "open and free: go read the 6 million lines of code in an ancient language" but instead actually readable
+++- encrypted - by far not as well as WhatsApp but rather "NSA's state of the art in the '70s'; still encrypted enough to stop anyone short of a supercomputer(many thousands of nodes) to eavesdrop
+++- authenticated - someone used a supercomputer and broke the key? they can now eavesdrop but can't impersonate
+++- distributed - no central server; well I host one but starting Your own is as easy as `./rat listen` or `./rat serve`
+++- no passwords - passwords were identified as moronic by NSA in '70s
+++- fun - no money, no corporations, no complications
+++- configurable - you get a secure byte stream. That's all. Everything else is optional. No chat history, no emoticons, no 'seen'. Unless configured so. And configuration is typing one word into a text file.
+++- unit and system tests
+++- bots are as easy as writing one word in the congig file
