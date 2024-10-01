@@ -2,7 +2,7 @@
 
 
 '''
-A peer to peer chat client entry point.
+A peer to peer chat client/server/nameserver entry point.
 '''
 
 
@@ -58,6 +58,7 @@ def ask(regex: str, ip: str) -> None:
 def listen(relay: bool=False) -> None:
     '''
     Create a socket and listen on in with a dedicated thread, forever.
+    relay - send everything received to everyone else(chatroom)
     '''
     own_priv, own_pub = crypto.read_keypair()
     remote_sockets = []

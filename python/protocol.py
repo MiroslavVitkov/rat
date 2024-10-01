@@ -10,6 +10,7 @@ from socket import socket
 
 import crypto
 import name
+import port
 import sock
 
 
@@ -79,8 +80,15 @@ def recv_user( s: socket ) -> name.User:
 
 
 def test():
+    server = sock.Server(port.TEST, lambda s, _: print(sock.recv_one(s)))
+    client = sock.Client('localhost'
+                        , port.TEST
+                        , lambda s: s.sendall('Protocol Test One'.encode('utf8')))
+    server.alive[0] = False
+
     assert crypto.read_keypair()[1] == parse_pubkey( emit_pubkey() )
-    print('UNIT TESTS PASSED')
+
+    print('protocol.py: UNIT TESTS PASSED')
 
 
 if __name__ == '__main__':
