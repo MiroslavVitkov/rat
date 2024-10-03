@@ -105,6 +105,9 @@ class Server:
 
 
     def _listen(me, port: int, func: callable) -> None:
+        '''
+        Accept connections and throw and thread and the passed callback at them.
+        '''
         assert 0 <= port <= 2**16-1, port
 
         try:
@@ -124,6 +127,9 @@ class Server:
                                                 ) )
             me.children[-1].start()
 
+
+        # Close listener socket - already established connections are unaffected.
+        s.close()
         print('Server down on ip', me.ip, 'port', me.port)
 
 

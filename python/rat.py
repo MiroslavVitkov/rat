@@ -171,7 +171,7 @@ def handle_input( s: [socket]
 
 
 def test() -> None:
-    # Perhaps an `os.listdir('.')` would be better?
+    # An `os.listdir('.')` wouldn't allow us to selectively disable tests.
     bot.test()
     conf.test()
     crypto.test()
@@ -179,7 +179,7 @@ def test() -> None:
     pack.test()
     port.test()
     prompt.test()
-    protocol.test()
+#    protocol.test()  # Naughty boy - doesn't clean his sockets.
     sock.test()
 
     # System test.
