@@ -79,14 +79,24 @@ def recv_user( s: socket ) -> name.User:
     return remote_user
 
 
+def test_crypto_sane():
+    assert crypto.read_keypair()[1] == parse_pubkey( emit_pubkey() )
+
+    priv, pub = crypto.read_keypair()
+    e1 = crypto.encrypt('string', pub)
+    e2 = crypto.encrypt(b'bytes', pub)
+    assert crypto.decrypt(e1, priv) == 'string'
+    assert crypto.decrypt(e2, priv) == 'bytes'
+
+
 def test():
+    test_crypto_sane()
+
     server = sock.Server(port.TEST, lambda s, _: print(sock.recv_one(s)))
     client = sock.Client('localhost'
                         , port.TEST
                         , lambda s: s.sendall('Protocol Test One'.encode('utf8')))
     server.alive[0] = False
-
-    assert crypto.read_keypair()[1] == parse_pubkey( emit_pubkey() )
 
     print('protocol.py: UNIT TESTS PASSED')
 
