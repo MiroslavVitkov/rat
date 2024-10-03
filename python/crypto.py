@@ -168,8 +168,17 @@ def test_chop_stitch():
     assert stitch(packets) == data
 
 
+def test_encrypt_decrypt():
+    priv, pub = read_keypair()
+    msg = 'This is supposed to work both as string or bytes.'
+    e = encrypt(msg, pub)
+    d = decrypt(e, priv)
+    assert d == msg
+
+
 def test() -> None:
     test_chop_stitch()
+    test_encrypt_decrypt()
 
     priv, pub = generate_keypair()
     p = Path('/tmp/whatever' + str(random.randint(0, int(1e6))))
