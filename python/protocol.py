@@ -89,8 +89,36 @@ def test_crypto_sane():
     assert crypto.decrypt(e2, priv) == 'bytes'
 
 
+class SocketMock:
+    def __init__(me):
+        me.buf = b''
+
+    def send(me, msg):
+        me.buf += msg
+
+    def recv(me, max=1024):
+        assert len(me.buf) < max
+        tmp = me.buf
+        me.buf = b''
+        return tmp
+
+    def settimeout(me, val):
+        pass
+
+    def sendall(me, msg):
+        me.send(msg)
+
+
+def test_sockmock():
+    s = SocketMock()
+    s.send(b'Mock sockets as we are trying to deal only with protocol here.')
+    print(s.recv())
+    assert len(s.buf) == 0
+
+
 def test():
     test_crypto_sane()
+    test_sockmock()
 
     server = sock.Server(port.TEST, lambda s, _: print(sock.recv_one(s)))
     client = sock.Client('localhost'
