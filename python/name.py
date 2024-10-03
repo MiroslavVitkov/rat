@@ -24,7 +24,7 @@ import sock
 
 class User:
     '''
-        Gets transmitted around thus contains everything but the pruvate key.
+        Gets transmitted around thus contains everything but the private key.
     '''
     U = conf.get()['user']
 
@@ -33,13 +33,13 @@ class User:
                 , name: str=U['name']
                 , group: str=U['group']
                 , pub: crypto.Pub=crypto.read_keypair()[1]
-                , ip: [str]=[sock.get_extern_ip(),]
+                , ips: [str]=[sock.get_extern_ip(),]
                 , status: str=U['status']
                 ):
         me.name = name
         me.group = group
         me.pub = pub
-        me.ip = ip
+        me.ips = ips
         me.status = status
 
 
@@ -58,12 +58,18 @@ class User:
         assert(me)
         assert(me.pub)
         pub = str(me.pub.save_pkcs1())
+        ips = ', '.join(me.ips)
         return ( '\n'
                + 'nickname: ' + me.name + '\n'
                + 'group: ' + me.group + '\n'
                + 'public key: ' + pub + '\n'
-               + 'IP: ' + me.ip + '\n'
+               + 'IPs: ' + ips + '\n'
                + 'status: ' + me.status)
+
+    def __eq__(me, other):
+        if type(me) != type(other):
+            return False;
+        return me.__dict__ == other.__dict__
 
 
 class Server:
@@ -118,11 +124,13 @@ class Server:
 
 
 def test() -> None:
+    assert User.from_bytes(User().to_bytes()) == User()
+
     s = Server()
     u = User( conf.get()['user']['name']
             , conf.get()['user']['group']
             , crypto.generate_keypair()[1]
-            , sock.get_extern_ip()
+            , [sock.get_extern_ip()]
             , conf.get()['user']['status'])
     s.register(u)
     print(len(s.users), 'users registered:')
