@@ -175,6 +175,11 @@ def test_encrypt_decrypt():
     d = decrypt(e, priv)
     assert d == msg
 
+    from name import User
+    e = encrypt(User().to_bytes(), pub)
+    d = decrypt(e, priv)
+    assert d == User()
+
 
 def test() -> None:
     test_chop_stitch()
