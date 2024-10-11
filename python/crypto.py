@@ -29,6 +29,35 @@ MAX_PLAINTEXT_BYTES = 117
 ENCRYPTED_CHUNK_BYTES = 128
 
 
+# Public API.
+#string = encode_chop_encrypt_stitch() and sign
+#blob = chop_encrypt_stitch() and sign
+
+
+# --- Details.
+def encode_chop_encrypt_stitch(msg: str, remote_pub: Pub) -> bytes:
+    return chop_encode_stitch(msg.encode('utf8'))
+
+
+def chop_encrypt_stitch(msg: bytes, remote_pub: Pub) -> bytes:
+    c = b.chop(b, MAX_PLAINTEXT_BYTES)
+    e = [encrypt(c_, pub) for c_ in c]
+    s = stitch(e)
+    return s
+
+
+def chop_decrypt_stitch_decode(b: bytes) -> bytes:
+    return chop_decrypt_stitch(b).decode('utf8')
+
+
+def chop_decrypt_stitch(b: bytes, own_priv: Priv) -> bytes:
+    c = chop(b, ENCRYPTED_CHUNK_BYTES)
+    assert c[-1] == ENCRYPTED_CHUNK_BYTES
+    d = [decrypt(d_, own_priv) for d_ in c]
+    s = stitch(d)
+    return s
+
+
 def generate_keypair(bits: int=1024) -> Keypair:
     pub, priv = rsa.newkeys(bits)
     return priv, pub
