@@ -10,6 +10,7 @@ import os
 from pathlib import Path
 import random
 import rsa
+import tempfile
 
 import conf
 
@@ -22,6 +23,7 @@ Keypair = (Priv, Pub)
 # 'MD5', 'SHA-1', 'SHA-224', 'SHA-256', 'SHA-384' or 'SHA-512'
 HASH = 'SHA-256'
 
+
 # No idea how to calculate this; using  the reported by python exception value.
 # Should be a function of HASH algo and key size.
 # But what function?
@@ -29,7 +31,7 @@ MAX_PLAINTEXT_BYTES = 117
 ENCRYPTED_CHUNK_BYTES = 128
 
 
-# Public API.
+# --- Public API.
 def from_string(msg: str, remote_pub: Pub) -> bytes:
     return encode_chop_sign_encrypt_stitch(msg, remote_pub)
 
@@ -206,6 +208,15 @@ def test_chop_stitch():
     assert stitch(packets) == data
 
 
+def test_key() -> None:
+    priv, pub = generate_keypair()
+    p = tempfile.TemporaryDirectory().name
+    write_keypair(priv, pub, p)
+    newpriv, newpub = read_keypair(p, True)
+    assert priv == newpriv, (priv, newpriv)
+    assert pub == newpub, (pub, newpub)
+
+
 def test_encrypt_decrypt():
     # Short strings cover the happy path.
     priv, pub = read_keypair()
@@ -246,6 +257,7 @@ def test_API() -> None:
 
 def test() -> None:
     test_chop_stitch()
+    test_key()
     test_encrypt_decrypt()
     test_API()
     print('crypto.py: UNIT TESTS PASSED')
