@@ -30,32 +30,43 @@ ENCRYPTED_CHUNK_BYTES = 128
 
 
 # Public API.
-#string = encode_chop_encrypt_stitch() and sign
-#blob = chop_encrypt_stitch() and sign
+def from_string(msg: str, remote_pub: Pub) -> bytes:
+    return encode_chop_sign_encrypt_stitch(msg, remote_pub)
 
+
+def to_string(msg: bytes) -> str:
+    '''
+    Decrypt a string someone sent specifically to us.
+    '''
+    s = chop_decrypt_verify_stitch_decode(msg)
+    return s
 
 # --- Details.
-def encode_chop_encrypt_stitch(msg: str, remote_pub: Pub) -> bytes:
-    return chop_encode_stitch(msg.encode('utf8'))
+def encode_chop_sign_encrypt_stitch(msg: str, remote_pub: Pub) -> bytes:
+    return chop_sign_encrypt_stitch(msg.encode('utf8'), remote_pub)
 
 
-def chop_encrypt_stitch(msg: bytes, remote_pub: Pub) -> bytes:
-    c = b.chop(b, MAX_PLAINTEXT_BYTES)
-    e = [encrypt(c_, pub) for c_ in c]
-    s = stitch(e)
-    return s
+def chop_sign_encrypt_stitch(msg: bytes, remote_pub: Pub) -> bytes:
+    #priv, _ = read_keypair()
+
+    c = chop(msg, MAX_PLAINTEXT_BYTES)
+    s = c #s = [sign(c_, priv) for c_ in c]
+    e = [encrypt(c_, remote_pub) for c_ in c]
+    return stitch(e)
 
 
-def chop_decrypt_stitch_decode(b: bytes) -> bytes:
-    return chop_decrypt_stitch(b).decode('utf8')
+def chop_decrypt_verify_stitch_decode(b: bytes) -> bytes:
+    return chop_decrypt_verify_stitch(b).decode('utf8')
 
 
-def chop_decrypt_stitch(b: bytes, own_priv: Priv) -> bytes:
+def chop_decrypt_verify_stitch(b: bytes) -> bytes:
+    priv, _ = read_keypair()
+
+    assert type(b) == bytes, type(b)
     c = chop(b, ENCRYPTED_CHUNK_BYTES)
-    assert c[-1] == ENCRYPTED_CHUNK_BYTES
-    d = [decrypt(d_, own_priv) for d_ in c]
-    s = stitch(d)
-    return s
+    d = [decrypt(d_, priv) for d_ in c]
+    #verify(str, signature, pub)
+    return stitch(d)
 
 
 def generate_keypair(bits: int=1024) -> Keypair:
@@ -224,9 +235,19 @@ def test_encrypt_decrypt():
     assert User.from_bytes(d) == User()
 
 
+def test_API() -> None:
+    priv, pub = read_keypair()
+    msg = 'Random long string.' * 999
+    blob = from_string(msg, pub)  # Send to ourselves.
+    assert type(blob) == bytes, type(blob)
+    msg2 = to_string(blob) # We are the intended recepient so we can read it.
+    assert msg == msg2
+
+
 def test() -> None:
     test_chop_stitch()
     test_encrypt_decrypt()
+    test_API()
     print('crypto.py: UNIT TESTS PASSED')
 
     return
