@@ -2,12 +2,8 @@
 
 
 '''
-Asymmetric criptography of chat messages.
+Asymmetric criptography transport layer - basically a dumbified ssl.
 '''
-#TODO: implement perfect foreward secrecy
-#Because of forward secrecy an attacker would need to have access to the internal SSH state of either the client or server at the time the SSH connection still exists.
-#TODO: protect aainst traffic analysis
-# Everything is peer to peer, which is cool, but the IP fetching needs to be anonymysed as well.
 
 
 import os
@@ -26,10 +22,11 @@ Keypair = (Priv, Pub)
 # 'MD5', 'SHA-1', 'SHA-224', 'SHA-256', 'SHA-384' or 'SHA-512'
 HASH = 'SHA-256'
 
-# No idea how to calculate that; using  the reported by python exception value.
+# No idea how to calculate this; using  the reported by python exception value.
 # Should be a function of HASH algo and key size.
 # But what function?
 MAX_PLAINTEXT_BYTES = 117
+ENCRYPTED_CHUNK_BYTES = 128
 
 
 def generate_keypair(bits: int=1024) -> Keypair:
@@ -104,31 +101,25 @@ def stitch( bb: [bytes] ) -> bytes:
     return ret
 
 
-def encrypt(text: str | bytes, pub: Pub) -> bytes:
+def encrypt(payload: bytes, pub: Pub) -> bytes:
     '''
     Encrypt a message so that only the owner of the private key can read it.
-
-    In case it's too long:
-        - chop the plaintext up
-        - encrypt the chops
-        - concatinate them
-        - hope the remote side can reverse the procedure.
     '''
-    if type(text) is not bytes:
-        text = text.encode('utf8')
-    return stitch([rsa.encrypt(t, pub) for t in chop(text, MAX_PLAINTEXT_BYTES)])
+    assert type(payload) == type(b''), type(payload)
+    assert len(payload) <= MAX_PLAINTEXT_BYTES
+    return rsa.encrypt(payload, pub)
 
 
-# TODO - rsa.pkcs1.DecryptionError's stack trace is unsafe, ours isn't!
-def decrypt(encrypted: str | bytes, priv: Priv) -> str:
+def decrypt(encrypted: bytes, priv: Priv) -> bytes:
+    '''
+    Read a message if it was intended for you.
+    '''
     try:
-        b = rsa.decrypt(encrypted, priv)
-        string = b.decode('utf8')
+        return rsa.decrypt(encrypted, priv)
     except rsa.pkcs1.DecryptionError:
         # Printing a stack trace leaks information about the key.
-        print('ERROR: DecryptionError!')
-        string = ''
-    return string
+        # However prining a trace from here is safe.
+        raise Exception('rsa.pkcs1.DecryptionError')
 
 
 def sign(msg: str, priv: Priv) -> bytes:
@@ -162,29 +153,54 @@ def verify(msg: str, signature: bytes, pub: Pub):
 
 
 def test_chop_stitch():
+    # Long payload.
     max = 42
     data = b'This is an extremely long text!' * 666
     packets = chop(data, max)
     assert stitch(packets) == data
 
+    # Binary payload.
+    from name import User
+    data = User().to_bytes()
+    packets = chop(data, max)
+    assert stitch(packets) == data
+
 
 def test_encrypt_decrypt():
+    # Short strings cover the happy path.
     priv, pub = read_keypair()
-    msg = 'This is supposed to work both as string or bytes.'
+    msg = b'The basic unit of transfer is of course the byte blob - see constants at top.'
     e = encrypt(msg, pub)
     d = decrypt(e, priv)
     assert d == msg
 
+    # Long strings.
+    # Chop - encrypt - stitch.
+    msg *= 666
+    msg_chopped = chop(msg, MAX_PLAINTEXT_BYTES)
+    msg_encrypted = [encrypt(msg, priv) for msg in msg_chopped]
+    msg_stitched = stitch(msg_encrypted)
+
+    # And vice versa.
+    msg_encrypted_2 = chop(msg_stitched, ENCRYPTED_CHUNK_BYTES)
+    msg_chopped_2 = [decrypt(m, priv) for m in msg_encrypted_2]
+    msg2 = stitch(msg_chopped_2)
+    assert msg == msg2
+
+    # Binary payload.
     from name import User
-    e = encrypt(User().to_bytes(), pub)
-    d = decrypt(e, priv)
-    assert d == User()
+    msg = User().to_bytes()
+    e = [encrypt(m, pub) for m in chop(msg, MAX_PLAINTEXT_BYTES)]
+    d = stitch([decrypt(en, priv) for en in e])
+    assert User.from_bytes(d) == User()
 
 
 def test() -> None:
     test_chop_stitch()
     test_encrypt_decrypt()
+    print('crypto.py: UNIT TESTS PASSED')
 
+    return
     priv, pub = generate_keypair()
     p = Path('/tmp/whatever' + str(random.randint(0, int(1e6))))
     write_keypair(priv, pub, p)
@@ -199,8 +215,6 @@ def test() -> None:
 
     signature = sign(msg, priv)
     verify(msg, signature, pub)
-
-    print('crypto.py: UNIT TESTS PASSED')
 
 
 if __name__ == '__main__':
