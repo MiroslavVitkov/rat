@@ -23,47 +23,41 @@ Keypair = (Priv, Pub)
 # 'MD5', 'SHA-1', 'SHA-224', 'SHA-256', 'SHA-384' or 'SHA-512'
 HASH = 'SHA-256'
 
-
-# No idea how to calculate this; using  the reported by python exception value.
-# Should be a function of HASH algo and key size.
-# But what function?
+# 1024 bit key, SHA-256
 MAX_PLAINTEXT_BYTES = 117
 ENCRYPTED_CHUNK_BYTES = 128
 
 
 # --- Public API.
-def from_string(msg: str, remote_pub: Pub) -> bytes:
-    return encode_chop_sign_encrypt_stitch(msg, remote_pub)
+def from_string(msg: str, own_priv: Priv, remote_pub: Pub) -> bytes:
+    return encode_chop_sign_encrypt_stitch(msg, own_priv, remote_pub)
 
 
-def to_string(msg: bytes) -> str:
+def to_string(msg: bytes, priv: Priv) -> str:
     '''
     Decrypt a string someone sent specifically to us.
     '''
-    s = chop_decrypt_verify_stitch_decode(msg)
+    s = chop_decrypt_verify_stitch_decode(msg, priv)
     return s
 
+
 # --- Details.
-def encode_chop_sign_encrypt_stitch(msg: str, remote_pub: Pub) -> bytes:
-    return chop_sign_encrypt_stitch(msg.encode('utf8'), remote_pub)
+def encode_chop_sign_encrypt_stitch(msg: str, own_priv: Priv, remote_pub: Pub) -> bytes:
+    return chop_sign_encrypt_stitch(msg.encode('utf8'), own_priv, remote_pub)
 
 
-def chop_sign_encrypt_stitch(msg: bytes, remote_pub: Pub) -> bytes:
-    #priv, _ = read_keypair()
-
+def chop_sign_encrypt_stitch(msg: bytes, own_priv: Priv, remote_pub: Pub) -> bytes:
     c = chop(msg, MAX_PLAINTEXT_BYTES)
     s = c #s = [sign(c_, priv) for c_ in c]
     e = [encrypt(c_, remote_pub) for c_ in c]
     return stitch(e)
 
 
-def chop_decrypt_verify_stitch_decode(b: bytes) -> bytes:
-    return chop_decrypt_verify_stitch(b).decode('utf8')
+def chop_decrypt_verify_stitch_decode(b: bytes, priv: Priv) -> bytes:
+    return chop_decrypt_verify_stitch(b, priv).decode('utf8')
 
 
-def chop_decrypt_verify_stitch(b: bytes) -> bytes:
-    priv, _ = read_keypair()
-
+def chop_decrypt_verify_stitch(b: bytes, priv: Priv) -> bytes:
     assert type(b) == bytes, type(b)
     c = chop(b, ENCRYPTED_CHUNK_BYTES)
     d = [decrypt(d_, priv) for d_ in c]
@@ -219,7 +213,7 @@ def test_key() -> None:
 
 def test_encrypt_decrypt():
     # Short strings cover the happy path.
-    priv, pub = read_keypair()
+    priv, pub = generate_keypair()
     msg = b'The basic unit of transfer is of course the byte blob - see constants at top.'
     e = encrypt(msg, pub)
     d = decrypt(e, priv)
@@ -247,11 +241,11 @@ def test_encrypt_decrypt():
 
 
 def test_API() -> None:
-    priv, pub = read_keypair()
+    priv, pub = generate_keypair()
     msg = 'Random long string.' * 999
-    blob = from_string(msg, pub)  # Send to ourselves.
+    blob = from_string(msg, priv, pub)  # Send to ourselves.
     assert type(blob) == bytes, type(blob)
-    msg2 = to_string(blob) # We are the intended recepient so we can read it.
+    msg2 = to_string(blob, priv) # We are the intended recepient so we can read it.
     assert msg == msg2
 
 
