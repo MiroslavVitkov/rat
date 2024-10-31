@@ -20,12 +20,10 @@ Pub = rsa.key.PublicKey
 Keypair = (Priv, Pub)
 
 
-# 'MD5', 'SHA-1', 'SHA-224', 'SHA-256', 'SHA-384' or 'SHA-512'
 HASH = 'SHA-256'
-
-# 1024 bit key, SHA-256
-MAX_PLAINTEXT_BYTES = 117
-ENCRYPTED_CHUNK_BYTES = 128
+BITS = 1024
+MAX_PLAINTEXT_BYTES = 117  # (BITS/8)-11
+ENCRYPTED_CHUNK_BYTES = SIGNATURE_BYTES = 128  # key size
 
 
 # --- Public API.
@@ -65,7 +63,7 @@ def chop_decrypt_verify_stitch(b: bytes, priv: Priv) -> bytes:
     return stitch(d)
 
 
-def generate_keypair(bits: int=1024) -> Keypair:
+def generate_keypair(bits: int=BITS) -> Keypair:
     pub, priv = rsa.newkeys(bits)
     return priv, pub
 
