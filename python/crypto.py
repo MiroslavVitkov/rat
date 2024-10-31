@@ -23,7 +23,7 @@ Keypair = (Priv, Pub)
 HASH = 'SHA-256'
 BITS = 1024
 MAX_PLAINTEXT_BYTES = 117  # (BITS/8)-11
-ENCRYPTED_CHUNK_BYTES = SIGNATURE_BYTES = 128  # key size
+CHUNK_BYTES = SIGNATURE_BYTES = 128  # key size
 
 
 # --- Public API.
@@ -31,12 +31,11 @@ def from_string(msg: str, own_priv: Priv, remote_pub: Pub) -> bytes:
     return encode_chop_sign_encrypt_stitch(msg, own_priv, remote_pub)
 
 
-def to_string(msg: bytes, priv: Priv) -> str:
+def to_string(msg: bytes, own_priv: Priv, remote_pub: Pub) -> str:
     '''
     Decrypt a string someone sent specifically to us.
     '''
-    s = chop_decrypt_verify_stitch_decode(msg, priv)
-    return s
+    return chop_decrypt_verify_stitch_decode(msg, own_priv, remote_pub)
 
 
 # --- Details.
@@ -45,22 +44,31 @@ def encode_chop_sign_encrypt_stitch(msg: str, own_priv: Priv, remote_pub: Pub) -
 
 
 def chop_sign_encrypt_stitch(msg: bytes, own_priv: Priv, remote_pub: Pub) -> bytes:
+    '''
+    Example input: 200 byte payload
+    Output: [(128 byte blob over first 117 bytes, 128 byte signature over them)
+            ,(128 byte blob over remaining 83 bytes, 128 byte signature over them)]
+    '''
     c = chop(msg, MAX_PLAINTEXT_BYTES)
-    s = c #s = [sign(c_, priv) for c_ in c]
-    e = [encrypt(c_, remote_pub) for c_ in c]
-    return stitch(e)
+    e = [encrypt(_, remote_pub) for _ in c]
+    s = [sign(_, own_priv) for _ in c]
+    return stitch([e_+s_ for e_, s_ in zip(e, s)])
 
 
-def chop_decrypt_verify_stitch_decode(b: bytes, priv: Priv) -> bytes:
-    return chop_decrypt_verify_stitch(b, priv).decode('utf8')
+def chop_decrypt_verify_stitch_decode(b: bytes, own_priv: Priv, remote_pub: Pub) -> str:
+    return chop_decrypt_verify_stitch(b, own_priv, remote_pub).decode('utf8')
 
 
-def chop_decrypt_verify_stitch(b: bytes, priv: Priv) -> bytes:
+def chop_decrypt_verify_stitch(b: bytes, own_priv: Priv, remote_pub: Pub) -> bytes:
     assert type(b) == bytes, type(b)
-    c = chop(b, ENCRYPTED_CHUNK_BYTES)
-    d = [decrypt(d_, priv) for d_ in c]
-    #verify(str, signature, pub)
-    return stitch(d)
+    ret = b''
+    for es in chop(b, CHUNK_BYTES+SIGNATURE_BYTES):
+        e = es[:CHUNK_BYTES]
+        s = es[CHUNK_BYTES:]
+        d = decrypt(e, own_priv)
+        verify(d, s, remote_pub)
+        ret += d
+    return ret
 
 
 def generate_keypair(bits: int=BITS) -> Keypair:
@@ -153,7 +161,7 @@ def decrypt(encrypted: bytes, priv: Priv) -> bytes:
     except rsa.pkcs1.DecryptionError:
         # Printing a stack trace leaks information about the key.
         # However prining a trace from here is safe.
-        raise Exception('rsa.pkcs1.DecryptionError')
+        raise rsa.pkcs1.DecryptionError
 
 
 def sign(msg: str, priv: Priv) -> bytes:
@@ -180,10 +188,10 @@ def sign(msg: str, priv: Priv) -> bytes:
     return signature
 
 
-def verify(msg: str, signature: bytes, pub: Pub):
+def verify(msg: bytes, signature: bytes, pub: Pub) -> None:
     '''VerificationError - when the signature doesn't match the message.'''
     assert(pub)
-    rsa.verify(msg.encode('utf8'), signature, pub)
+    rsa.verify(msg, signature, pub)
 
 
 def test_chop_stitch():
@@ -225,7 +233,7 @@ def test_encrypt_decrypt():
     msg_stitched = stitch(msg_encrypted)
 
     # And vice versa.
-    msg_encrypted_2 = chop(msg_stitched, ENCRYPTED_CHUNK_BYTES)
+    msg_encrypted_2 = chop(msg_stitched, CHUNK_BYTES)
     msg_chopped_2 = [decrypt(m, priv) for m in msg_encrypted_2]
     msg2 = stitch(msg_chopped_2)
     assert msg == msg2
@@ -243,8 +251,30 @@ def test_API() -> None:
     msg = 'Random long string.' * 999
     blob = from_string(msg, priv, pub)  # Send to ourselves.
     assert type(blob) == bytes, type(blob)
-    msg2 = to_string(blob, priv) # We are the intended recepient so we can read it.
+    msg2 = to_string(blob, priv, pub) # We are the intended recepient so we can read it.
     assert msg == msg2
+
+
+def test_failures() -> None:
+    priv1, pub1 = generate_keypair()
+    priv2, pub2 = generate_keypair()
+
+    msg = 'Random long string.' * 99
+    blob = from_string(msg, priv1, pub2)  # Send to some random dude.
+    # But try to read it ourselves instead.
+    try:
+        to_string(blob, priv1, pub1)
+        raise Exception('test_failures() decrypted nonsence.')
+    except rsa.pkcs1.DecryptionError:
+        pass
+
+    # He tries to read the message.
+    # But enjoys only messages from himself.
+    try:
+        to_string(blob, priv2, pub2)
+        raise Exception('test_failures() ignored a tampered signature.')
+    except rsa.VerificationError:
+        pass
 
 
 def test() -> None:
@@ -252,23 +282,8 @@ def test() -> None:
     test_key()
     test_encrypt_decrypt()
     test_API()
+    test_failures()
     print('crypto.py: UNIT TESTS PASSED')
-
-    return
-    priv, pub = generate_keypair()
-    p = Path('/tmp/whatever' + str(random.randint(0, int(1e6))))
-    write_keypair(priv, pub, p)
-    newpriv, newpub = read_keypair(p, True)
-    assert priv == newpriv, (priv, newpriv)
-    assert pub == newpub, (pub, newpub)
-
-    msg = "We come in peace!"
-    bytes = encrypt(msg, pub)
-    newmsg = decrypt(bytes, priv)
-    assert msg == newmsg
-
-    signature = sign(msg, priv)
-    verify(msg, signature, pub)
 
 
 if __name__ == '__main__':
