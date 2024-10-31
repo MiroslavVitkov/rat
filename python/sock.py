@@ -82,7 +82,7 @@ class Server:
     A server TCP socket is always meant to negotiate connections, not content.
     Each returned connection is a content socket with a client.
 
-    func(socket.socket) - communicate with one client until connection drops
+    func(socket, [alive]) - communicate with one client until connection drops
 
     Set `me.alive[0] = False` to kill permanently but spawned children remain unaffected.
     '''

@@ -66,7 +66,7 @@ def listen(relay: bool=False) -> None:
     inout = bot.InOut()
     bot.spawn_bots(inout)
 
-    def forever(s):
+    def forever(s: socket, a: [bool]):
         # Handshake.
         client = protocol.handshake_as_server(s)
         print('The remote user identifies as', client)
