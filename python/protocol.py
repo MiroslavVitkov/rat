@@ -83,10 +83,8 @@ def test_crypto_sane():
     assert crypto.read_keypair()[1] == parse_pubkey( emit_pubkey() )
 
     priv, pub = crypto.read_keypair()
-    e1 = crypto.encrypt('string', pub)
-    e2 = crypto.encrypt(b'bytes', pub)
-    assert crypto.decrypt(e1, priv) == 'string'
-    assert crypto.decrypt(e2, priv) == 'bytes'
+    e = crypto.from_string('something', priv, pub)
+    assert crypto.to_string(e, priv, pub) == 'something'
 
 
 class SocketMock:
@@ -116,15 +114,18 @@ def test_sockmock():
     assert len(s.buf) == 0
 
 
-def test():
-    test_crypto_sane()
-    test_sockmock()
-
+def test_handshake():
     server = sock.Server(port.TEST, lambda s, _: print(sock.recv_one(s)))
     client = sock.Client('localhost'
                         , port.TEST
                         , lambda s: s.sendall('Protocol Test One'.encode('utf8')))
     server.alive[0] = False
+
+
+def test():
+    test_crypto_sane()
+    test_sockmock()
+    test_handshake()
 
     print('protocol.py: UNIT TESTS PASSED')
 
