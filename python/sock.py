@@ -3,18 +3,6 @@
 
 '''
 Socket stuff - provides connection objects.
-
-All the usual
-    - dropped messages
-    - out of order messages
-    - binary deviations in transit
-    - weird endianness and padding
-    - etc.
-are the norm.
-
-For some reason, even after socket.setblocking(True)
-socket.recv() doesn't block.
-time.sleep() is the current workaround.
 '''
 
 
@@ -56,7 +44,8 @@ def recv( s: socket.socket, alive: [bool]=[True] ) -> bytes:
             if data:
                 yield data
         except TimeoutError:
-            pass  # expected error, any other is propagated up
+            # Expected error, any other is propagated out.
+            pass
 
 
 def recv_one(s: socket.socket) -> bytes:
@@ -106,7 +95,7 @@ class Server:
 
     def _listen(me, port: int, func: callable) -> None:
         '''
-        Accept connections and throw and thread and the passed callback at them.
+        Accept connections and create a thread with the passed callback for each.
         '''
         assert 0 <= port <= 2**16-1, port
 
@@ -117,9 +106,10 @@ class Server:
             s = socket.socket()
             s.bind(('localhost', port))
 
+        s.settimeout(.1)
         s.listen()
 
-        for conn, addr in me._live(s):
+        for conn, addr in me._poll(s):
             print('New client connected:', addr)
             me.children.append( threading.Thread( target=func
                                                 , args=[conn, me.alive]
@@ -133,12 +123,7 @@ class Server:
         print('Server down on ip', me.ip, 'port', me.port)
 
 
-    def _live(me, s: socket.socket) -> (socket.socket, tuple):
-        '''
-        Listen for new clients and return the newly allocated socket.
-        '''
-        s.settimeout(.1)
-
+    def _poll(me, s: socket):
         while me.alive[0]:
             try:
                 conn, addr = s.accept()
@@ -182,7 +167,7 @@ def test_nonblocking_recv() -> None:
 
     content_th = threading.Thread(target=read_one_message, name='content_th')
     content_th.start()
-    time.sleep(2)
+    time.sleep(1)
     alive[0] = False
     content_th.join()
     assert threading.active_count() == 1
@@ -203,10 +188,13 @@ def test_server_client() -> None:
     s = Server(port.TEST, listen)
     Client('localhost', port.TEST, yell)
 
+    # BUG: time.sleep() here sees CPU trashing!
+    # So: server _listen() loop fumbles even without protocol.py.
+
     # Kill the server.
     # The child connection notices that through it's bool parameter and commits suicide.
     s.alive[0] = False
-    time.sleep(2)
+    time.sleep(1)
     assert threading.active_count() == 1
 
 
