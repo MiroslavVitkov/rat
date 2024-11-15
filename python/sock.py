@@ -33,18 +33,20 @@ def send( text: str
 
 def recv( s: socket.socket, alive: [bool]=[True] ) -> bytes:
     '''
-    Accepts packets on a socket until terminated.
+    Accepts packets on a socket until terminated or the remote leaves.
     '''
     s.settimeout(.1)
 
     while alive[0]:
         try:
             data = s.recv(MAX_MSG_BYTES)
-            # What do we do with empty packets e.g. on connect/disconnect?
-            if data:
-                yield data
-        except TimeoutError:
-            # Expected error, any other is propagated out.
+
+            # A returned empty bytes object indicates that the client has disconnected.
+            if not data:
+                return  # == raise StopIteration
+
+            yield data
+        except socket.timeout as e:
             pass
 
 
@@ -181,18 +183,16 @@ def test_server_client() -> None:
         '''Server echoes received strings, forever.'''
         for msg in recv(s, alive):
             print(msg)
+        print('Listener disonnected or killed.')
     def yell(s: socket):
         '''Client transmits something and disconnects.'''
         s.sendall('Something!'.encode('utf8'))
-
     s = Server(port.TEST, listen)
     Client('localhost', port.TEST, yell)
 
-    # BUG: time.sleep() here sees CPU trashing!
-    # So: server _listen() loop fumbles even without protocol.py.
-
     # Kill the server.
     # The child connection notices that through it's bool parameter and commits suicide.
+    # Manual regression test here: time.sleep() and check cpu usage.
     s.alive[0] = False
     time.sleep(1)
     assert threading.active_count() == 1
