@@ -148,7 +148,7 @@ def encrypt(payload: bytes, pub: Pub) -> bytes:
     Encrypt a message so that only the owner of the private key can read it.
     '''
     assert type(payload) == type(b''), type(payload)
-    assert len(payload) <= MAX_PLAINTEXT_BYTES
+    assert len(payload) <= MAX_PLAINTEXT_BYTES, (len(payload), MAX_PLAINTEXT_BYTES)
     return rsa.encrypt(payload, pub)
 
 
