@@ -30,16 +30,13 @@ Privacy
 ---
 No 'last seen', no user broadcast or discovery, no central server, no files on the hard disk by default.
 
-Scriptable
----
-Adhering to the linux design guidelines, the program output is easily parsable by command-line tools.
 
-
-Scripting
+Modes of Use
 ---
-The client is interactive (the binary keeps on running between commands).
-However, it is intended to be machine understandable.
-Just capture stdout and stderr and parse them; synthetyse commands for stdin.
+ - classical interactive chat
+ - `git` style `rat send John hey there moron` non-interactive chat
+ - chatroom host
+ - artificial entities(bots, plugins, features e.g. chat history) are easy to interface
 
 
 Tested On
