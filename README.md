@@ -56,3 +56,19 @@ Development Notes
 To exclude conf.ini from staging run  
 `echo 'conf.ini' >> .git/info/exclude`  
 `git update-index --assume-unchanged conf.ini`  
+
+
+Branching Model
+---
+Releases are tags in `master`.
+Only QA are allowed to make those.
+In the unlikely event of backporting fixes to a release, a branch is created and QA work with dev to advance the tag pointer.
+
+All commits to `master` are smoke tested.
+Those can be merge commits for anything complex at all or single commits for simple bugfixes.
+
+Inactive feature branches are reaped monthly - there is no persistent branch beyond `master`.
+
+The python implementation is the spec.
+Any change to that is supposed to bring along chagnges in all the others.
+If not, do indicate in the commit message very clearly why.
