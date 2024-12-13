@@ -18,10 +18,10 @@ Has anyone you know?
 Although this project relies on many libraries, the project-exclusive code strives to be concise and readable even to a beginner.
 
 
-Encription
+Encryption
 ---
-Asymetric criptography is provenly uncrackeble by brute force.
-All messages are transmited encrypted and are secure if the two endpoints are not compromised.
+Asymmetric cryptography is proven uncrackeble by brute force.
+All messages are transmitted encrypted and are secure if the two endpoints are not compromised.
 Disclaimer: this application was not implemented by a cryptographer.
 Disclaimer: unlike WhatsApp, a compromise of a private key enables an attacker to decrypt all past messages.
 
