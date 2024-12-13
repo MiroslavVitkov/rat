@@ -21,54 +21,53 @@ Keypair = (Priv, Pub)
 
 
 HASH = 'SHA-256'
-BITS = 1024
-MAX_PLAINTEXT_BYTES = 117  # (BITS/8)-11
-CHUNK_BYTES = SIGNATURE_BYTES = 128  # key size
+BITS = 1024  # key size
+CHUNK_BYTES = SIGNATURE_BYTES = BITS // 8  # 128
+MAX_PLAINTEXT_BYTES = CHUNK_BYTES - 11  # 117
 
 
 # --- Public API.
 def from_string(msg: str, own_priv: Priv, remote_pub: Pub) -> bytes:
-    return encode_chop_sign_encrypt_stitch(msg, own_priv, remote_pub)
+    return encode_sign_chop_encrypt_stitch(msg, own_priv, remote_pub)
 
 
 def to_string(msg: bytes, own_priv: Priv, remote_pub: Pub) -> str:
     '''
     Decrypt a string someone sent specifically to us.
     '''
-    return chop_decrypt_verify_stitch_decode(msg, own_priv, remote_pub)
+    return chop_decrypt_stitch_verify_decode(msg, own_priv, remote_pub)
 
 
 # --- Details.
-def encode_chop_sign_encrypt_stitch(msg: str, own_priv: Priv, remote_pub: Pub) -> bytes:
-    return chop_sign_encrypt_stitch(msg.encode('utf8'), own_priv, remote_pub)
+def encode_sign_chop_encrypt_stitch(msg: str, own_priv: Priv, remote_pub: Pub) -> bytes:
+    return sign_chop_encrypt_stitch(msg.encode('utf8'), own_priv, remote_pub)
 
 
-def chop_sign_encrypt_stitch(msg: bytes, own_priv: Priv, remote_pub: Pub) -> bytes:
+def sign_chop_encrypt_stitch(msg: bytes, own_priv: Priv, remote_pub: Pub) -> bytes:
     '''
     Example input: 200 byte payload
-    Output: [(128 byte blob over first 117 bytes, 128 byte signature over them)
-            ,(128 byte blob over remaining 83 bytes, 128 byte signature over them)]
+    Output: [ 128 byte blob over first 117 bytes
+            , 128 byte blob over remaining 83 bytes
+            , 128 signature over the whole thing]
     '''
+    s = sign(msg, own_priv)
     c = chop(msg, MAX_PLAINTEXT_BYTES)
     e = [encrypt(_, remote_pub) for _ in c]
-    s = [sign(_, own_priv) for _ in c]
-    return stitch([e_+s_ for e_, s_ in zip(e, s)])
+    return stitch(e) + s
 
 
-def chop_decrypt_verify_stitch_decode(b: bytes, own_priv: Priv, remote_pub: Pub) -> str:
-    return chop_decrypt_verify_stitch(b, own_priv, remote_pub).decode('utf8')
+def chop_decrypt_stitch_verify_decode(b: bytes, own_priv: Priv, remote_pub: Pub) -> str:
+    return chop_decrypt_stitch_verify(b, own_priv, remote_pub).decode('utf8')
 
 
-def chop_decrypt_verify_stitch(b: bytes, own_priv: Priv, remote_pub: Pub) -> bytes:
-    assert type(b) == bytes, type(b)
-    ret = b''
-    for es in chop(b, CHUNK_BYTES+SIGNATURE_BYTES):
-        e = es[:CHUNK_BYTES]
-        s = es[CHUNK_BYTES:]
-        d = decrypt(e, own_priv)
-        verify(d, s, remote_pub)
-        ret += d
-    return ret
+def chop_decrypt_stitch_verify(b: bytes, own_priv: Priv, remote_pub: Pub) -> bytes:
+    '''
+    Last packet is signature, right?
+    '''
+    d = [decrypt(_, own_priv) for _ in chop(b, CHUNK_BYTES)[:-1]]
+    msg = stitch(d)
+    verify(msg, chop(b, CHUNK_BYTES)[-1], remote_pub)
+    return msg
 
 
 def generate_keypair(bits: int=BITS) -> Keypair:
@@ -154,7 +153,7 @@ def encrypt(payload: bytes, pub: Pub) -> bytes:
 
 def decrypt(encrypted: bytes, priv: Priv) -> bytes:
     '''
-    Read a message if it was intended for you.
+    Read a message if it was intended for us.
     '''
     try:
         return rsa.decrypt(encrypted, priv)
@@ -179,7 +178,7 @@ def sign(msg: str, priv: Priv) -> bytes:
     Furthermore it increases privacy.
     Only the recepient can validate the sender instead of anyone intercepting.
     '''
-    # Conert 'str' to 'bytes'.
+    # Convert 'str' to 'bytes'.
     payload = msg
     if(type(msg) == str):
         payload = msg.encode('utf8')
