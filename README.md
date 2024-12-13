@@ -39,6 +39,13 @@ Modes of Use
  - artificial entities(bots, plugins, features e.g. chat history) are easy to interface
 
 
+Authentication
+---
+The private key is Your digital identity.
+A single or multiple `rat` instances can run simultaneously with different keys.
+Any number of devices or instances using the same key is assumed to be a singular logical entity.
+
+
 Development Notes
 ---
 To exclude conf.ini from staging run  
