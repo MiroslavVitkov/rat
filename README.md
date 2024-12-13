@@ -39,15 +39,6 @@ Modes of Use
  - artificial entities(bots, plugins, features e.g. chat history) are easy to interface
 
 
-Tested On
----
-- arch
-- debian
-- raspbian
-- mint
-- ububtu
-
-
 Development Notes
 ---
 To exclude conf.ini from staging run  
