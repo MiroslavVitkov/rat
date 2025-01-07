@@ -38,6 +38,14 @@ def to_string(msg: bytes, own_priv: Priv, remote_pub: Pub) -> str:
     return chop_decrypt_stitch_verify_decode(msg, own_priv, remote_pub)
 
 
+def from_bin(msg: bytes, own_priv: Priv, remote_pub: Pub) -> bytes:
+    return sign_chop_encrypt_stitch(msg, own_priv, remote_pub)
+
+
+def to_bin(msg: bytes, own_priv: Priv, remote_pub: Pub) -> bytes:
+    return chop_decrypt_stitch_verify(msg, own_priv, remote_pub)
+
+
 # --- Details.
 def encode_sign_chop_encrypt_stitch(msg: str, own_priv: Priv, remote_pub: Pub) -> bytes:
     return sign_chop_encrypt_stitch(msg.encode('utf8'), own_priv, remote_pub)
@@ -180,9 +188,10 @@ def sign(msg: str, priv: Priv) -> bytes:
     '''
     # Convert 'str' to 'bytes'.
     payload = msg
-    if(type(msg) == str):
+    if type(msg) == str:
         payload = msg.encode('utf8')
 
+    assert type(priv) == Priv, type(priv)
     signature = rsa.sign(payload, priv, HASH)
     return signature
 

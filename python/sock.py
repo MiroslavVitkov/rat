@@ -2,7 +2,7 @@
 
 
 '''
-Socket stuff - provides connection objects.
+Provides TCP/IP connection objects, perhaps soon UDP too.
 '''
 
 
@@ -12,53 +12,59 @@ import threading
 import time
 
 import crypto
-import pack
 import port
 
 
-MAX_MSG_BYTES=1024
 
-
-def send( text: str
+def send( text: str|bytes
         , s: socket.socket
         , remote_pub: crypto.Pub
         , own_priv: crypto.Priv = crypto.read_keypair()[0]
         ) -> None:
-    signature = crypto.sign(text, own_priv)
-    encrypted = crypto.encrypt(text, remote_pub)
-    msg = pack.Packet(encrypted, signature).to_bytes()
-    for m in crypto.chop(msg):
-        s.sendall(m)
+    '''Ecrypt, sign and transmit the text.'''
+    assert type(own_priv) == crypto.Priv, type(own_priv)
+    if type(text) == str:
+        e = crypto.from_string(text, own_priv, remote_pub)
+    else:
+        e = crypto.from_bin(text, own_priv, remote_pub)
+    s.sendall(e)
 
 
-def recv( s: socket.socket, alive: [bool]=[True] ) -> bytes:
+def recv( s: socket.socket, alive: [bool]=[True], cache: [bytes]=[b''] ) -> bytes:
+    '''Block until one chunk is yielded.
+       Use 'alive' to kill from the outside.
+       Returns(doesn't throw) on remote disconnect.
     '''
-    Accepts packets on a socket until terminated or the remote leaves.
-    '''
+    def try_yield():
+        if len(cache[0]) >= crypto.CHUNK_BYTES:
+            r = cache[0][-crypto.CHUNK_BYTES:]
+            cache[0] = cache[0][:-crypto.CHUNK_BYTES]
+            yield r
+
+    yield from try_yield()
+
     s.settimeout(.1)
-
     while alive[0]:
         try:
-            data = s.recv(MAX_MSG_BYTES)
+            # Recommended value in the docs.
+            data = s.recv(4096)
 
-            # A returned empty bytes object indicates that the client has disconnected.
+            # The client has disconnected.
             if not data:
                 return  # == raise StopIteration
 
-            yield data
-        except socket.timeout as e:
+            cache[0] = data + cache[0]
+            yield from try_yield()
+
+        except socket.timeout:
             pass
 
 
-def recv_one(s: socket.socket) -> bytes:
-    '''
-    Block until a single message has been received and read out.
-
-    Stitching long messages is a TODO.
-    '''
-    for data in recv(s):
-        assert len(data) <= MAX_MSG_BYTES, len(data)
-        return data
+def recv_one( s: socket.socket, alive: [bool]=[True]):
+    '''Return one 128 byte chunk.'''
+    while alive[0]:
+        r = recv(s)
+        return r
 
 
 def get_extern_ip() -> str:

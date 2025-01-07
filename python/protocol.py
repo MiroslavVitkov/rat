@@ -19,7 +19,7 @@ def handshake_as_server( s: socket ) -> name.User:
     send_pubkey(s)
 
     # Receive client's encrypted User object.
-    client = recv_user(s)
+    client = recv_user(s, None)
 
     # Transmit own encrypted User object.
     send_user(s, client.pub)
@@ -34,10 +34,42 @@ def handshake_as_client( s: socket ) -> name.User:
     send_user(s, server_pub)
 
     # Receive the server's encrypted User object.
-    server = recv_user(s)
+    server = recv_user(s, server_pub)
     return server
 
 
+def send_msg( msg: str|bytes
+            , s: socket
+            , own_priv: crypto.Priv
+            , remote_pub: crypto.Pub):
+    if type(msg) == str:
+        e = crypto.from_str(msg, own_priv, remote_pub)
+    else:
+        e = crypto.from_bin(msg, own_priv, remote_pub)
+    s.sendall(e)
+
+
+def recv_msg( s: socket
+            , own_priv: crypto.Priv
+            , remote_pub: crypto.Pub
+            , alive: [bool]=[True]) -> bytes:
+    '''
+    Block until an entire message has been read out.
+    A message is the longest sequence ending with a signature.
+    On errors exceptions are reised.
+    '''
+    buf = b''
+    for data in recv(s, alive):
+        try:
+            d = crypto.from_bin(data, own_priv, remote_pub)
+            buf = buf + d
+        except:
+            verify(buf, data, remote_pub)
+            return buf
+    raise runtime_error('Remote disconnected.')
+
+
+### Details.
 def emit_pubkey() -> bytes:
     '''Convert rsa.PublicKey to a format suitable to be transmitted.'''
     _, pub = crypto.read_keypair()
@@ -46,7 +78,7 @@ def emit_pubkey() -> bytes:
 
 def send_pubkey( s: socket ) -> None:
     '''Transmit own public key unencrypted.'''
-    s.sendall( emit_pubkey() )
+    s.sendall( emit_pubkey() )  # 251 bytes
 
 
 def parse_pubkey( b: bytes) -> crypto.Pub:
@@ -56,7 +88,8 @@ def parse_pubkey( b: bytes) -> crypto.Pub:
 
 def recv_pubkey( s: socket ) -> crypto.Pub:
     '''Receive unencrypted remote public key.'''
-    key_data = sock.recv_one(s)
+    key_data = s.recv(256)
+    assert len(key_data) == 251, len(key_data)
     pub = parse_pubkey(key_data)
     return pub
 
@@ -64,19 +97,23 @@ def recv_pubkey( s: socket ) -> crypto.Pub:
 def send_user( s: socket
              , remote_pub: crypto.Pub ) -> None:
     own_priv, _ = crypto.read_keypair()
-    u = name.User().to_bytes()
-    sock.send(u, s, remote_pub, own_priv)
+    u = name.User().to_bytes()  # 282 bytes
+    send_msg(u, s, own_priv, remote_pub)
 
 
-def recv_user( s: socket ) -> name.User:
-    '''Receive remote User object encrypted by our pubkey.'''
-    encrypted = sock.recv_one(s)
+def recv_user( s: socket, remote_pub: crypto.Pub ) -> name.User:
+    '''Receive remote User object encrypted and signed.
+       Basically a re-implementation of recv_msg() which allows None.
+    '''
     own_priv, _ = crypto.read_keypair()
-    data = crypto.decrypt(encrypted, own_priv)
-    assert data  # on error decrypt() returns ''
-    remote_user = name.User.from_bytes(bytes(data, 'utf8'))
-    assert type(remote_user) == name.User, type(remote_user)
-    return remote_user
+    data = s.recv(4096)  # We get four 128 byte packets.
+    packets = crypto.chop(data, crypto.CHUNK_BYTES)
+    decr = crypto.stitch([crypto.decrypt(p, own_priv) for p in packets[:-1]])
+    user = name.User.from_bytes(decr)
+    if remote_pub is None:
+        remote_pub = user.pub
+    crypto.verify(decr, packets[-1], remote_pub)
+    return user
 
 
 def test_crypto_sane():
@@ -115,7 +152,7 @@ def test_sockmock():
 
 
 def test_handshake():
-    server = sock.Server(port.TEST, lambda s, _: print(sock.recv_one(s)))
+    server = sock.Server(port.TEST, lambda s, _: print( s.recv(64) ))
     client = sock.Client('localhost'
                         , port.TEST
                         , lambda s: s.sendall('Protocol Test One'.encode('utf8')))
