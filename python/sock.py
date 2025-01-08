@@ -30,7 +30,9 @@ def send( text: str|bytes
     s.sendall(e)
 
 
-def recv( s: socket.socket, alive: [bool]=[True], cache: [bytes]=[b''] ) -> bytes:
+def recv( s: socket.socket
+        , alive: [bool]=[True]
+        , cache: [bytes]=[b''] ) -> bytes:
     '''Block until one chunk is yielded.
        Use 'alive' to kill from the outside.
        Returns(doesn't throw) on remote disconnect.
@@ -49,22 +51,16 @@ def recv( s: socket.socket, alive: [bool]=[True], cache: [bytes]=[b''] ) -> byte
             # Recommended value in the docs.
             data = s.recv(4096)
 
-            # The client has disconnected.
-            if not data:
-                return  # == raise StopIteration
-
             cache[0] = data + cache[0]
             yield from try_yield()
 
+            # The client has disconnected.
+            if not data:
+                assert len(cache[0]) == 0, len(cache[0])
+                return  # == raise StopIteration
+
         except socket.timeout:
             pass
-
-
-def recv_one( s: socket.socket, alive: [bool]=[True]):
-    '''Return one 128 byte chunk.'''
-    while alive[0]:
-        r = recv(s)
-        return r
 
 
 def get_extern_ip() -> str:
@@ -88,7 +84,7 @@ class Server:
     MAX_THREADS = 20
 
 
-    def __init__(me, port: int=0, func: callable=None):
+    def __init__(me, port: int=port.TEST, func: callable=None):
         me.ip = get_extern_ip()
         me.port = port
         me.alive = [True]
@@ -144,15 +140,15 @@ class Client:
     '''
     Client-side view of the pipe to the Server over the assigned socket.
     '''
-    def __init__(me, ip: str, port: int, func: callable):
+    def __init__(me, ip: str='localhost', port: int=port.TEST, func: callable=None):
         try:
             s = socket.create_connection((ip, port))
         except:
             s = socket.socket()
             s.connect((ip, port))
 
-        assert s
-        func(s)
+        if func:
+            func(s)
 
 
 def test_nonblocking_recv() -> None:
@@ -166,7 +162,7 @@ def test_nonblocking_recv() -> None:
     client_s = socket.create_connection(('localhost', port.TEST))
     content_s = next(iter(server_s.accept()))  # Accept 1 connection.
 
-    # client_s.sendall('If this is commented out, the server hangs.'.encode('utf8'))
+    client_s.sendall('If this is commented out, the server hangs.'.encode('utf8'))
 
     alive = [True]
     def read_one_message():
@@ -204,9 +200,21 @@ def test_server_client() -> None:
     assert threading.active_count() == 1
 
 
+def test_send_recv() -> None:
+    msg = b'.' * crypto.CHUNK_BYTES * 5
+    def listen(s: socket, alive: [bool]=[True]):
+        for msg in recv(s, alive):
+            assert len(msg) == crypto.CHUNK_BYTES, len(msg)
+    server = Server(func=listen)
+    client = Client('localhost', port.TEST, func=lambda s: s.sendall(msg))
+    time.sleep(1)
+    server.alive[0] = False
+
+
 def test() -> None:
     test_nonblocking_recv()
     test_server_client()
+    test_send_recv()
     print('sock.py: UNIT TESTS PASSED')
 
 
