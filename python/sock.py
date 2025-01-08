@@ -36,7 +36,7 @@ def recv( s: socket.socket, alive: [bool]=[True], cache: [bytes]=[b''] ) -> byte
        Returns(doesn't throw) on remote disconnect.
     '''
     def try_yield():
-        if len(cache[0]) >= crypto.CHUNK_BYTES:
+        while len(cache[0]) >= crypto.CHUNK_BYTES:
             r = cache[0][-crypto.CHUNK_BYTES:]
             cache[0] = cache[0][:-crypto.CHUNK_BYTES]
             yield r
