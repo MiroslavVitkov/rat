@@ -74,7 +74,7 @@ def chop_decrypt_stitch_verify(b: bytes, own_priv: Priv, remote_pub: Pub) -> byt
     '''
     d = [decrypt(_, own_priv) for _ in chop(b, CHUNK_BYTES)[:-1]]
     msg = stitch(d)
-    verify(msg, chop(b, CHUNK_BYTES)[-1], remote_pub)
+    verify(msg, b[-CHUNK_BYTES:], remote_pub)
     return msg
 
 
@@ -171,7 +171,7 @@ def decrypt(encrypted: bytes, priv: Priv) -> bytes:
         raise rsa.pkcs1.DecryptionError
 
 
-def sign(msg: str, priv: Priv) -> bytes:
+def sign(msg: bytes|str, priv: Priv) -> bytes:
     '''
     Prove you wrote the message.
 
