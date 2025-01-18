@@ -43,7 +43,7 @@ def send_msg( msg: str|bytes
             , own_priv: crypto.Priv
             , remote_pub: crypto.Pub):
     if type(msg) == str:
-        e = crypto.from_str(msg, own_priv, remote_pub)
+        e = crypto.from_string(msg, own_priv, remote_pub)
     else:
         e = crypto.from_bin(msg, own_priv, remote_pub)
     s.sendall(e)
@@ -59,14 +59,14 @@ def recv_msg( s: socket
     On errors exceptions are reised.
     '''
     buf = b''
-    for data in recv(s, alive):
+    for chunk in sock.recv(s, alive):
         try:
-            d = crypto.from_bin(data, own_priv, remote_pub)
+            d = crypto.from_bin(chunk, own_priv, remote_pub)
             buf = buf + d
         except:
-            verify(buf, data, remote_pub)
+            verify(buf, chuk, remote_pub)
             return buf
-    raise runtime_error('Remote disconnected.')
+    raise RuntimeError('Remote disconnected.')
 
 
 ### Details.
@@ -151,7 +151,7 @@ def test_sockmock():
     assert len(s.buf) == 0
 
 
-def test_handshake():
+def test_handshake():  # WARN: no handshake, those are just sockets!
     server = sock.Server(port.TEST, lambda s, _: print( s.recv(64) ))
     client = sock.Client('localhost'
                         , port.TEST
