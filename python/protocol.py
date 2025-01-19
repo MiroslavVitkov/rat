@@ -168,22 +168,19 @@ def test_send_recv_msg():
         for chunk in sock.recv(s):
             try:
                 d = crypto.decrypt(chunk, priv)
-                print(d)
+                buf = buf + d
             except:
-                pass #crypto.verify(buf, chunk, pub)
-        return
-        try:
-            m = recv_msg(s, priv, pub, a)
-            print('Received message:', m)
-        except RuntimeError as e:
-            print('Server exiting due to:', e)
+                crypto.verify(buf, chunk, pub)
 
     def client_send(s):
         m = msg.encode('utf8')
         enc = crypto.encrypt(m, pub)
         sign = crypto.sign(m, priv)
+
+        assert crypto.decrypt(enc, priv) == m
         crypto.verify(m, sign, pub)
-        s.sendall(enc+sign)
+
+        s.sendall(sign+enc)
 
     server = sock.Server(port.TEST, silent_recv)
     client = sock.Client('localhost'
