@@ -46,7 +46,8 @@ def send_msg( msg: str|bytes
         e = crypto.from_string(msg, own_priv, remote_pub)
     else:
         e = crypto.from_bin(msg, own_priv, remote_pub)
-    s.sendall(e)
+    # Somewhere along the way the message gets inverted - prevent that.
+    s.sendall(e[::-1])
 
 
 def recv_msg( s: socket
