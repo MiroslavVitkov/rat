@@ -56,7 +56,7 @@ def recv( s: socket.socket
 
             # The client has disconnected.
             if not data:
-                assert len(cache[0]) == 0, len(cache[0])
+                assert len(cache[0]) == 0, (len(cache[0]), cache[0])
                 return  # == raise StopIteration
 
         except socket.timeout:

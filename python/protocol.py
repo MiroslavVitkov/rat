@@ -159,10 +159,46 @@ def test_handshake():  # WARN: no handshake, those are just sockets!
     server.alive[0] = False
 
 
+def test_send_recv_msg():
+    msg = str(list(range(9)))
+    priv, pub = crypto.read_keypair()  # Send to ourselves.
+
+    def silent_recv(s, a):
+        buf = b''
+        for chunk in sock.recv(s):
+            try:
+                d = crypto.decrypt(chunk, priv)
+                print(d)
+            except:
+                pass #crypto.verify(buf, chunk, pub)
+        return
+        try:
+            m = recv_msg(s, priv, pub, a)
+            print('Received message:', m)
+        except RuntimeError as e:
+            print('Server exiting due to:', e)
+
+    def client_send(s):
+        m = msg.encode('utf8')
+        enc = crypto.encrypt(m, pub)
+        sign = crypto.sign(m, priv)
+        crypto.verify(m, sign, pub)
+        s.sendall(enc+sign)
+
+    server = sock.Server(port.TEST, silent_recv)
+    client = sock.Client('localhost'
+                        , port.TEST
+                        , client_send)
+
+    server.alive[0] = False
+
+
+
 def test():
     test_crypto_sane()
     test_sockmock()
     test_handshake()
+    test_send_recv_msg()
 
     print('protocol.py: UNIT TESTS PASSED')
 
