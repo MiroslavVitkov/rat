@@ -17,7 +17,6 @@ import crypto
 import name
 import pack
 from pack import Packet
-import prompt
 import protocol
 import port
 import sock
@@ -88,7 +87,7 @@ def listen(relay: bool=False) -> None:
                 inout.in_cond.notify_all()
 
             # Show the text. Should this be a bot?
-            print( prompt.get( remote_user.name
+            print( get_prompt( remote_user.name
                              , remote_user.group)
                  + text )
 
@@ -96,7 +95,7 @@ def listen(relay: bool=False) -> None:
             if relay:
                 for socket, key in zip(remote_sockets, remote_keys):
                     if socket != s:
-                        sock.send( prompt.get( remote_user.name
+                        sock.send( get_prompt( remote_user.name
                                              , remote_user.group )
                                              + text
                                  , socket, key, own_priv)
@@ -125,7 +124,7 @@ def connect(ip: str) -> None:
             crypto.verify(text, packet.signature, remote_user.pub)
 
             # Show the text.
-            print( prompt.get( remote_user.name
+            print( get_prompt( remote_user.name
                              , remote_user.group)
                  + text )
 
@@ -170,6 +169,12 @@ def handle_input( s: [socket]
     Thread(target=inp).start()
 
 
+def get_prompt( name: str=conf.get()['user']['name']
+              , group:str=conf.get()['user']['group']
+              ) -> str:
+    return (name + '@' + group + '<-')
+
+
 def test() -> None:
     # An `os.listdir('.')` wouldn't allow us to selectively disable tests.
     bot.test()
@@ -178,7 +183,6 @@ def test() -> None:
     name.test()
     pack.test()
     port.test()
-    prompt.test()
     protocol.test(); time.sleep(1)
     sock.test()
 
