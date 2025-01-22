@@ -32,15 +32,15 @@ def send( text: str|bytes
 
 def recv( s: socket.socket
         , alive: [bool]=[True]
-        , cache: [bytes]=[b''] ) -> bytes:
+        , _cache: [bytes]=[b''] ) -> bytes:
     '''Block until one chunk is yielded.
        Use 'alive' to kill from the outside.
        Returns(doesn't throw) on remote disconnect.
     '''
     def try_yield():
-        while len(cache[0]) >= crypto.CHUNK_BYTES:
-            r = cache[0][-crypto.CHUNK_BYTES:]
-            cache[0] = cache[0][:-crypto.CHUNK_BYTES]
+        while len(_cache[0]) >= crypto.CHUNK_BYTES:
+            r = _cache[0][-crypto.CHUNK_BYTES:]
+            _cache[0] = _cache[0][:-crypto.CHUNK_BYTES]
             yield r
 
     yield from try_yield()
@@ -51,16 +51,20 @@ def recv( s: socket.socket
             # Recommended value in the docs.
             data = s.recv(4096)
 
-            cache[0] = data + cache[0]
+            _cache[0] = data + _cache[0]
             yield from try_yield()
 
             # The client has disconnected.
             if not data:
-                assert len(cache[0]) == 0, (len(cache[0]), cache[0])
+                assert len(_cache[0]) == 0, (len(_cache[0]), _cache[0])
                 return  # == raise StopIteration
 
         except socket.timeout:
             pass
+
+
+def recv_one(s, a):
+    return next(iter(recv(s, a)))
 
 
 def get_extern_ip() -> str:
@@ -183,9 +187,7 @@ def test_server_client() -> None:
     '''
     def listen(s: socket, alive: [bool]=[True]):
         '''Server echoes received strings, forever.'''
-        for msg in recv(s, alive):
-            print(msg)
-        print('Listener disonnected or killed.')
+        print(s.recv(1024))
     def yell(s: socket):
         '''Client transmits something and disconnects.'''
         s.sendall('Something!'.encode('utf8'))
@@ -201,12 +203,23 @@ def test_server_client() -> None:
 
 
 def test_send_recv() -> None:
-    msg = b'.' * crypto.CHUNK_BYTES * 5
+    '''
+    Ensure packets are received in the correct chunk, byte and bit order.
+    '''
+    msg = str(list(range(99)))
+
     def listen(s: socket, alive: [bool]=[True]):
         for msg in recv(s, alive):
-            assert len(msg) == crypto.CHUNK_BYTES, len(msg)
+            print(msg[0])
+
+    def transmit(s):
+        m = bytearray(crypto.CHUNK_BYTES)
+        for i in range(20):
+            m[0] = i
+            s.sendall(m)
+
     server = Server(func=listen)
-    client = Client('localhost', port.TEST, func=lambda s: s.sendall(msg))
+    client = Client(func=transmit)
     time.sleep(1)
     server.alive[0] = False
 
