@@ -15,8 +15,6 @@ import bot
 import conf
 import crypto
 import name
-import pack
-from pack import Packet
 import protocol
 import port
 import sock
@@ -181,7 +179,6 @@ def test() -> None:
     conf.test()
     crypto.test()
     name.test()
-    pack.test()
     port.test()
     protocol.test(); time.sleep(1)
     sock.test()
