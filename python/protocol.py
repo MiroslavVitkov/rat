@@ -161,7 +161,7 @@ def test_handshake():  # WARN: no handshake, those are just sockets!
 
 
 def test_send_recv_msg():
-    msg = str(list(range(9)))
+    msg = str(list(range(99)))
     priv, pub = crypto.read_keypair()  # Send to ourselves.
 
     def silent_recv(s, a):
@@ -172,16 +172,10 @@ def test_send_recv_msg():
                 buf = buf + d
             except:
                 crypto.verify(buf, chunk, pub)
+                print('Decrypted and verified incoming message:', buf.decode('utf8'))
 
     def client_send(s):
-        m = msg.encode('utf8')
-        enc = crypto.encrypt(m, pub)
-        sign = crypto.sign(m, priv)
-
-        assert crypto.decrypt(enc, priv) == m
-        crypto.verify(m, sign, pub)
-
-        s.sendall(sign+enc)
+        s.sendall(crypto.from_string(msg, priv, pub))
 
     server = sock.Server(port.TEST, silent_recv)
     client = sock.Client('localhost'

@@ -179,7 +179,7 @@ def test() -> None:
     pack.test()
     port.test()
     prompt.test()
-#    protocol.test()  # Naughty boy - doesn't clean his sockets.
+    protocol.test(); time.sleep(1)
     sock.test()
 
     # System test.
