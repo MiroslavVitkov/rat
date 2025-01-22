@@ -37,10 +37,11 @@ def recv( s: socket.socket
        Use 'alive' to kill from the outside.
        Returns(doesn't throw) on remote disconnect.
     '''
+    # Index 0 of the buffer is the oldest received chunk.
     def try_yield():
         while len(_cache[0]) >= crypto.CHUNK_BYTES:
-            r = _cache[0][-crypto.CHUNK_BYTES:]
-            _cache[0] = _cache[0][:-crypto.CHUNK_BYTES]
+            r = _cache[0][:crypto.CHUNK_BYTES]
+            _cache[0] = _cache[0][crypto.CHUNK_BYTES:]
             yield r
 
     yield from try_yield()
@@ -51,7 +52,7 @@ def recv( s: socket.socket
             # Recommended value in the docs.
             data = s.recv(4096)
 
-            _cache[0] = data + _cache[0]
+            _cache[0] += data  # Larger index means more recent data.
             yield from try_yield()
 
             # The client has disconnected.
@@ -202,24 +203,25 @@ def test_server_client() -> None:
     assert threading.active_count() == 1
 
 
-def test_send_recv() -> None:
+def test_recv() -> None:
     '''
     Ensure packets are received in the correct chunk, byte and bit order.
+    Not much to test about send() - all the logic is external.
     '''
-    msg = str(list(range(99)))
-
     def listen(s: socket, alive: [bool]=[True]):
         for msg in recv(s, alive):
+#        while alive[0]:
+#            msg = s.recv(crypto.CHUNK_BYTES)
             print(msg[0])
 
-    def transmit(s):
-        m = bytearray(crypto.CHUNK_BYTES)
+    def say(s):
+        m = bytearray(b'.') * crypto.CHUNK_BYTES
         for i in range(20):
             m[0] = i
             s.sendall(m)
 
     server = Server(func=listen)
-    client = Client(func=transmit)
+    client = Client(func=say)
     time.sleep(1)
     server.alive[0] = False
 
@@ -227,7 +229,7 @@ def test_send_recv() -> None:
 def test() -> None:
     test_nonblocking_recv()
     test_server_client()
-    test_send_recv()
+    test_recv()
     print('sock.py: UNIT TESTS PASSED')
 
 
