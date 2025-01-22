@@ -89,7 +89,7 @@ class Server:
     MAX_THREADS = 20
 
 
-    def __init__(me, port: int=port.TEST, func: callable=None):
+    def __init__(me, func: callable, port: int=port.TEST):
         me.ip = get_extern_ip()
         me.port = port
         me.alive = [True]
@@ -145,7 +145,7 @@ class Client:
     '''
     Client-side view of the pipe to the Server over the assigned socket.
     '''
-    def __init__(me, ip: str='localhost', port: int=port.TEST, func: callable=None):
+    def __init__(me, func: callable, ip: str='localhost', port: int=port.TEST):
         try:
             s = socket.create_connection((ip, port))
         except:
@@ -187,13 +187,13 @@ def test_server_client() -> None:
     This is the intended API of the module.
     '''
     def listen(s: socket, alive: [bool]=[True]):
-        '''Server echoes received strings, forever.'''
-        print(s.recv(1024))
+        while alive[0]:
+            print(s.recv(1024))
     def yell(s: socket):
         '''Client transmits something and disconnects.'''
         s.sendall('Something!'.encode('utf8'))
-    s = Server(port.TEST, listen)
-    Client('localhost', port.TEST, yell)
+    s = Server(listen)
+    Client(yell)
 
     # Kill the server.
     # The child connection notices that through it's bool parameter and commits suicide.
@@ -210,8 +210,6 @@ def test_recv() -> None:
     '''
     def listen(s: socket, alive: [bool]=[True]):
         for msg in recv(s, alive):
-#        while alive[0]:
-#            msg = s.recv(crypto.CHUNK_BYTES)
             print(msg[0])
 
     def say(s):
@@ -220,8 +218,8 @@ def test_recv() -> None:
             m[0] = i
             s.sendall(m)
 
-    server = Server(func=listen)
-    client = Client(func=say)
+    server = Server(listen)
+    client = Client(say)
     time.sleep(1)
     server.alive[0] = False
 

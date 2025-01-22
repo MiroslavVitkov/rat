@@ -105,7 +105,7 @@ def listen(relay: bool=False) -> None:
     # It is responsible for a clissicle p2p chat.
     # TODO After connectionless rat is done and thested this need to be un-broken!
     # handle_input(remote_sockets, own_priv, remote_keys)
-    sock.Server(port.CHATSERVER, forever)
+    sock.Server(forever, port.CHATSERVER)
 
 
 def connect(ip: str) -> None:

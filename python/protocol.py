@@ -153,10 +153,8 @@ def test_sockmock():
 
 
 def test_handshake():  # WARN: no handshake, those are just sockets!
-    server = sock.Server(port.TEST, lambda s, _: print( s.recv(64) ))
-    client = sock.Client('localhost'
-                        , port.TEST
-                        , lambda s: s.sendall('Protocol Test One'.encode('utf8')))
+    server = sock.Server(lambda s, _: print( s.recv(64) ))
+    client = sock.Client(lambda s: s.sendall('Protocol Test One'.encode('utf8')))
     server.alive[0] = False
 
 
@@ -177,10 +175,8 @@ def test_send_recv_msg():
     def client_send(s):
         s.sendall(crypto.from_string(msg, priv, pub))
 
-    server = sock.Server(port.TEST, silent_recv)
-    client = sock.Client('localhost'
-                        , port.TEST
-                        , client_send)
+    server = sock.Server(silent_recv)
+    client = sock.Client(client_send)
 
     server.alive[0] = False
 
