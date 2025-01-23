@@ -20,6 +20,21 @@ import port
 import sock
 
 
+def say( ip: str, text: str) -> None:
+    '''
+    Transmit a text message and disconnect.
+    Example: $rat say localhost hey bryh, wazzup
+    '''
+    own_priv, _ = crypto.read_keypair(conf.get_keypath())
+
+    def func(s: socket):
+        '''Transmit a message and die.'''
+        protocol.handshake_as_client(s)
+        sock.send(text, s, own_priv, remote.pub)
+
+    client = sock.Client(func, ip, port.CHATSERVER)
+
+
 def serve() -> None:
     '''
     Run a nameserver forever.
@@ -224,6 +239,14 @@ def print_help() -> None:
 if __name__ == '__main__':
     if len(sys.argv) < 2 or sys.argv[1] == 'help' or sys.argv[1] == '?':
         print_help()
+
+    elif sys.argv[1] == 'say':
+        # No need for '' around the message.
+        if len(sys.argv) > 3:
+            msg = ' '.join(sys.argv[3:])
+            say(sys.argv[2], msg)
+        else:
+            print('Provide a destination IP and a message!')
 
     elif sys.argv[1] == 'serve':
         serve()
