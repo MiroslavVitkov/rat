@@ -153,8 +153,8 @@ def test_sockmock():
 
 
 def test_handshake():  # WARN: no handshake, those are just sockets!
-    server = sock.Server(lambda s, _: print( s.recv(64) ))
-    client = sock.Client(lambda s: s.sendall('Protocol Test One'.encode('utf8')))
+    server = sock.Server(lambda s, _: handshake_as_server(s))
+    client = sock.Client(handshake_as_client)
     server.alive[0] = False
 
 
