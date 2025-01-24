@@ -33,9 +33,10 @@ def send( text: str|bytes
 def recv( s: socket.socket
         , alive: [bool]=[True]
         , _cache: [bytes]=[b''] ) -> bytes:
-    '''Block until one chunk is yielded.
-       Use 'alive' to kill from the outside.
-       Returns(doesn't throw) on remote disconnect.
+    '''
+    Block until one chunk is yielded.
+    Use 'alive' to kill from the outside.
+    Returns(doesn't throw) on remote disconnect.
     '''
     # Index 0 of the buffer is the oldest received chunk.
     def try_yield():
@@ -62,6 +63,9 @@ def recv( s: socket.socket
 
         except socket.timeout:
             pass
+        except ConnectionResetError:  # Probably the client disconnected.
+            assert len(_cache[0]) == 0, (len(_cache[0]), _cache[0])
+            return  # == raise StopIteration
 
 
 def recv_one(s, a):
@@ -152,8 +156,7 @@ class Client:
             s = socket.socket()
             s.connect((ip, port))
 
-        if func:
-            func(s)
+        func(s)
 
 
 def test_nonblocking_recv() -> None:
