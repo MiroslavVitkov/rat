@@ -46,8 +46,7 @@ def send_msg( msg: str|bytes
         e = crypto.from_string(msg, own_priv, remote_pub)
     else:
         e = crypto.from_bin(msg, own_priv, remote_pub)
-    # Somewhere along the way the message gets inverted - prevent that.
-    s.sendall(e[::-1])
+    s.sendall(e)
 
 
 def recv_msg( s: socket
@@ -107,13 +106,17 @@ def recv_user( s: socket, remote_pub: crypto.Pub ) -> name.User:
        Basically a re-implementation of recv_msg() which allows None.
     '''
     own_priv, _ = crypto.read_keypair()
-    data = s.recv(1024)  # We get four 128 byte chunks with default config.
-    chunks = crypto.chop(data, crypto.CHUNK_BYTES)
+
+    chunks = []
+    for c in sock.recv(s):
+        chunks.append(c)
     decr = crypto.stitch([crypto.decrypt(c, own_priv) for c in chunks[:-1]])
     user = name.User.from_bytes(decr)
+
     if remote_pub is None:
         remote_pub = user.pub
     crypto.verify(decr, chunks[-1], remote_pub)
+
     return user
 
 
@@ -152,7 +155,7 @@ def test_sockmock():
     assert len(s.buf) == 0
 
 
-def test_handshake():  # WARN: no handshake, those are just sockets!
+def test_handshake():
     server = sock.Server(lambda s, _: handshake_as_server(s))
     client = sock.Client(handshake_as_client)
     server.alive[0] = False
