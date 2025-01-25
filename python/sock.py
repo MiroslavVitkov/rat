@@ -68,7 +68,7 @@ def recv( s: socket.socket
             return  # == raise StopIteration
 
 
-def recv_one(s, a):
+def recv_one(s: socket, a: [bool]=[True]):
     return next(iter(recv(s, a)))
 
 
