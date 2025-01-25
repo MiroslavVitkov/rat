@@ -107,13 +107,13 @@ def recv_user( s: socket, remote_pub: crypto.Pub ) -> name.User:
        Basically a re-implementation of recv_msg() which allows None.
     '''
     own_priv, _ = crypto.read_keypair()
-    data = s.recv(4096)  # We get four 128 byte packets.
-    packets = crypto.chop(data, crypto.CHUNK_BYTES)
-    decr = crypto.stitch([crypto.decrypt(p, own_priv) for p in packets[:-1]])
+    data = s.recv(1024)  # We get four 128 byte chunks with default config.
+    chunks = crypto.chop(data, crypto.CHUNK_BYTES)
+    decr = crypto.stitch([crypto.decrypt(c, own_priv) for c in chunks[:-1]])
     user = name.User.from_bytes(decr)
     if remote_pub is None:
         remote_pub = user.pub
-    crypto.verify(decr, packets[-1], remote_pub)
+    crypto.verify(decr, chunks[-1], remote_pub)
     return user
 
 
