@@ -28,7 +28,7 @@ MAX_PLAINTEXT_BYTES = CHUNK_BYTES - 11  # 117
 
 # --- Public API.
 def from_string(msg: str, own_priv: Priv, remote_pub: Pub) -> bytes:
-    return encode_sign_chop_encrypt_stitch(msg, own_priv, remote_pub)
+    return sign_chop_encrypt_stitch(msg.encode('utf8'), own_priv, remote_pub)
 
 
 def to_string(msg: bytes, own_priv: Priv, remote_pub: Pub) -> str:
@@ -47,10 +47,6 @@ def to_bin(msg: bytes, own_priv: Priv, remote_pub: Pub) -> bytes:
 
 
 # --- Details.
-def encode_sign_chop_encrypt_stitch(msg: str, own_priv: Priv, remote_pub: Pub) -> bytes:
-    return sign_chop_encrypt_stitch(msg.encode('utf8'), own_priv, remote_pub)
-
-
 def sign_chop_encrypt_stitch(msg: bytes, own_priv: Priv, remote_pub: Pub) -> bytes:
     '''
     Example input: 200 byte payload
