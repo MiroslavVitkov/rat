@@ -162,7 +162,7 @@ def test_handshake():
 
 
 def test_send_recv_msg():
-    msg = str(list(range(99)))
+    msg = str(list(range(101)))
     priv, pub = crypto.read_keypair()  # Send to ourselves.
 
     def silent_recv(s, a):
