@@ -67,7 +67,31 @@ def ask(regex: str, ip: str) -> None:
     c = sock.Client(ip[0], port=port.NAMESERVER, func=func)
 
 
+
 def listen(relay: bool=False) -> None:
+    '''
+    Accept and try to decrypt and veify any received messages.
+    '''
+    def forever(s: socket, a: [bool]):
+        # Handshake.
+        try:
+            client = protocol.handshake_as_server(s)
+            print('The remote user identifies as', client)
+        except:
+            # Drop the connection as soon as it breaks protocol.
+            return
+
+        # Accept messages.
+        priv, _ = crypto.read_keypair()
+        for msg in protocol.recv_msg(s, priv, client.pub, a):
+            print(msg.decode('utf8'))
+
+    sock.Server(forever, port.CHATSERVER)
+
+
+
+
+def listen2(relay: bool=False) -> None:
     '''
     Create a socket and listen on in with a dedicated thread, forever.
     relay - send everything received to everyone else(chatroom)
