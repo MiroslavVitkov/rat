@@ -22,15 +22,15 @@ import sock
 
 def say( ip: str, text: str) -> None:
     '''
-    Transmit a text message and disconnect.
+    Send a text message to someone listening and disconnect.
     Example: $rat say localhost hey bryh, wazzup
     '''
     own_priv, _ = crypto.read_keypair(conf.get_keypath())
 
     def func(s: socket):
         '''Transmit a message and die.'''
-        protocol.handshake_as_client(s)
-        sock.send(text, s, own_priv, remote.pub)
+        remote = protocol.handshake_as_client(s)
+        protocol.send_msg(text, s, own_priv, remote.pub)
 
     client = sock.Client(func, ip, port.CHATSERVER)
 
@@ -73,22 +73,20 @@ def listen(relay: bool=False) -> None:
     Accept and try to decrypt and veify any received messages.
     '''
     def forever(s: socket, a: [bool]):
-        # Handshake.
         try:
+            # Handshake.
             client = protocol.handshake_as_server(s)
             print('The remote user identifies as', client)
+
+            # Accept messages.
+            priv, _ = crypto.read_keypair()
+            for msg in protocol.recv_msg(s, priv, client.pub, a):
+                print(msg.decode('utf8'))
         except:
             # Drop the connection as soon as it breaks protocol.
             return
 
-        # Accept messages.
-        priv, _ = crypto.read_keypair()
-        for msg in protocol.recv_msg(s, priv, client.pub, a):
-            print(msg.decode('utf8'))
-
     sock.Server(forever, port.CHATSERVER)
-
-
 
 
 def listen2(relay: bool=False) -> None:
