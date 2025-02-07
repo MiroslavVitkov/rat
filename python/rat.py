@@ -32,12 +32,12 @@ def say( ip: str, text: str) -> None:
         remote = protocol.handshake_as_client(s)
         protocol.send_msg(text, s, own_priv, remote.pub)
 
-    client = sock.Client(func, ip, port.CHATSERVER)
+    sock.Client(func, ip, port.CHATSERVER)
 
 
-def listen(relay: bool=False) -> None:
+def listen() -> None:
     '''
-    Accept and try to decrypt and veify any received messages.
+    Accept and display incoming messages.
     '''
     def forever(s: socket, a: [bool]):
         try:
