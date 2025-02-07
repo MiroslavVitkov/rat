@@ -97,7 +97,6 @@ class Server:
         me.ip = get_extern_ip()
         me.port = port
         me.alive = [True]
-        me.children = []
         me.thread = threading.Thread( target=me._listen
                                     , args=[port, func]
                                     , name='server'
@@ -123,13 +122,10 @@ class Server:
         s.listen()
 
         for conn, addr in me._poll(s):
-            print('New client connected:', addr)
-            me.children.append( threading.Thread( target=func
-                                                , args=[conn, me.alive]
-                                                , name='server_content_socket'
-                                                ) )
-            me.children[-1].start()
-
+            threading.Thread( target=func
+                            , args=[conn, me.alive]
+                            , name='server_content_socket'
+                            ).start()
 
         # Close listener socket - already established connections are unaffected.
         s.close()
