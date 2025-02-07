@@ -6,6 +6,8 @@ Communication sequences as to fufill top-level commands.
 '''
 
 
+import time
+
 from socket import socket
 
 import crypto
@@ -78,7 +80,8 @@ def emit_pubkey() -> bytes:
 
 def send_pubkey( s: socket ) -> None:
     '''Transmit own public key unencrypted.'''
-    s.sendall( emit_pubkey() )  # 251 bytes
+    key = emit_pubkey()  # 251 bytes
+    s.sendall( key )
 
 
 def parse_pubkey( b: bytes) -> crypto.Pub:
@@ -155,12 +158,6 @@ def test_sockmock():
     assert len(s.buf) == 0
 
 
-def test_handshake():
-    server = sock.Server(lambda s, _: handshake_as_server(s))
-    client = sock.Client(handshake_as_client)
-    server.alive[0] = False
-
-
 def test_send_recv_msg():
     msg = str(list(range(101)))
     priv, pub = crypto.read_keypair()  # Send to ourselves.
@@ -184,12 +181,38 @@ def test_send_recv_msg():
     server.alive[0] = False
 
 
+def test_send_recv_pubkey() -> None:
+    _, pub = crypto.read_keypair()
+    received = []
+    server = sock.Server(lambda s, _: send_pubkey(s))
+    sock.Client(lambda s: received.append(recv_pubkey(s)))
+    assert received[0] == pub, received[0]
+    server.alive[0] = False
+
+
+def test_send_recv_user() -> None:
+    '''Exchange user objects having reliably exchanged public keys.'''
+    _, pub = crypto.read_keypair()
+    received = []
+    server = sock.Server(lambda s, _: received.append(recv_user(s, pub)))
+    sock.Client(lambda s: send_user(s, pub))
+    time.sleep(1)
+    assert received[0] == name.User(), received[0]
+    server.alive[0] = False
+
+
+def test_handshake():
+    server = sock.Server(lambda s, _: handshake_as_server(s))
+    client = sock.Client(handshake_as_client)
+    server.alive[0] = False
+
 
 def test():
     test_crypto_sane()
     test_sockmock()
-    test_handshake()
     test_send_recv_msg()
+    test_send_recv_pubkey()
+    test_send_recv_user()
 
     print('protocol.py: UNIT TESTS PASSED')
 
