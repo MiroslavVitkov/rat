@@ -186,6 +186,7 @@ def test_send_recv_pubkey() -> None:
     received = []
     server = sock.Server(lambda s, _: send_pubkey(s))
     sock.Client(lambda s: received.append(recv_pubkey(s)))
+
     assert received[0] == pub, received[0]
     server.alive[0] = False
 
@@ -196,15 +197,21 @@ def test_send_recv_user() -> None:
     received = []
     server = sock.Server(lambda s, _: received.append(recv_user(s, pub)))
     sock.Client(lambda s: send_user(s, pub))
+
     time.sleep(1)
     assert received[0] == name.User(), received[0]
     server.alive[0] = False
 
 
 def test_handshake():
-    server = sock.Server(lambda s, _: handshake_as_server(s))
-    client = sock.Client(handshake_as_client)
-    server.alive[0] = False
+    server = []
+    client = []
+    s = sock.Server(lambda s, _: client.append(handshake_as_server(s)))
+    sock.Client(lambda s: server.append(handshake_as_client(s)))
+
+    time.sleep(1)
+    assert server[0] == client[0] == name.User()
+    s.alive[0] = False
 
 
 def test():
