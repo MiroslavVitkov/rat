@@ -64,7 +64,7 @@ def recv_msg( s: socket
     for chunk in sock.recv(s, alive):
         try:
             d = crypto.from_bin(chunk, own_priv, remote_pub)
-            buf = buf + d
+            buf += d
         except:
             crypto.verify(buf, chuk, remote_pub)
             return buf
@@ -106,21 +106,21 @@ def send_user( s: socket
 
 def recv_user( s: socket, remote_pub: crypto.Pub ) -> name.User:
     '''Receive remote User object encrypted and signed.
-       Basically a re-implementation of recv_msg() which allows None.
+       A copy-ast of recv_msg() which however allows None.
     '''
     own_priv, _ = crypto.read_keypair()
 
-    chunks = []
-    for c in sock.recv(s):
-        chunks.append(c)
-    decr = crypto.stitch([crypto.decrypt(c, own_priv) for c in chunks[:-1]])
-    user = name.User.from_bytes(decr)
-
-    if remote_pub is None:
-        remote_pub = user.pub
-    crypto.verify(decr, chunks[-1], remote_pub)
-
-    return user
+    decr = b''
+    for chunk in sock.recv(s):
+        try:
+            d = crypto.decrypt(chunk, own_priv)
+            decr += d
+        except:
+            user = name.User.from_bytes(decr)
+            if remote_pub is None:
+                remote_pub = user.pub
+            crypto.verify(decr, chunk, remote_pub)
+            return user
 
 
 def test_crypto_sane():
@@ -213,6 +213,7 @@ def test():
     test_send_recv_msg()
     test_send_recv_pubkey()
     test_send_recv_user()
+    test_handshake()
 
     print('protocol.py: UNIT TESTS PASSED')
 
