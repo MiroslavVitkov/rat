@@ -35,6 +35,27 @@ def say( ip: str, text: str) -> None:
     client = sock.Client(func, ip, port.CHATSERVER)
 
 
+def listen(relay: bool=False) -> None:
+    '''
+    Accept and try to decrypt and veify any received messages.
+    '''
+    def forever(s: socket, a: [bool]):
+        try:
+            # Handshake.
+            client = protocol.handshake_as_server(s)
+            print('The remote user identifies as', client)
+
+            # Accept messages.
+            priv, _ = crypto.read_keypair()
+            for msg in protocol.recv_msg(s, priv, client.pub, a):
+                print(msg.decode('utf8'))
+        except:
+            # Drop the connection as soon as it breaks protocol.
+            return
+
+    sock.Server(forever, port.CHATSERVER)
+
+
 def serve() -> None:
     '''
     Run a nameserver forever.
@@ -65,28 +86,6 @@ def ask(regex: str, ip: str) -> None:
         print(data)
 
     c = sock.Client(ip[0], port=port.NAMESERVER, func=func)
-
-
-
-def listen(relay: bool=False) -> None:
-    '''
-    Accept and try to decrypt and veify any received messages.
-    '''
-    def forever(s: socket, a: [bool]):
-        try:
-            # Handshake.
-            client = protocol.handshake_as_server(s)
-            print('The remote user identifies as', client)
-
-            # Accept messages.
-            priv, _ = crypto.read_keypair()
-            for msg in protocol.recv_msg(s, priv, client.pub, a):
-                print(msg.decode('utf8'))
-        except:
-            # Drop the connection as soon as it breaks protocol.
-            return
-
-    sock.Server(forever, port.CHATSERVER)
 
 
 def listen2(relay: bool=False) -> None:
