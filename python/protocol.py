@@ -66,7 +66,7 @@ def recv_msg( s: socket
             d = crypto.decrypt(chunk, own_priv)
             buf += d
         except:
-            # crypto.verify(buf, chuk, remote_pub)
+            crypto.verify(buf, chunk, remote_pub)
             return buf
     raise RuntimeError('Remote disconnected.')
 

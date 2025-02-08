@@ -195,7 +195,6 @@ def sign(msg: bytes|str, priv: Priv) -> bytes:
 
 def verify(msg: bytes, signature: bytes, pub: Pub) -> None:
     '''VerificationError - when the signature doesn't match the message.'''
-    assert(pub)
     rsa.verify(msg, signature, pub)
 
 
