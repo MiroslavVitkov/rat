@@ -11,23 +11,8 @@ import socket
 import threading
 import time
 
-import crypto
+from crypto import CHUNK_BYTES
 import port
-
-
-
-def send( text: str|bytes
-        , s: socket.socket
-        , remote_pub: crypto.Pub
-        , own_priv: crypto.Priv = crypto.read_keypair()[0]
-        ) -> None:
-    '''Ecrypt, sign and transmit the text.'''
-    assert type(own_priv) == crypto.Priv, type(own_priv)
-    if type(text) == str:
-        e = crypto.from_string(text, own_priv, remote_pub)
-    else:
-        e = crypto.from_bin(text, own_priv, remote_pub)
-    s.sendall(e)
 
 
 def recv( s: socket.socket
@@ -40,9 +25,9 @@ def recv( s: socket.socket
     '''
     # Index 0 of the buffer is the oldest received chunk.
     def try_yield():
-        while len(_cache[0]) >= crypto.CHUNK_BYTES:
-            r = _cache[0][:crypto.CHUNK_BYTES]
-            _cache[0] = _cache[0][crypto.CHUNK_BYTES:]
+        while len(_cache[0]) >= CHUNK_BYTES:
+            r = _cache[0][:CHUNK_BYTES]
+            _cache[0] = _cache[0][CHUNK_BYTES:]
             yield r
 
     yield from try_yield()
@@ -212,7 +197,7 @@ def test_recv() -> None:
             print(msg[0])
 
     def say(s):
-        m = bytearray(b'.') * crypto.CHUNK_BYTES
+        m = bytearray(b'.') * CHUNK_BYTES
         for i in range(20):
             m[0] = i
             s.sendall(m)
