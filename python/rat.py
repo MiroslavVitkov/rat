@@ -73,7 +73,7 @@ def register(ip) -> None:
     def func(s: socket):
         server = protocol.handshake_as_client(s)
         own_priv, _ = crypto.read_keypair()
-        sock.send(b'register', s, server.pub, own_priv)
+#        sock.send(b'register', s, server.pub, own_priv)
 
     sock.Client(ip=ip, port=port.NAMESERVER, func=func)
 
@@ -82,7 +82,7 @@ def ask(regex: str, ip: str) -> None:
     '''Request a list of matching userames from a nameserver.'''
     def func(s: socket):
         server = protocol.handshake_as_client(s)
-        sock.send('ask ' + regex, s, server.pub)
+#        sock.send('ask ' + regex, s, server.pub)
         data = sock.recv_one(s)
         print(data)
 
@@ -127,13 +127,13 @@ def listen2(relay: bool=False) -> None:
                  + text )
 
             # Relay operation.
-            if relay:
-                for socket, key in zip(remote_sockets, remote_keys):
-                    if socket != s:
-                        sock.send( get_prompt( remote_user.name
-                                             , remote_user.group )
-                                             + text
-                                 , socket, key, own_priv)
+#            if relay:
+#                for socket, key in zip(remote_sockets, remote_keys):
+#                    if socket != s:
+#                        sock.send( get_prompt( remote_user.name
+#                                             , remote_user.group )
+#                                             + text
+#                                 , socket, key, own_priv)
 
     # Comenting this out temporarily.
     # It is responsible for a clissicle p2p chat.
@@ -172,7 +172,7 @@ def send( ip: str, text: str) -> None:
     def func(s: socket):
         '''Transmit a message and die.'''
         protocol.handshake_as_client(s)
-        sock.send(text, s, own_priv, remote.pub)
+#        sock.send(text, s, own_priv, remote.pub)
 
     client = sock.Client(ip, port.CHATSERVER, func)
 
@@ -197,9 +197,9 @@ def handle_input( s: [socket]
             # (the remote network buffer gets clogged).
             # Perhaps a better alternative is to insert a delay in send()?
             # Because what we see on the screen is different from the peer's?
-            if text:
-                for ip, pub in zip(s, remote_pub):
-                    sock.send(text, ip, own_priv, pub)
+#            if text:
+#                for ip, pub in zip(s, remote_pub):
+#                    sock.send(text, ip, own_priv, pub)
 
     Thread(target=inp).start()
 
