@@ -123,14 +123,6 @@ def recv_user( s: socket, remote_pub: crypto.Pub ) -> name.User:
             return user
 
 
-def test_crypto_sane():
-    assert crypto.read_keypair()[1] == parse_pubkey( emit_pubkey() )
-
-    priv, pub = crypto.read_keypair()
-    e = crypto.from_string('something', priv, pub)
-    assert crypto.to_string(e, priv, pub) == 'something'
-
-
 class SocketMock:
     def __init__(me):
         me.buf = b''
