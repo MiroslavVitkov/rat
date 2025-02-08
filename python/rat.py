@@ -16,7 +16,6 @@ import conf
 import crypto
 import name
 import protocol
-import port
 import sock
 
 
@@ -32,7 +31,7 @@ def say( ip: str, text: str) -> None:
         remote = protocol.handshake_as_client(s)
         protocol.send_msg(text, s, own_priv, remote.pub)
 
-    sock.Client(func, ip, port.CHATSERVER)
+    sock.Client(func, ip, conf.CHATSERVER)
 
 
 def listen() -> None:
@@ -54,7 +53,7 @@ def listen() -> None:
             # Drop the connection as soon as it breaks protocol.
             return
 
-    sock.Server(forever, port.CHATSERVER)
+    sock.Server(forever, conf.CHATSERVER)
 
 
 def serve() -> None:
@@ -73,20 +72,20 @@ def register(ip) -> None:
     def func(s: socket):
         server = protocol.handshake_as_client(s)
         own_priv, _ = crypto.read_keypair()
-        sock.send(b'register', s, server.pub, own_priv)
+#        sock.send(b'register', s, server.pub, own_priv)
 
-    sock.Client(ip=ip, port=port.NAMESERVER, func=func)
+    sock.Client(ip=ip, port=conf.NAMESERVER, func=func)
 
 
 def ask(regex: str, ip: str) -> None:
     '''Request a list of matching userames from a nameserver.'''
     def func(s: socket):
         server = protocol.handshake_as_client(s)
-        sock.send('ask ' + regex, s, server.pub)
+#        sock.send('ask ' + regex, s, server.pub)
         data = sock.recv_one(s)
         print(data)
 
-    c = sock.Client(ip[0], port=port.NAMESERVER, func=func)
+    c = sock.Client(ip[0], port=conf.NAMESERVER, func=func)
 
 
 def listen2(relay: bool=False) -> None:
@@ -127,19 +126,19 @@ def listen2(relay: bool=False) -> None:
                  + text )
 
             # Relay operation.
-            if relay:
-                for socket, key in zip(remote_sockets, remote_keys):
-                    if socket != s:
-                        sock.send( get_prompt( remote_user.name
-                                             , remote_user.group )
-                                             + text
-                                 , socket, key, own_priv)
+#            if relay:
+#                for socket, key in zip(remote_sockets, remote_keys):
+#                    if socket != s:
+#                        sock.send( get_prompt( remote_user.name
+#                                             , remote_user.group )
+#                                             + text
+#                                 , socket, key, own_priv)
 
     # Comenting this out temporarily.
     # It is responsible for a clissicle p2p chat.
     # TODO After connectionless rat is done and thested this need to be un-broken!
     # handle_input(remote_sockets, own_priv, remote_keys)
-    sock.Server(forever, port.CHATSERVER)
+    sock.Server(forever, conf.CHATSERVER)
 
 
 def connect(ip: str) -> None:
@@ -163,7 +162,7 @@ def connect(ip: str) -> None:
                              , remote_user.group)
                  + text )
 
-    client = sock.Client(ip, port.CHATSERVER, func)
+    client = sock.Client(ip, conf.CHATSERVER, func)
 
 
 def send( ip: str, text: str) -> None:
@@ -172,9 +171,9 @@ def send( ip: str, text: str) -> None:
     def func(s: socket):
         '''Transmit a message and die.'''
         protocol.handshake_as_client(s)
-        sock.send(text, s, own_priv, remote.pub)
+#        sock.send(text, s, own_priv, remote.pub)
 
-    client = sock.Client(ip, port.CHATSERVER, func)
+    client = sock.Client(ip, conf.CHATSERVER, func)
 
 
 def get() -> None:
@@ -197,9 +196,9 @@ def handle_input( s: [socket]
             # (the remote network buffer gets clogged).
             # Perhaps a better alternative is to insert a delay in send()?
             # Because what we see on the screen is different from the peer's?
-            if text:
-                for ip, pub in zip(s, remote_pub):
-                    sock.send(text, ip, own_priv, pub)
+#            if text:
+#                for ip, pub in zip(s, remote_pub):
+#                    sock.send(text, ip, own_priv, pub)
 
     Thread(target=inp).start()
 
@@ -216,7 +215,6 @@ def test() -> None:
     conf.test()
     crypto.test()
     name.test()
-    port.test()
     protocol.test(); time.sleep(1)
     sock.test()
 

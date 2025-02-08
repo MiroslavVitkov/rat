@@ -11,23 +11,8 @@ import socket
 import threading
 import time
 
-import crypto
-import port
-
-
-
-def send( text: str|bytes
-        , s: socket.socket
-        , remote_pub: crypto.Pub
-        , own_priv: crypto.Priv = crypto.read_keypair()[0]
-        ) -> None:
-    '''Ecrypt, sign and transmit the text.'''
-    assert type(own_priv) == crypto.Priv, type(own_priv)
-    if type(text) == str:
-        e = crypto.from_string(text, own_priv, remote_pub)
-    else:
-        e = crypto.from_bin(text, own_priv, remote_pub)
-    s.sendall(e)
+import conf
+from crypto import CHUNK_BYTES
 
 
 def recv( s: socket.socket
@@ -40,9 +25,9 @@ def recv( s: socket.socket
     '''
     # Index 0 of the buffer is the oldest received chunk.
     def try_yield():
-        while len(_cache[0]) >= crypto.CHUNK_BYTES:
-            r = _cache[0][:crypto.CHUNK_BYTES]
-            _cache[0] = _cache[0][crypto.CHUNK_BYTES:]
+        while len(_cache[0]) >= CHUNK_BYTES:
+            r = _cache[0][:CHUNK_BYTES]
+            _cache[0] = _cache[0][CHUNK_BYTES:]
             yield r
 
     yield from try_yield()
@@ -93,7 +78,7 @@ class Server:
     MAX_THREADS = 20
 
 
-    def __init__(me, func: callable, port: int=port.TEST):
+    def __init__(me, func: callable, port: int=conf.TEST):
         me.ip = get_extern_ip()
         me.port = port
         me.alive = [True]
@@ -145,7 +130,7 @@ class Client:
     '''
     Client-side view of the pipe to the Server over the assigned socket.
     '''
-    def __init__(me, func: callable, ip: str='localhost', port: int=port.TEST):
+    def __init__(me, func: callable, ip: str='localhost', port: int=conf.TEST):
         try:
             s = socket.create_connection((ip, port))
         except:
@@ -161,9 +146,9 @@ def test_nonblocking_recv() -> None:
     '''
     # Create 3 sockets - sever administrative, server content and client content.
     # Bind the latter and forget about the former.
-    server_s = socket.create_server(('', port.TEST))
+    server_s = socket.create_server(('', conf.TEST))
     server_s.listen()
-    client_s = socket.create_connection(('localhost', port.TEST))
+    client_s = socket.create_connection(('localhost', conf.TEST))
     content_s = next(iter(server_s.accept()))  # Accept 1 connection.
 
     client_s.sendall('If this is commented out, the server hangs.'.encode('utf8'))
@@ -212,7 +197,7 @@ def test_recv() -> None:
             print(msg[0])
 
     def say(s):
-        m = bytearray(b'.') * crypto.CHUNK_BYTES
+        m = bytearray(b'.') * CHUNK_BYTES
         for i in range(20):
             m[0] = i
             s.sendall(m)

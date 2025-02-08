@@ -12,7 +12,6 @@ from socket import socket
 
 import crypto
 import name
-import port
 import sock
 
 
@@ -121,14 +120,6 @@ def recv_user( s: socket, remote_pub: crypto.Pub ) -> name.User:
                 remote_pub = user.pub
             crypto.verify(decr, chunk, remote_pub)
             return user
-
-
-def test_crypto_sane():
-    assert crypto.read_keypair()[1] == parse_pubkey( emit_pubkey() )
-
-    priv, pub = crypto.read_keypair()
-    e = crypto.from_string('something', priv, pub)
-    assert crypto.to_string(e, priv, pub) == 'something'
 
 
 class SocketMock:

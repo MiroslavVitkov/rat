@@ -18,7 +18,6 @@ import socket
 
 import conf
 import crypto
-import port
 import sock
 
 
@@ -80,7 +79,7 @@ class Server:
         me.users = {}
         me.alive = [True]
 
-        me.server = sock.Server(me._handle, port.NAMESERVER)
+        me.server = sock.Server(me._handle, conf.NAMESERVER)
         me.server.alive = me.alive
         me.priv, _ = crypto.read_keypair()
 
@@ -107,20 +106,20 @@ class Server:
                 try:
                     r = re.compile(text)
                 except:
-                    sock.send( b'Invalid regular expression!'
-                             , s, own_priv, remote_pub )
+#                    sock.send( b'Invalid regular expression!'
+#                             , s, own_priv, remote_pub )
                     continue
 
                 matches = [me.users[u] for u in me.users
                            if r.match(me.users[u].name)]
                 if not matches:
-                    sock.send( b'No matches!'
-                             , s, own_priv, remote_user.pub )
+#                    sock.send( b'No matches!'
+#                             , s, own_priv, remote_user.pub )
                     continue
 
-                for u in matches:
-                    bytes = pickle.dumps(u)
-                    sock.send(bytes, s, own_priv, remote_user.pub)
+#                for u in matches:
+#                    bytes = pickle.dumps(u)
+#                    sock.send(bytes, s, own_priv, remote_user.pub)
 
 
 def test() -> None:
