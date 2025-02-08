@@ -31,13 +31,6 @@ def from_string(msg: str, own_priv: Priv, remote_pub: Pub) -> bytes:
     return sign_chop_encrypt_stitch(msg.encode('utf8'), own_priv, remote_pub)
 
 
-def to_string(msg: bytes, own_priv: Priv, remote_pub: Pub) -> str:
-    '''
-    Decrypt a string someone sent specifically to us.
-    '''
-    return chop_decrypt_stitch_verify_decode(msg, own_priv, remote_pub)
-
-
 def from_bin(msg: bytes, own_priv: Priv, remote_pub: Pub) -> bytes:
     return sign_chop_encrypt_stitch(msg, own_priv, remote_pub)
 
@@ -255,8 +248,8 @@ def test_API() -> None:
     msg = 'Random long string.' * 999
     blob = from_string(msg, priv, pub)  # Send to ourselves.
     assert type(blob) == bytes, type(blob)
-    msg2 = to_string(blob, priv, pub) # We are the intended recepient so we can read it.
-    assert msg == msg2
+#    msg2 = to_string(blob, priv, pub) # We are the intended recepient so we can read it.
+#    assert msg == msg2
 
 
 def test_failures() -> None:
@@ -266,11 +259,11 @@ def test_failures() -> None:
     msg = 'Random long string.' * 99
     blob = from_string(msg, priv1, pub2)  # Send to some random dude.
     # But try to read it ourselves instead.
-    try:
-        to_string(blob, priv1, pub1)
-        raise Exception('test_failures() decrypted nonsence.')
-    except rsa.pkcs1.DecryptionError:
-        pass
+#    try:
+#        to_string(blob, priv1, pub1)
+#        raise Exception('test_failures() decrypted nonsence.')
+#    except rsa.pkcs1.DecryptionError:
+#        pass
 
     # He tries to read the message.
     # But enjoys only messages from himself.
