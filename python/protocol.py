@@ -12,7 +12,6 @@ from socket import socket
 
 import crypto
 import name
-import port
 import sock
 
 

@@ -2,12 +2,18 @@
 
 
 '''
-Config file perser.
+Configuration povider, mainly via a config file parser, but ports are hardcoded.
 '''
 
 
 from configparser import ConfigParser
 import os
+
+
+# Standard ports used by the program.
+CHATSERVER = 42666
+NAMESERVER = CHATSERVER + 1
+TEST = NAMESERVER + 1
 
 
 def where_are_we():

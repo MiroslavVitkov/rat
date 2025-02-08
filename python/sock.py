@@ -11,8 +11,8 @@ import socket
 import threading
 import time
 
+import conf
 from crypto import CHUNK_BYTES
-import port
 
 
 def recv( s: socket.socket
@@ -78,7 +78,7 @@ class Server:
     MAX_THREADS = 20
 
 
-    def __init__(me, func: callable, port: int=port.TEST):
+    def __init__(me, func: callable, port: int=conf.TEST):
         me.ip = get_extern_ip()
         me.port = port
         me.alive = [True]
@@ -130,7 +130,7 @@ class Client:
     '''
     Client-side view of the pipe to the Server over the assigned socket.
     '''
-    def __init__(me, func: callable, ip: str='localhost', port: int=port.TEST):
+    def __init__(me, func: callable, ip: str='localhost', port: int=conf.TEST):
         try:
             s = socket.create_connection((ip, port))
         except:
@@ -146,9 +146,9 @@ def test_nonblocking_recv() -> None:
     '''
     # Create 3 sockets - sever administrative, server content and client content.
     # Bind the latter and forget about the former.
-    server_s = socket.create_server(('', port.TEST))
+    server_s = socket.create_server(('', conf.TEST))
     server_s.listen()
-    client_s = socket.create_connection(('localhost', port.TEST))
+    client_s = socket.create_connection(('localhost', conf.TEST))
     content_s = next(iter(server_s.accept()))  # Accept 1 connection.
 
     client_s.sendall('If this is commented out, the server hangs.'.encode('utf8'))

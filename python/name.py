@@ -18,7 +18,6 @@ import socket
 
 import conf
 import crypto
-import port
 import sock
 
 
@@ -80,7 +79,7 @@ class Server:
         me.users = {}
         me.alive = [True]
 
-        me.server = sock.Server(me._handle, port.NAMESERVER)
+        me.server = sock.Server(me._handle, conf.NAMESERVER)
         me.server.alive = me.alive
         me.priv, _ = crypto.read_keypair()
 
