@@ -63,10 +63,10 @@ def recv_msg( s: socket
     buf = b''
     for chunk in sock.recv(s, alive):
         try:
-            d = crypto.from_bin(chunk, own_priv, remote_pub)
+            d = crypto.decrypt(chunk, own_priv)
             buf += d
         except:
-            crypto.verify(buf, chuk, remote_pub)
+            # crypto.verify(buf, chuk, remote_pub)
             return buf
     raise RuntimeError('Remote disconnected.')
 

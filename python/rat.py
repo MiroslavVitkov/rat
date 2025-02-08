@@ -47,7 +47,8 @@ def listen() -> None:
 
             # Accept messages.
             priv, _ = crypto.read_keypair()
-            for msg in protocol.recv_msg(s, priv, client.pub, a):
+            while True:
+                msg = protocol.recv_msg(s, priv, client.pub, a)
                 print(msg.decode('utf8'))
         except:
             # Drop the connection as soon as it breaks protocol.
