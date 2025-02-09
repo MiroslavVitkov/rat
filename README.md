@@ -28,11 +28,8 @@ Although this project relies on many libraries, the project-exclusive code striv
 
 Encryption
 ---
-Asymmetric cryptography is proven uncrackeble by brute force.
-All messages are transmitted encrypted and are secure if the two endpoints are not compromised.
-Disclaimer: this application was not implemented by a cryptographer.
-Disclaimer: unlike WhatsApp, a compromise of a private key enables an attacker to decrypt all past messages.
-
+As long as neither private key has leaked, nothing can be cracked.
+Hopefully soon we'll have forward secrecy, meaning no past conversation is vulnerable.
 
 Privacy
 ---
