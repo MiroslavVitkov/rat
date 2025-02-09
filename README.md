@@ -1,5 +1,13 @@
 # rat
-RAm-only chaT. Inspectable code and industry standard encryption.
+RAm-only chaT. Messaging utility intended to leave little trace.
+
+
+Warning
+---
+This app has neither been designed nor inspected by a cryptographer.
+It's a hobby project aimed as portable command line chat.
+It makes strides for confidentiality and privacy but those are marely educational.
+
 
 How to use
 ---
