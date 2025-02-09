@@ -29,19 +29,15 @@ Although this project relies on many libraries, the project-exclusive code striv
 Encryption
 ---
 As long as neither private key has leaked, nothing can be cracked.
-Hopefully soon we'll have forward secrecy, meaning no past conversation is vulnerable.
-
-Privacy
----
-No 'last seen', no user broadcast or discovery, no central server, no files on the hard disk by default.
+Hopefully soon we'll have forward secrecy meaning no past conversation is vulnerable.
 
 
 Modes of Use
 ---
+ - `git` style `rat say John hey there moron` non-interactive chat
  - classical interactive chat
- - `git` style `rat send John hey there moron` non-interactive chat
  - chatroom host
- - artificial entities(bots, plugins, features e.g. chat history) are easy to interface
+ - artificial entities(bots e.g. chat history)
 
 
 Authentication
