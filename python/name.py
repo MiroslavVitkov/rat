@@ -90,6 +90,11 @@ class Server:
 
 
     def _handle(me, s: socket.socket) -> None:
+        client = protocol.handshake_as_server(s)
+        for msg in protocol.recv_msg(s, priv, client.pub):
+            print(len(msg))
+
+    def _handle2(me, s: socket.socket) -> None:
         for data in sock.recv(s, me.alive):
             # Accept remote User object.
             remote_user = User.from_bytes(data)
