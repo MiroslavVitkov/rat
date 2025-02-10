@@ -14,7 +14,6 @@ import socket
 import bot
 import conf
 import crypto
-import name
 import protocol
 import sock
 
@@ -62,7 +61,7 @@ def serve() -> None:
     On the standard port.
     Acept all requests from everyone.
     '''
-    name.Server()
+    protocol.NameServer()
 
 
 def register(ip) -> None:
@@ -214,7 +213,6 @@ def test() -> None:
     bot.test()
     conf.test()
     crypto.test()
-    name.test()
     protocol.test(); time.sleep(1)
     sock.test()
 

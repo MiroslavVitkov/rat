@@ -100,14 +100,15 @@ class User:
 
 
 def test():
-    '''
-    Ensure fields exist and are non-empty.
-    '''
+    assert User.from_bytes(User().to_bytes()) == User()
+
+    # Ensure fields exist and are non-empty.
     assert len(get()['user']['name'])
     assert len(get()['user']['group'])
     assert len(get()['user']['status'])
     assert len(get()['user']['keypath'])
     # ['user']['bots'] is empty by default.
+
     print('conf.py: UNIT TESTS PASSED')
 
 
