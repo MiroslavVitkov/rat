@@ -68,3 +68,13 @@ Inactive feature branches are reaped monthly - there is no persistent branch bey
 The python implementation is the spec.
 Any change to that is supposed to bring along chagnges in all the others.
 If not, do indicate in the commit message very clearly why.
+
+
+Architecture
+---
+Three layers.
+Only rule so far is 'never access higher layers'.
+
+rat - interact with outside world
+protocol - group tasks into algorithms
+sock, crypto, conf - do specific tasks
