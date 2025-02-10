@@ -71,18 +71,19 @@ def register(ip) -> None:
     def func(s: socket):
         server = protocol.handshake_as_client(s)
         own_priv, _ = crypto.read_keypair()
-#        sock.send(b'register', s, server.pub, own_priv)
+        protocol.send_msg(b'register', s, server.pub, own_priv)
 
     sock.Client(ip=ip, port=conf.NAMESERVER, func=func)
 
 
 def ask(regex: str, ip: str) -> None:
     '''Request a list of matching userames from a nameserver.'''
+    own_priv, _ = crypto.read_keypair()
     def func(s: socket):
         server = protocol.handshake_as_client(s)
-#        sock.send('ask ' + regex, s, server.pub)
-        data = sock.recv_one(s)
-        print(data)
+        protocol.send_msg(regex, s, own_priv, server.pub)
+        data = protocol.recv_msg(s, own_priv, server.pub)
+        print(len(data))
 
     c = sock.Client(ip[0], port=conf.NAMESERVER, func=func)
 

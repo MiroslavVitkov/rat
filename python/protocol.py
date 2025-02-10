@@ -24,6 +24,7 @@ def handshake_as_server( s: socket ) -> conf.User:
 
     # Transmit own encrypted User object.
     send_user(s, client.pub)
+    assert client
     return client
 
 
@@ -36,6 +37,7 @@ def handshake_as_client( s: socket ) -> conf.User:
 
     # Receive the server's encrypted User object.
     server = recv_user(s, server_pub)
+    assert server
     return server
 
 
@@ -77,6 +79,8 @@ class NameServer:
 
     Groups look like regular users and are regular users,
     they just retransmit anything they receive to everyone else.
+
+    Received input is either 'register' or an arbitrary string to regex over use names.
     '''
     def __init__(me):
         me.users = {}
@@ -93,9 +97,16 @@ class NameServer:
 
 
     def _handle(me, s: socket, alive: [bool]) -> None:
-        client = protocol.handshake_as_server(s)
-        for msg in protocol.recv_msg(s, priv, client.pub):
-            print(len(msg))
+        try:
+            client = handshake_as_server(s)
+            print(client)
+        except:
+            # Drop the connection as soon as it breaks protocol.
+            return
+
+        priv, _ = crypto.read_keypair()
+        print(recv_msg(s, priv, client.pub))
+
 
     def _handle2(me, s: socket) -> None:
         for data in sock.recv(s, me.alive):
@@ -128,6 +139,28 @@ class NameServer:
 #                for u in matches:
 #                    bytes = pickle.dumps(u)
 #                    sock.send(bytes, s, own_priv, remote_user.pub)
+
+# 36 def listen() -> None:                                                           
+# 37     '''                                                                         
+# 38     Accept and display incoming messages.                                       
+# 39     '''                                                                         
+# 40     def forever(s: socket, a: [bool]):                                          
+# 41         try:                                                                    
+# 42             # Handshake.                                                        
+# 43             client = protocol.handshake_as_server(s)                            
+# 44             print('The remote user identifies as', client)                      
+# 45                                                                                 
+# 46             # Accept messages.                                                  
+# 47             priv, _ = crypto.read_keypair()                                     
+# 48             while True:                                                         
+# 49                 msg = protocol.recv_msg(s, priv, client.pub, a)                 
+# 50                 print(msg.decode('utf8'))                                       
+# 51         except:                                                                 
+# 52             # Drop the connection as soon as it breaks protocol.                
+# 53             return                                                              
+# 54                                                                                 
+# 55     sock.Server(forever, conf.CHATSERVER)
+
 
 
 ### Details.
