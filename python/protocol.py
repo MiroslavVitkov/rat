@@ -75,20 +75,8 @@ class NameServer:
     A server where users publish their (nickname, public key, ip, comment)
     for everyone to see.
 
-    Groups look like regular users but are based on peer to peer broadcast.
-    Still a central relay ca be created easily.
-
-    Encryption is cool but no authentication mechanism has been implemented yet!
-    '''
-#import pickle
-#import re
-#import socket
-
-#import conf
-#import crypto
-#import sock
-    '''
-    The client has obtained the nameserver's ip and public key via another medium.
+    Groups look like regular users and are regular users,
+    they just retransmit anything they receive to everyone else.
     '''
     def __init__(me):
         me.users = {}
@@ -104,7 +92,7 @@ class NameServer:
         me.users[u.pub] = u
 
 
-    def _handle(me, s: socket) -> None:
+    def _handle(me, s: socket, alive: [bool]) -> None:
         client = protocol.handshake_as_server(s)
         for msg in protocol.recv_msg(s, priv, client.pub):
             print(len(msg))
