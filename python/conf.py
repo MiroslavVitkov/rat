@@ -8,6 +8,7 @@ Configuration povider, mainly via a config file parser, but ports are hardcoded.
 
 from configparser import ConfigParser
 import os
+import pickle
 
 
 # Standard ports used by the program.

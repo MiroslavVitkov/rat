@@ -64,7 +64,7 @@ def serve() -> None:
     protocol.NameServer()
 
 
-def register(ip) -> None:
+def register(ip: str) -> None:
     '''
     Register our User object(conf.ini + pub key) with nameserver(s).
     '''
