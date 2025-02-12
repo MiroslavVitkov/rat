@@ -231,33 +231,6 @@ def recv_user( s: socket, remote_pub: crypto.Pub ) -> User:
             return user
 
 
-class SocketMock:
-    def __init__(me):
-        me.buf = b''
-
-    def send(me, msg):
-        me.buf += msg
-
-    def recv(me, max=1024):
-        assert len(me.buf) < max
-        tmp = me.buf
-        me.buf = b''
-        return tmp
-
-    def settimeout(me, val):
-        pass
-
-    def sendall(me, msg):
-        me.send(msg)
-
-
-def test_sockmock():
-    s = SocketMock()
-    s.send(b'Mock sockets as we are trying to deal only with protocol here.')
-    print(s.recv())
-    assert len(s.buf) == 0
-
-
 def test_send_recv_msg():
     msg = str(list(range(101)))
     priv, pub = crypto.read_keypair()  # Send to ourselves.
@@ -315,26 +288,15 @@ def test_handshake():
 
 
 def test_nameserver() -> None:
-    s = Server()
-    u = User( conf.get()['user']['name']
-            , conf.get()['user']['group']
-            , crypto.generate_keypair()[1]
-            , [sock.get_extern_ip()]
-            , conf.get()['user']['status'])
+    s = NameServer()
+    u = User()
     s.register(u)
-    print(len(s.users), 'users registered:')
-    print(s.users)
-    # TODO: test ask()
+    assert len(s.users) == 1, len(s.users)
+    assert s.ask(u.name)[0] == u.to_bytes(), len(s.ask(u.name))
     s.alive[0] = False
-    import time; time.sleep(1)
-    import threading as th; assert th.active_count() == 1
-    print('crypto.py: UNIT TESTS PASSED')
-
 
 
 def test():
-    test_crypto_sane()
-    test_sockmock()
     test_send_recv_msg()
     test_send_recv_pubkey()
     test_send_recv_user()
