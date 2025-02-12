@@ -8,14 +8,68 @@ Communication sequences as to fufill top-level commands.
 
 import time
 
+import pickle
+import re
 from socket import socket
 
+import conf
 import crypto
-import name
 import sock
 
 
-def handshake_as_server( s: socket ) -> name.User:
+class User:
+    '''
+    A 'user' is defined by their public key.
+    Meaning 5 devices with the same key - one logical user.
+    rat is supposed to allow different users to perform code paths in a single invocation.
+    '''
+    U = conf.get()['user']
+
+
+    def __init__( me
+                , name: str=U['name']
+                , group: str=U['group']
+                , pub: crypto.Pub=crypto.read_keypair()[1]
+                , ips: [str]=[sock.get_extern_ip()]
+                , status: str=U['status']
+                ):
+        me.name = name
+        me.group = group
+        me.pub = pub
+        me.ips = ips
+        me.status = status
+
+
+    @classmethod
+    def from_bytes(cls, b: bytes) -> 'User':
+        obj = pickle.loads(b)
+        assert type(obj) == cls, (type(obj), cls)
+        return obj
+
+
+    def to_bytes(me) -> bytes:
+        return pickle.dumps(me)
+
+
+    def __repr__(me) -> str:
+        assert(me)
+        assert(me.pub)
+        pub = str(me.pub.save_pkcs1())
+        ips = ', '.join(me.ips)
+        return ( '\n'
+               + 'nickname: ' + me.name + '\n'
+               + 'group: ' + me.group + '\n'
+               + 'public key: ' + pub + '\n'
+               + 'IPs: ' + ips + '\n'
+               + 'status: ' + me.status)
+
+    def __eq__(me, other):
+        if type(me) != type(other):
+            return False;
+        return me.__dict__ == other.__dict__
+
+
+def handshake_as_server( s: socket ) -> User:
     # After a client connects, send own pubkey unencrypted.
     send_pubkey(s)
 
@@ -24,10 +78,11 @@ def handshake_as_server( s: socket ) -> name.User:
 
     # Transmit own encrypted User object.
     send_user(s, client.pub)
+    assert client
     return client
 
 
-def handshake_as_client( s: socket ) -> name.User:
+def handshake_as_client( s: socket ) -> User:
     # After connecting, receive server unencrypted pubkey.
     server_pub = recv_pubkey(s)
 
@@ -36,6 +91,7 @@ def handshake_as_client( s: socket ) -> name.User:
 
     # Receive the server's encrypted User object.
     server = recv_user(s, server_pub)
+    assert server
     return server
 
 
@@ -70,6 +126,121 @@ def recv_msg( s: socket
     raise RuntimeError('Remote disconnected.')
 
 
+class NameServer:
+    '''
+    A server where users publish their (nickname, public key, ip, comment)
+    for everyone to see.
+
+    Groups look like regular users and are regular users,
+    they just retransmit anything they receive to everyone else.
+
+    Received input is either 'register' or an arbitrary string to regex over use names.
+    '''
+    def __init__(me):
+        me.users = {}
+        me.alive = [True]
+
+        me.server = sock.Server(me._handle, conf.NAMESERVER)
+        me.server.alive = me.alive
+        me.priv, _ = crypto.read_keypair()
+
+
+    def register(me, u: User) -> None:
+        assert type(u) == User, type(u)
+        me.users[u.pub] = u
+        print('New user registered:', u)
+        print('Now there are', len(me.users), 'registered users.\n')
+
+
+    def ask(me, regex) ->[bytes]:
+        try:
+            r = re.compile(regex)
+        except:
+            send_msg(b'Invalid regular expression!', s, own_priv, remote_pub)
+            return []
+
+        r = [u.to_bytes() for u in me.users.values()
+             if r.match(u.name)]
+        return r
+
+
+    def _handle(me, s: socket, alive: [bool]) -> None:
+        try:
+            client = handshake_as_server(s)
+            print(client)
+        except:
+            # Drop the connection as soon as it breaks protocol.
+            return
+
+        # We expect exacly one text message from this peer.
+        # After that we disconnect by returning from this handler.
+        priv, _ = crypto.read_keypair()
+        try:
+            msg = recv_msg(s, priv, client.pub)
+            if msg == b'register':
+                me.register(client)
+            else:
+                msg = msg.decode('utf8')
+                print(s.getsockname(), 'is asking for', msg)
+                for u in me.ask(msg):
+                    send_msg(u, s, priv, client.pub)
+        except:
+            pass
+
+
+    def _handle2(me, s: socket) -> None:
+        for data in sock.recv(s, me.alive):
+            # Accept remote User object.
+            remote_user = User.from_bytes(data)
+            assert type(remote_user) == User, type(remote_user)
+
+            # This could be an `ask` or a `register` request.
+            text = data.decode('utf-8')
+            if text == 'register':
+                me.register(remote_user)
+            else:
+                print(s.getsockname(), 'is asking for', text)
+                try:
+                    r = re.compile(text)
+                except:
+#                    sock.send( b'Invalid regular expression!'
+#                             , s, own_priv, remote_pub )
+                    continue
+
+                matches = [me.users[u] for u in me.users
+                           if r.match(me.users[u].name)]
+                if not matches:
+#                    sock.send( b'No matches!'
+#                             , s, own_priv, remote_user.pub )
+                    continue
+
+#                for u in matches:
+#                    bytes = pickle.dumps(u)
+#                    sock.send(bytes, s, own_priv, remote_user.pub)
+
+# 36 def listen() -> None:                                                           
+# 37     '''                                                                         
+# 38     Accept and display incoming messages.                                       
+# 39     '''                                                                         
+# 40     def forever(s: socket, a: [bool]):                                          
+# 41         try:                                                                    
+# 42             # Handshake.                                                        
+# 43             client = protocol.handshake_as_server(s)                            
+# 44             print('The remote user identifies as', client)                      
+# 45                                                                                 
+# 46             # Accept messages.                                                  
+# 47             priv, _ = crypto.read_keypair()                                     
+# 48             while True:                                                         
+# 49                 msg = protocol.recv_msg(s, priv, client.pub, a)                 
+# 50                 print(msg.decode('utf8'))                                       
+# 51         except:                                                                 
+# 52             # Drop the connection as soon as it breaks protocol.                
+# 53             return                                                              
+# 54                                                                                 
+# 55     sock.Server(forever, conf.CHATSERVER)
+
+
+
 ### Details.
 def emit_pubkey() -> bytes:
     '''Convert rsa.PublicKey to a format suitable to be transmitted.'''
@@ -99,11 +270,11 @@ def recv_pubkey( s: socket ) -> crypto.Pub:
 def send_user( s: socket
              , remote_pub: crypto.Pub ) -> None:
     own_priv, _ = crypto.read_keypair()
-    u = name.User().to_bytes()  # 282 bytes
+    u = User().to_bytes()  # 282 bytes
     send_msg(u, s, own_priv, remote_pub)
 
 
-def recv_user( s: socket, remote_pub: crypto.Pub ) -> name.User:
+def recv_user( s: socket, remote_pub: crypto.Pub ) -> User:
     '''Receive remote User object encrypted and signed.
        A copy-ast of recv_msg() which however allows None.
     '''
@@ -115,7 +286,7 @@ def recv_user( s: socket, remote_pub: crypto.Pub ) -> name.User:
             d = crypto.decrypt(chunk, own_priv)
             decr += d
         except:
-            user = name.User.from_bytes(decr)
+            user = User.from_bytes(decr)
             if remote_pub is None:
                 remote_pub = user.pub
             crypto.verify(decr, chunk, remote_pub)
@@ -190,7 +361,7 @@ def test_send_recv_user() -> None:
     sock.Client(lambda s: send_user(s, pub))
 
     time.sleep(1)
-    assert received[0] == name.User(), received[0]
+    assert received[0] == User(), received[0]
     server.alive[0] = False
 
 
@@ -201,8 +372,26 @@ def test_handshake():
     sock.Client(lambda s: server.append(handshake_as_client(s)))
 
     time.sleep(1)
-    assert server[0] == client[0] == name.User()
+    assert server[0] == client[0] == User()
     s.alive[0] = False
+
+
+def test_nameserver() -> None:
+    s = Server()
+    u = User( conf.get()['user']['name']
+            , conf.get()['user']['group']
+            , crypto.generate_keypair()[1]
+            , [sock.get_extern_ip()]
+            , conf.get()['user']['status'])
+    s.register(u)
+    print(len(s.users), 'users registered:')
+    print(s.users)
+    # TODO: test ask()
+    s.alive[0] = False
+    import time; time.sleep(1)
+    import threading as th; assert th.active_count() == 1
+    print('crypto.py: UNIT TESTS PASSED')
+
 
 
 def test():
@@ -212,6 +401,8 @@ def test():
     test_send_recv_pubkey()
     test_send_recv_user()
     test_handshake()
+    test_nameserver()
+    assert User.from_bytes(User().to_bytes()) == User()
 
     print('protocol.py: UNIT TESTS PASSED')
 

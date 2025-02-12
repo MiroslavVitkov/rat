@@ -39,20 +39,20 @@ def get(path: str=where_are_we()+'/../conf.ini', c: list=[]):
 
     return c[0]
 
+
 def get_keypath():
     p = get()['user']['keypath']
     return os.path.expanduser(p)
 
 
 def test():
-    '''
-    Ensure fields exist and are non-empty.
-    '''
+    # Ensure fields exist and are non-empty.
     assert len(get()['user']['name'])
     assert len(get()['user']['group'])
     assert len(get()['user']['status'])
     assert len(get()['user']['keypath'])
     # ['user']['bots'] is empty by default.
+
     print('conf.py: UNIT TESTS PASSED')
 
 
