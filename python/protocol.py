@@ -153,25 +153,16 @@ class NameServer:
 
 
     def ask(me, regex) ->[bytes]:
-#        matches = [me.users[u] for u in me.users
-#                  if r.match(me.users[u].name)]
-#                if not matches:
-#                    sock.send( b'No matches!'
-#                             , s, own_priv, remote_user.pub )
-#                    continue
-#
-#                for u in matches:
-#                    bytes = pickle.dumps(u)
-#                    sock.send(bytes, s, own_priv, remote_user.pub)
+        try:
+            r = re.compile(regex)
+        except:
+            send_msg(b'Invalid regular expression!', s, own_priv, remote_pub)
+            return []
 
-#                try:
-#                    r = re.compile(text)
-#                except:
-#                    sock.send( b'Invalid regular expression!'
-#                             , s, own_priv, remote_pub )
-#                    continue
+        r = [u.to_bytes() for u in me.users.values()
+             if r.match(u.name)]
+        return r
 
-        return [u.to_bytes() for u in me.users.values()]
 
     def _handle(me, s: socket, alive: [bool]) -> None:
         try:
