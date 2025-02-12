@@ -8,6 +8,7 @@ Communication sequences as to fufill top-level commands.
 
 import time
 
+import pickle
 from socket import socket
 
 import conf
@@ -15,7 +16,59 @@ import crypto
 import sock
 
 
-def handshake_as_server( s: socket ) -> conf.User:
+class User:
+    '''
+    A 'user' is defined by their public key.
+    Meaning 5 devices with the same key - one logical user.
+    rat is supposed to allow different users to perform code paths in a single invocation.
+    '''
+    U = conf.get()['user']
+
+
+    def __init__( me
+                , name: str=U['name']
+                , group: str=U['group']
+                , pub: crypto.Pub=crypto.read_keypair()[1]
+                , ips: [str]=[sock.get_extern_ip()]
+                , status: str=U['status']
+                ):
+        me.name = name
+        me.group = group
+        me.pub = pub
+        me.ips = ips
+        me.status = status
+
+
+    @classmethod
+    def from_bytes(cls, b: bytes) -> 'User':
+        obj = pickle.loads(b)
+        assert type(obj) == cls, (type(obj), cls)
+        return obj
+
+
+    def to_bytes(me) -> bytes:
+        return pickle.dumps(me)
+
+
+    def __repr__(me) -> str:
+        assert(me)
+        assert(me.pub)
+        pub = str(me.pub.save_pkcs1())
+        ips = ', '.join(me.ips)
+        return ( '\n'
+               + 'nickname: ' + me.name + '\n'
+               + 'group: ' + me.group + '\n'
+               + 'public key: ' + pub + '\n'
+               + 'IPs: ' + ips + '\n'
+               + 'status: ' + me.status)
+
+    def __eq__(me, other):
+        if type(me) != type(other):
+            return False;
+        return me.__dict__ == other.__dict__
+
+
+def handshake_as_server( s: socket ) -> User:
     # After a client connects, send own pubkey unencrypted.
     send_pubkey(s)
 
@@ -28,7 +81,7 @@ def handshake_as_server( s: socket ) -> conf.User:
     return client
 
 
-def handshake_as_client( s: socket ) -> conf.User:
+def handshake_as_client( s: socket ) -> User:
     # After connecting, receive server unencrypted pubkey.
     server_pub = recv_pubkey(s)
 
@@ -91,8 +144,8 @@ class NameServer:
         me.priv, _ = crypto.read_keypair()
 
 
-    def register(me, u: conf.User) -> None:
-        assert type(u) == conf.User, type(u)
+    def register(me, u: User) -> None:
+        assert type(u) == User, type(u)
         me.users[u.pub] = u
 
 
@@ -105,14 +158,18 @@ class NameServer:
             return
 
         priv, _ = crypto.read_keypair()
-        print(recv_msg(s, priv, client.pub))
+        # We're awaiting exacly one message from this peer.
+        try:
+            print(recv_msg(s, priv, client.pub).decode('utf8'))
+        except:
+            pass
 
 
     def _handle2(me, s: socket) -> None:
         for data in sock.recv(s, me.alive):
             # Accept remote User object.
-            remote_user = conf.User.from_bytes(data)
-            assert type(remote_user) == conf.User, type(remote_user)
+            remote_user = User.from_bytes(data)
+            assert type(remote_user) == User, type(remote_user)
 
             # This could be an `ask` or a `register` request.
             text = data.decode('utf-8')
@@ -192,11 +249,11 @@ def recv_pubkey( s: socket ) -> crypto.Pub:
 def send_user( s: socket
              , remote_pub: crypto.Pub ) -> None:
     own_priv, _ = crypto.read_keypair()
-    u = conf.User().to_bytes()  # 282 bytes
+    u = User().to_bytes()  # 282 bytes
     send_msg(u, s, own_priv, remote_pub)
 
 
-def recv_user( s: socket, remote_pub: crypto.Pub ) -> conf.User:
+def recv_user( s: socket, remote_pub: crypto.Pub ) -> User:
     '''Receive remote User object encrypted and signed.
        A copy-ast of recv_msg() which however allows None.
     '''
@@ -208,7 +265,7 @@ def recv_user( s: socket, remote_pub: crypto.Pub ) -> conf.User:
             d = crypto.decrypt(chunk, own_priv)
             decr += d
         except:
-            user = conf.User.from_bytes(decr)
+            user = User.from_bytes(decr)
             if remote_pub is None:
                 remote_pub = user.pub
             crypto.verify(decr, chunk, remote_pub)
@@ -283,7 +340,7 @@ def test_send_recv_user() -> None:
     sock.Client(lambda s: send_user(s, pub))
 
     time.sleep(1)
-    assert received[0] == conf.User(), received[0]
+    assert received[0] == User(), received[0]
     server.alive[0] = False
 
 
@@ -294,7 +351,7 @@ def test_handshake():
     sock.Client(lambda s: server.append(handshake_as_client(s)))
 
     time.sleep(1)
-    assert server[0] == client[0] == conf.User()
+    assert server[0] == client[0] == User()
     s.alive[0] = False
 
 
@@ -324,6 +381,7 @@ def test():
     test_send_recv_user()
     test_handshake()
     test_nameserver()
+    assert User.from_bytes(User().to_bytes()) == User()
 
     print('protocol.py: UNIT TESTS PASSED')
 

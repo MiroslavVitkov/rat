@@ -199,10 +199,10 @@ def test_chop_stitch():
     assert stitch(packets) == data
 
     # Binary payload.
-    from name import User
-    data = User().to_bytes()
-    packets = chop(data, max)
-    assert stitch(packets) == data
+#    from name import User
+#    data = User().to_bytes()
+#    packets = chop(data, max)
+#    assert stitch(packets) == data
 
 
 def test_key() -> None:
@@ -236,11 +236,11 @@ def test_encrypt_decrypt():
     assert msg == msg2
 
     # Binary payload.
-    from name import User
-    msg = User().to_bytes()
-    e = [encrypt(m, pub) for m in chop(msg, MAX_PLAINTEXT_BYTES)]
-    d = stitch([decrypt(en, priv) for en in e])
-    assert User.from_bytes(d) == User()
+#    from name import User
+#    msg = User().to_bytes()
+#    e = [encrypt(m, pub) for m in chop(msg, MAX_PLAINTEXT_BYTES)]
+#    d = stitch([decrypt(en, priv) for en in e])
+#    assert User.from_bytes(d) == User()
 
 
 def test_API() -> None:
