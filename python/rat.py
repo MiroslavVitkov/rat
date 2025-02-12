@@ -117,47 +117,6 @@ def serve() -> None:
     protocol.NameServer()
 
 
-##
-def listen2(relay: bool=False) -> None:
-    '''
-    Create a socket and listen on in with a dedicated thread, forever.
-    relay - send everything received to everyone else(chatroom)
-    '''
-    own_priv, own_pub = crypto.read_keypair()
-    remote_sockets = []
-    remote_keys = []
-    inout = bot.InOut()
-    bot.spawn_bots(inout)
-
-    def forever(s: socket, a: [bool]):
-        # Handshake.
-        client = protocol.handshake_as_server(s)
-        print('The remote user identifies as', client)
-        remote_sockets.append(s)
-        remote_keys.append(client.pub)
-
-        # TODO: report disconnects.
-        print('New user joined:', client)
-
-        # Accept text messages.
-        for data in sock.recv(s):
-            packet = Packet.from_bytes(data)
-            text = crypto.decrypt(packet.encrypted, own_priv)
-            crypto.verify(text, packet.signature, remote_user.pub)
-
-            # Inform bots of the new input.
-            inout.in_msg = text
-            with inout.in_cond:
-                inout.in_cond.notify_all()
-
-            # Show the text. Should this be a bot?
-            print( get_prompt( remote_user.name
-                             , remote_user.group)
-                 + text )
-
-    sock.Server(forever, conf.CHATSERVER)
-
-
 def get_prompt( name: str=conf.get()['user']['name']
               , group:str=conf.get()['user']['group']
               ) -> str:
