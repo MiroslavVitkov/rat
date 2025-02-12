@@ -64,7 +64,7 @@ def serve() -> None:
     protocol.NameServer()
 
 
-def register(ip: str) -> None:
+def register(ip: [str]) -> None:
     '''
     Register our User object(conf.ini + pub key) with nameserver(s).
     '''
@@ -73,19 +73,20 @@ def register(ip: str) -> None:
         own_priv, _ = crypto.read_keypair()
         protocol.send_msg(b'register', s, own_priv, server.pub)
 
-    sock.Client(ip=ip, port=conf.NAMESERVER, func=func)
+    sock.Client(ip=ip[0], port=conf.NAMESERVER, func=func)
 
 
-def ask(regex: str, ip: str) -> None:
+def ask(regex: str, ip: [str]) -> None:
     '''Request a list of matching userames from a nameserver.'''
     own_priv, _ = crypto.read_keypair()
-    def func(s: socket):
+    def f(s: socket):
         server = protocol.handshake_as_client(s)
         protocol.send_msg(regex, s, own_priv, server.pub)
         data = protocol.recv_msg(s, own_priv, server.pub)
-        print(len(data))
+        user = protocol.User.from_bytes(data)
+        print(user)
 
-    c = sock.Client(ip[0], port=conf.NAMESERVER, func=func)
+    c = sock.Client(func=f, ip=ip[0], port=conf.NAMESERVER)
 
 
 def listen2(relay: bool=False) -> None:
@@ -272,13 +273,13 @@ if __name__ == '__main__':
 
     elif sys.argv[1] == 'register':
         if len(sys.argv) >= 3:
-            register(sys.argv[2])  # TODO: allow multiple server IPs
+            register(sys.argv[2:])
         else:
-            print('Provide the IP of the nameserver!')
+            print('Provide the IPs of the nameservers!')
 
     elif sys.argv[1] == 'ask':
         if len(sys.argv) >= 4:
-            ask(sys.argv[2], sys.argv[3:len(sys.argv)])
+            ask(sys.argv[2], sys.argv[3:])
         else:
             print('Provide your regex followed by nameserver IPs!')
 

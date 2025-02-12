@@ -122,6 +122,7 @@ def recv_msg( s: socket
             buf += d
         except:
             crypto.verify(buf, chunk, remote_pub)
+            print('SANTA IS DEFEATED', buf)
             return buf
     raise RuntimeError('Remote disconnected.')
 
@@ -153,7 +154,8 @@ class NameServer:
 
 
     def ask(me, regex) ->[User]:
-        pass
+        return User()
+#        return me.users[0] # KUR
 
 
     def _handle(me, s: socket, alive: [bool]) -> None:
@@ -163,14 +165,17 @@ class NameServer:
         except:
             # Drop the connection as soon as it breaks protocol.
             return
+
+        # We expect exacly one text message from this peer.
         priv, _ = crypto.read_keypair()
-        # We're awaiting exacly one text message from this peer.
         try:
             msg = recv_msg(s, priv, client.pub)
             if msg == b'register':
                 me.register(client)
                 return
-            print(msg.decode(utf8))
+            else:
+                print('Asking for', msg.decode('utf8'))
+                send_msg(User().to_bytes(), s, priv, client.pub)
         except:
             pass
 
