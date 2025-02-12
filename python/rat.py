@@ -117,6 +117,7 @@ def serve() -> None:
     protocol.NameServer()
 
 
+##
 def listen2(relay: bool=False) -> None:
     '''
     Create a socket and listen on in with a dedicated thread, forever.
@@ -154,82 +155,7 @@ def listen2(relay: bool=False) -> None:
                              , remote_user.group)
                  + text )
 
-            # Relay operation.
-#            if relay:
-#                for socket, key in zip(remote_sockets, remote_keys):
-#                    if socket != s:
-#                        sock.send( get_prompt( remote_user.name
-#                                             , remote_user.group )
-#                                             + text
-#                                 , socket, key, own_priv)
-
-    # Comenting this out temporarily.
-    # It is responsible for a clissicle p2p chat.
-    # TODO After connectionless rat is done and thested this need to be un-broken!
-    # handle_input(remote_sockets, own_priv, remote_keys)
     sock.Server(forever, conf.CHATSERVER)
-
-
-def connect(ip: str) -> None:
-    own_priv, own_pub = crypto.read_keypair()
-    # TODO: spawn bots
-    def func(s: socket):
-        server = protocol.handshake_as_client(s)
-        print('The server identifies as', server)
-
-        # Send messages to the remote peer.
-        handle_input((s,), own_priv, (server.pub,))
-
-        # Receive messages from the remote peer.
-        for data in sock.recv(s):
-            packet = Packet.from_bytes(data)
-            text = crypto.decrypt(packet.encrypted, own_priv)
-            crypto.verify(text, packet.signature, remote_user.pub)
-
-            # Show the text.
-            print( get_prompt( remote_user.name
-                             , remote_user.group)
-                 + text )
-
-    client = sock.Client(ip, conf.CHATSERVER, func)
-
-
-def send( ip: str, text: str) -> None:
-    own_priv, own_pub = crypto.read_keypair(conf.get_keypath())
-
-    def func(s: socket):
-        '''Transmit a message and die.'''
-        protocol.handshake_as_client(s)
-#        sock.send(text, s, own_priv, remote.pub)
-
-    client = sock.Client(ip, conf.CHATSERVER, func)
-
-
-def get() -> None:
-    pass
-
-
-def handle_input( s: [socket]
-                , own_priv: crypto.Priv
-                , remote_pub: [crypto.Pub]
-                , alive: bool=True
-                ) -> None:
-    '''
-    We need 2 threads to do simultaneous input and output.
-    So let's use the current thread for listening and spin an input one.
-    '''
-    def inp():
-        while alive:
-            text = input()
-            # Forbid sending empty messages because they DOS the remote peer
-            # (the remote network buffer gets clogged).
-            # Perhaps a better alternative is to insert a delay in send()?
-            # Because what we see on the screen is different from the peer's?
-#            if text:
-#                for ip, pub in zip(s, remote_pub):
-#                    sock.send(text, ip, own_priv, pub)
-
-    Thread(target=inp).start()
 
 
 def get_prompt( name: str=conf.get()['user']['name']
@@ -319,28 +245,11 @@ if __name__ == '__main__':
     elif sys.argv[1] == 'serve':
         serve()
 
-##
-
-    elif sys.argv[1] == 'connect':
-        if len(sys.argv) == 3:
-            connect(sys.argv[2])
-        else:
-            print('Provide the IP to connect to, it must be listening!')
-
-    elif sys.argv[1] == 'get':
-        if 'recv_buff' in conf.get()['user']['bots']:
-            pass
-        else:
-            print('To enable this command you must both enable recv_buff bot '
-                  'and keep a running `rat listen` instance.')
-
     elif sys.argv[1] == 'generate':
-        if len(sys.argv) == 2:
-            keypath = conf.get_keypath()
-            priv, pub = crypto.generate_keypair()
-            crypto.write_keypair(priv, pub, keypath)
-        else:
-            print('Provide path for the generated key!')
+        assert len(sys.argv) == 2
+        keypath = conf.get_keypath()
+        priv, pub = crypto.generate_keypair()
+        crypto.write_keypair(priv, pub, keypath)
 
     elif sys.argv[1] == 'test':
         test()
