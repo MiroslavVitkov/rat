@@ -70,7 +70,11 @@ def relay() -> None:
             priv, _ = crypto.read_keypair()
             while True:
                 msg = protocol.recv_msg(s, priv, client.pub, a)
-                [protocol.send_msg(msg, s_) for s_ in peers if s_ != s]
+                print(msg.decode('utf8'))
+                for s_ in peers:
+                    if s_ != s:
+                        protocol.send_msg(msg, s_)
+                #[protocol.send_msg(msg, s_) for s_ in peers if s_ != s]
         except:
             #peers.remove(s)
             # Drop the connection as soon as it breaks protocol.
