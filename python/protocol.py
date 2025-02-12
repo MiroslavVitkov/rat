@@ -9,6 +9,7 @@ Communication sequences as to fufill top-level commands.
 import time
 
 import pickle
+import re
 from socket import socket
 
 import conf
@@ -147,6 +148,12 @@ class NameServer:
     def register(me, u: User) -> None:
         assert type(u) == User, type(u)
         me.users[u.pub] = u
+        print('New user registered:', u)
+        print('Now there are', len(me.users), 'registered users.\n')
+
+
+    def ask(me, regex) ->[User]:
+        pass
 
 
     def _handle(me, s: socket, alive: [bool]) -> None:
@@ -156,11 +163,14 @@ class NameServer:
         except:
             # Drop the connection as soon as it breaks protocol.
             return
-
         priv, _ = crypto.read_keypair()
-        # We're awaiting exacly one message from this peer.
+        # We're awaiting exacly one text message from this peer.
         try:
-            print(recv_msg(s, priv, client.pub).decode('utf8'))
+            msg = recv_msg(s, priv, client.pub)
+            if msg == b'register':
+                me.register(client)
+                return
+            print(msg.decode(utf8))
         except:
             pass
 
@@ -175,8 +185,6 @@ class NameServer:
             text = data.decode('utf-8')
             if text == 'register':
                 me.register(remote_user)
-                print('New user registered:', remote_user)
-                print('Now there are', len(me.users), 'registered users.\n')
             else:
                 print(s.getsockname(), 'is asking for', text)
                 try:
