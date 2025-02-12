@@ -71,7 +71,7 @@ def register(ip: str) -> None:
     def func(s: socket):
         server = protocol.handshake_as_client(s)
         own_priv, _ = crypto.read_keypair()
-        protocol.send_msg(b'register', s, server.pub, own_priv)
+        protocol.send_msg(b'register', s, own_priv, server.pub)
 
     sock.Client(ip=ip, port=conf.NAMESERVER, func=func)
 
