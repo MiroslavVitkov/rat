@@ -30,7 +30,7 @@ def where_are_we():
 def get(path: str=where_are_we()+'/../conf.ini', c: list=[]):
     '''
     Use like:
-        get_conf()['section_name']['setting_name']
+        get()['section_name']['setting_name']
     '''
     if not len(c):
         c_ = ConfigParser()

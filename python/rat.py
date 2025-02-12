@@ -55,13 +55,17 @@ def listen() -> None:
     sock.Server(forever, conf.CHATSERVER)
 
 
-def serve() -> None:
-    '''
-    Run a nameserver forever.
-    On the standard port.
-    Acept all requests from everyone.
-    '''
-    protocol.NameServer()
+def ask(regex: str, ip: [str]) -> None:
+    '''Request a list of matching userames from a nameserver.'''
+    own_priv, _ = crypto.read_keypair()
+    def f(s: socket):
+        server = protocol.handshake_as_client(s)
+        protocol.send_msg(regex, s, own_priv, server.pub)
+        data = protocol.recv_msg(s, own_priv, server.pub)
+        user = protocol.User.from_bytes(data)
+        print(user)
+
+    c = sock.Client(func=f, ip=ip[0], port=conf.NAMESERVER)
 
 
 def register(ip: [str]) -> None:
@@ -76,17 +80,13 @@ def register(ip: [str]) -> None:
     sock.Client(ip=ip[0], port=conf.NAMESERVER, func=func)
 
 
-def ask(regex: str, ip: [str]) -> None:
-    '''Request a list of matching userames from a nameserver.'''
-    own_priv, _ = crypto.read_keypair()
-    def f(s: socket):
-        server = protocol.handshake_as_client(s)
-        protocol.send_msg(regex, s, own_priv, server.pub)
-        data = protocol.recv_msg(s, own_priv, server.pub)
-        user = protocol.User.from_bytes(data)
-        print(user)
-
-    c = sock.Client(func=f, ip=ip[0], port=conf.NAMESERVER)
+def serve() -> None:
+    '''
+    Run a nameserver forever.
+    On the standard port.
+    Acept all requests from everyone.
+    '''
+    protocol.NameServer()
 
 
 def listen2(relay: bool=False) -> None:
@@ -260,32 +260,35 @@ if __name__ == '__main__':
     if len(sys.argv) < 2 or sys.argv[1] == 'help' or sys.argv[1] == '?':
         print_help()
 
+    # Example: rat say localhost Hey bryh!
     elif sys.argv[1] == 'say':
-        # No need for '' around the message.
         if len(sys.argv) > 3:
             msg = ' '.join(sys.argv[3:])
             say(sys.argv[2], msg)
         else:
             print('Provide a destination IP and a message!')
 
-    elif sys.argv[1] == 'serve':
-        serve()
+    elif sys.argv[1] == 'listen':
+        listen()
 
-    elif sys.argv[1] == 'register':
-        if len(sys.argv) >= 3:
-            register(sys.argv[2:])
-        else:
-            print('Provide the IPs of the nameservers!')
-
+    # Example: rat ask regex server1 server2
     elif sys.argv[1] == 'ask':
         if len(sys.argv) >= 4:
             ask(sys.argv[2], sys.argv[3:])
         else:
             print('Provide your regex followed by nameserver IPs!')
 
-    elif sys.argv[1] == 'listen':
-        listen()
+    # Example: rat register server1 server2
+    elif sys.argv[1] == 'register':
+        if len(sys.argv) >= 3:
+            register(sys.argv[2:])
+        else:
+            print('Provide the IPs of the nameservers!')
 
+    elif sys.argv[1] == 'serve':
+        serve()
+
+##
     elif sys.argv[1] == 'relay':
         listen(relay=True)
 
@@ -294,14 +297,6 @@ if __name__ == '__main__':
             connect(sys.argv[2])
         else:
             print('Provide the IP to connect to, it must be listening!')
-
-    elif sys.argv[1] == 'send':
-        if len(sys.argv) >= 3:
-            # No need for '' around the message.
-            msg = ' '.join(sys.argv[3:])
-            send(sys.argv[2], msg)
-        else:
-            print('Provide a destination IP and a message!')
 
     elif sys.argv[1] == 'get':
         if 'recv_buff' in conf.get()['user']['bots']:

@@ -20,7 +20,7 @@ import sock
 class User:
     '''
     A 'user' is defined by their public key.
-    Meaning 5 devices with the same key - one logical user.
+    Meaning that 5 devices with the same key are one logical user.
     rat is supposed to allow different users to perform code paths in a single invocation.
     '''
     U = conf.get()['user']
@@ -78,7 +78,6 @@ def handshake_as_server( s: socket ) -> User:
 
     # Transmit own encrypted User object.
     send_user(s, client.pub)
-    assert client
     return client
 
 
@@ -91,7 +90,6 @@ def handshake_as_client( s: socket ) -> User:
 
     # Receive the server's encrypted User object.
     server = recv_user(s, server_pub)
-    assert server
     return server
 
 
@@ -128,13 +126,7 @@ def recv_msg( s: socket
 
 class NameServer:
     '''
-    A server where users publish their (nickname, public key, ip, comment)
-    for everyone to see.
-
-    Groups look like regular users and are regular users,
-    they just retransmit anything they receive to everyone else.
-
-    Received input is either 'register' or an arbitrary string to regex over use names.
+    A phonebook.
     '''
     def __init__(me):
         me.users = {}
@@ -188,59 +180,6 @@ class NameServer:
             pass
 
 
-    def _handle2(me, s: socket) -> None:
-        for data in sock.recv(s, me.alive):
-            # Accept remote User object.
-            remote_user = User.from_bytes(data)
-            assert type(remote_user) == User, type(remote_user)
-
-            # This could be an `ask` or a `register` request.
-            text = data.decode('utf-8')
-            if text == 'register':
-                me.register(remote_user)
-            else:
-                print(s.getsockname(), 'is asking for', text)
-                try:
-                    r = re.compile(text)
-                except:
-#                    sock.send( b'Invalid regular expression!'
-#                             , s, own_priv, remote_pub )
-                    continue
-
-                matches = [me.users[u] for u in me.users
-                           if r.match(me.users[u].name)]
-                if not matches:
-#                    sock.send( b'No matches!'
-#                             , s, own_priv, remote_user.pub )
-                    continue
-
-#                for u in matches:
-#                    bytes = pickle.dumps(u)
-#                    sock.send(bytes, s, own_priv, remote_user.pub)
-
-# 36 def listen() -> None:                                                           
-# 37     '''                                                                         
-# 38     Accept and display incoming messages.                                       
-# 39     '''                                                                         
-# 40     def forever(s: socket, a: [bool]):                                          
-# 41         try:                                                                    
-# 42             # Handshake.                                                        
-# 43             client = protocol.handshake_as_server(s)                            
-# 44             print('The remote user identifies as', client)                      
-# 45                                                                                 
-# 46             # Accept messages.                                                  
-# 47             priv, _ = crypto.read_keypair()                                     
-# 48             while True:                                                         
-# 49                 msg = protocol.recv_msg(s, priv, client.pub, a)                 
-# 50                 print(msg.decode('utf8'))                                       
-# 51         except:                                                                 
-# 52             # Drop the connection as soon as it breaks protocol.                
-# 53             return                                                              
-# 54                                                                                 
-# 55     sock.Server(forever, conf.CHATSERVER)
-
-
-
 ### Details.
 def emit_pubkey() -> bytes:
     '''Convert rsa.PublicKey to a format suitable to be transmitted.'''
@@ -261,8 +200,7 @@ def parse_pubkey( b: bytes) -> crypto.Pub:
 
 def recv_pubkey( s: socket ) -> crypto.Pub:
     '''Receive unencrypted remote public key.'''
-    key_data = s.recv(256)
-    assert len(key_data) == 251, len(key_data)
+    key_data = s.recv(1024)
     pub = parse_pubkey(key_data)
     return pub
 

@@ -198,13 +198,6 @@ def test_chop_stitch():
     packets = chop(data, max)
     assert stitch(packets) == data
 
-    # Binary payload.
-#    from name import User
-#    data = User().to_bytes()
-#    packets = chop(data, max)
-#    assert stitch(packets) == data
-
-
 def test_key() -> None:
     priv, pub = generate_keypair()
     p = tempfile.TemporaryDirectory().name
@@ -235,21 +228,14 @@ def test_encrypt_decrypt():
     msg2 = stitch(msg_chopped_2)
     assert msg == msg2
 
-    # Binary payload.
-#    from name import User
-#    msg = User().to_bytes()
-#    e = [encrypt(m, pub) for m in chop(msg, MAX_PLAINTEXT_BYTES)]
-#    d = stitch([decrypt(en, priv) for en in e])
-#    assert User.from_bytes(d) == User()
-
 
 def test_API() -> None:
     priv, pub = generate_keypair()
     msg = 'Random long string.' * 999
     blob = from_string(msg, priv, pub)  # Send to ourselves.
     assert type(blob) == bytes, type(blob)
-#    msg2 = to_string(blob, priv, pub) # We are the intended recepient so we can read it.
-#    assert msg == msg2
+    msg2 = to_bin(blob, priv, pub).decode('utf8') # We are the intended recepient so we can read it.
+    assert msg == msg2
 
 
 def test_failures() -> None:
@@ -259,11 +245,11 @@ def test_failures() -> None:
     msg = 'Random long string.' * 99
     blob = from_string(msg, priv1, pub2)  # Send to some random dude.
     # But try to read it ourselves instead.
-#    try:
-#        to_string(blob, priv1, pub1)
-#        raise Exception('test_failures() decrypted nonsence.')
-#    except rsa.pkcs1.DecryptionError:
-#        pass
+    try:
+        to_bin(blob, priv1, pub1).decode('utf8')
+        raise Exception('test_failures() decrypted nonsence.')
+    except rsa.pkcs1.DecryptionError:
+        pass
 
     # He tries to read the message.
     # But enjoys only messages from himself.
