@@ -122,7 +122,6 @@ def recv_msg( s: socket
             buf += d
         except:
             crypto.verify(buf, chunk, remote_pub)
-            print('SANTA IS DEFEATED', buf)
             return buf
     raise RuntimeError('Remote disconnected.')
 
@@ -153,10 +152,26 @@ class NameServer:
         print('Now there are', len(me.users), 'registered users.\n')
 
 
-    def ask(me, regex) ->[User]:
-        return User()
-#        return me.users[0] # KUR
+    def ask(me, regex) ->[bytes]:
+#        matches = [me.users[u] for u in me.users
+#                  if r.match(me.users[u].name)]
+#                if not matches:
+#                    sock.send( b'No matches!'
+#                             , s, own_priv, remote_user.pub )
+#                    continue
+#
+#                for u in matches:
+#                    bytes = pickle.dumps(u)
+#                    sock.send(bytes, s, own_priv, remote_user.pub)
 
+#                try:
+#                    r = re.compile(text)
+#                except:
+#                    sock.send( b'Invalid regular expression!'
+#                             , s, own_priv, remote_pub )
+#                    continue
+
+        return [u.to_bytes() for u in me.users.values()]
 
     def _handle(me, s: socket, alive: [bool]) -> None:
         try:
@@ -167,15 +182,17 @@ class NameServer:
             return
 
         # We expect exacly one text message from this peer.
+        # After that we disconnect by returning from this handler.
         priv, _ = crypto.read_keypair()
         try:
             msg = recv_msg(s, priv, client.pub)
             if msg == b'register':
                 me.register(client)
-                return
             else:
-                print('Asking for', msg.decode('utf8'))
-                send_msg(User().to_bytes(), s, priv, client.pub)
+                msg = msg.decode('utf8')
+                print(s.getsockname(), 'is asking for', msg)
+                for u in me.ask(msg):
+                    send_msg(u, s, priv, client.pub)
         except:
             pass
 
