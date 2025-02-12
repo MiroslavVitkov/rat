@@ -55,6 +55,30 @@ def listen() -> None:
     sock.Server(forever, conf.CHATSERVER)
 
 
+def relay() -> None:
+    '''Chatroom.'''
+    peers = set()
+
+    def forever(s: socket, a: [bool]):
+        try:
+            # Handshake.
+            client = protocol.handshake_as_server(s)
+            peers.add(s)
+            print('The remote user identifies as', client)
+
+            # Relay messages.
+            priv, _ = crypto.read_keypair()
+            while True:
+                msg = protocol.recv_msg(s, priv, client.pub, a)
+                [protocol.send_msg(msg, s_) for s_ in peers if s_ != s]
+        except:
+            #peers.remove(s)
+            # Drop the connection as soon as it breaks protocol.
+            return
+
+    sock.Server(forever, conf.CHATSERVER)
+
+
 def ask(regex: str, ip: [str]) -> None:
     '''Request a list of matching userames from a nameserver.'''
     own_priv, _ = crypto.read_keypair()
@@ -271,6 +295,9 @@ if __name__ == '__main__':
     elif sys.argv[1] == 'listen':
         listen()
 
+    elif sys.argv[1] == 'relay':
+        relay()
+
     # Example: rat ask regex server1 server2
     elif sys.argv[1] == 'ask':
         if len(sys.argv) >= 4:
@@ -289,8 +316,6 @@ if __name__ == '__main__':
         serve()
 
 ##
-    elif sys.argv[1] == 'relay':
-        listen(relay=True)
 
     elif sys.argv[1] == 'connect':
         if len(sys.argv) == 3:
