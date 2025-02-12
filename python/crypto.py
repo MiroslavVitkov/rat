@@ -254,7 +254,7 @@ def test_failures() -> None:
     # He tries to read the message.
     # But enjoys only messages from himself.
     try:
-        to_string(blob, priv2, pub2)
+        to_bin(blob, priv2, pub2).deode('utf8')
         raise Exception('test_failures() ignored a tampered signature.')
     except rsa.VerificationError:
         pass

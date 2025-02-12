@@ -11,7 +11,6 @@ import sys
 import time
 import socket
 
-import bot
 import conf
 import crypto
 import protocol
@@ -125,7 +124,6 @@ def get_prompt( name: str=conf.get()['user']['name']
 
 def test() -> None:
     # An `os.listdir('.')` wouldn't allow us to selectively disable tests.
-    bot.test()
     conf.test()
     crypto.test()
     protocol.test(); time.sleep(1)
@@ -134,7 +132,7 @@ def test() -> None:
     # System test.
     try:
         Thread(target=listen, daemon=True).start()
-        Thread(target=connect, args=['localhost'], daemon=True).start()
+        Thread(target=say, args=['localhost', 'test', 'message', '!@#'], daemon=True).start()
 # TODO: actually send a mesage and validate it was received
         print('\nSYSTEM TEST PASSED')
     except Exception as e:
