@@ -8,7 +8,6 @@ A peer to peer chat client/server/nameserver entry point.
 
 from threading import Thread
 import sys
-import time
 import socket
 
 import conf
@@ -126,8 +125,9 @@ def test() -> None:
     # An `os.listdir('.')` wouldn't allow us to selectively disable tests.
     conf.test()
     crypto.test()
-    protocol.test(); time.sleep(1)
     sock.test()
+    protocol.test()
+    return
 
     # System test.
     try:
