@@ -194,7 +194,7 @@ def test_recv() -> None:
     '''
     def listen(s: socket, alive: [bool]=[True]):
         for msg in recv(s, alive):
-            print(msg[0])
+            print(msg[0], end=', ')
 
     def say(s):
         m = bytearray(b'.') * CHUNK_BYTES
@@ -206,6 +206,7 @@ def test_recv() -> None:
     client = Client(say)
     time.sleep(1)
     server.alive[0] = False
+    print('20')  # For the newline.
 
 
 def test() -> None:
