@@ -12,11 +12,12 @@ It makes strides for confidentiality and privacy but those are marely educationa
 How to use
 ---
     git clone git@github.com:MiroslavVitkov/rat.git
-    pip install -r rat/python/requirements.txt
+    pip install -r python/requirements.txt
     alias rat="$PWD/rat/python/rat.py"
     rat --help
     rat generate
-    rat connect 87.121.47.253  # A chatroom that is supposed to be always up.
+    rat listen  # this blocks, open another terminal
+    rat say localhost hi bryh, wazzzup!?  # talk to yourself
 
 
 Inspectable code
@@ -75,6 +76,6 @@ Architecture
 Three layers.
 Only rule so far is 'never access higher layers'.
 
-rat - interact with outside world
-protocol - group tasks into algorithms
-sock, crypto, conf - do specific tasks
+rat - interact with outside world  
+protocol - group tasks into algorithms  
+sock, crypto, conf - do specific tasks  
