@@ -10,6 +10,6 @@ target_compile_features(rat PUBLIC cxx_std_26)
 target_sources(rat
   PUBLIC
     FILE_SET CXX_MODULES FILES
-      main.cpp)
+      main.cpp test.cpp)
 
 target_include_directories(rat PUBLIC ${PROJECT_SOURCE_DIR}/include)
