@@ -1,10 +1,18 @@
-cmake_minimum_required(VERSION 3.25)
+cmake_minimum_required(VERSION 3.27)
 project(rat)
 
-set(CMAKE_CXX_STANDARD 26)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-add_compile_options(-Wall -Wextra -pedantic -Werror -Wfatal-errors)
+add_executable(rat)
 
-set (SRC main.cpp)
-add_executable(rat "${SRC}")
+set_property(TARGET rat PROPERTY CMAKE_CXX_STANDARD 26)
+set_property(TARGET rat PROPERTY CMAKE_CXX_STANDARD_REQUIRED 26)
+set_property(TARGET rat PROPERTY CMAKE_CXX_EXTENSIONS OFF)
+target_compile_options(rat PUBLIC -Wall -Wextra -pedantic -Werror -Wfatal-errors -fmodules-ts)
+
+target_sources(rat PUBLIC
+      ${PROJECT_SOURCE_DIR}/main.cpp
+    PUBLIC
+    FILE_SET CXX_MODULES
+    BASE_DIRS ${PROJECT_SOURCE_DIR}
+    FILES
+    )
+target_include_directories(rat PUBLIC ${PROJECT_SOURCE_DIR}/include)
