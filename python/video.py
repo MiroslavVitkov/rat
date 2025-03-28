@@ -17,6 +17,7 @@ def run(cb):
 width = 640
 height = 480
 
+
 reader = (
     ffmpeg
     .input('/dev/video0', s='{}x{}'.format(width, height))
@@ -25,24 +26,7 @@ reader = (
 )
 
 
-encoder = (
-    ffmpeg
-    .input('pipe:', format='rawvideo', pix_fmt='yuv420p', s='{}x{}'.format(width, height))
-    .output('pipe:', format='h264', pix_fmt='yuv420p')
-    .run_async(pipe_stdin=True, pipe_stdout=True)
-)
-
-
 writer = (
-    ffmpeg
-    .input('pipe:', format='h264', pix_fmt='yuv420p', s='{}x{}'.format(width, height))
-    .output('/tmp/kur.mp4', format='h264', pix_fmt='yuv420p')
-    .overwrite_output()
-    .run_async(pipe_stdin=True)
-)
-
-
-writer2 = (
     ffmpeg
     .input('pipe:', format='rawvideo', pix_fmt='yuv420p', s='{}x{}'.format(width, height))
     .output('/tmp/kur.mp4', format='h264', pix_fmt='yuv420p')
@@ -54,6 +38,4 @@ writer2 = (
 while True:
     frame = reader.stdout.read(width * height * 3)
     print(len(frame))
-    #encoder.stdin.write(frame)
-    encoded = frame  #encoder.stdout.read()
-    writer2.stdin.write(encoded)
+    writer.stdin.write(frame)
