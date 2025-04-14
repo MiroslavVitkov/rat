@@ -16,20 +16,25 @@ def run(cb):
 ### Details.
 width = 640
 height = 480
+PIX_FMT='yuv420p'
+RESOLUTION = '{}x{}'.format(width, height)
+
+FORMAT = 'rawvideo'
+#FORMAT = 'h264'
 
 
 reader = (
     ffmpeg
-    .input('/dev/video0', s='{}x{}'.format(width, height))
-    .output('pipe:', format='rawvideo', pix_fmt='yuv420p')
+    .input('/dev/video0', s=RESOLUTION)
+    .output('pipe:', format=FORMAT, pix_fmt=PIX_FMT)
     .run_async(pipe_stdout=True)
 )
 
 
 writer = (
     ffmpeg
-    .input('pipe:', format='rawvideo', pix_fmt='yuv420p', s='{}x{}'.format(width, height))
-    .output('/tmp/kur.mp4', format='h264', pix_fmt='yuv420p')
+    .input('pipe:', format=FORMAT, pix_fmt=PIX_FMT, s=RESOLUTION)
+    .output('/tmp/kur.mp4', format='h264')
     .overwrite_output()
     .run_async(pipe_stdin=True)
 )
