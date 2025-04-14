@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 
-# In this file: reading frames one by one from the webcam.
+# In this file:
+#             - reading frames one by one from the webcam,
+#             - displaying frames one by one with mpv.
 
 
 import ffmpeg
+import subprocess
 
 
 ### Public API.
@@ -26,9 +29,15 @@ reader = (
 )
 
 
+mpv = subprocess.Popen(
+    ['mpv', '--no-cache', '--untimed', '--demuxer-lavf-o=flv_format=h264', '-'],
+    stdin=subprocess.PIPE
+)
+
+
 with open('/tmp/kur.h264', 'wb') as out_file:
     while True:
         chunk = reader.stdout.read(4096)
         print(len(chunk))
         out_file.write(chunk)
-#reader.wait()
+        mpv.stdin.write(chunk)
