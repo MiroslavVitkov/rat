@@ -5,16 +5,21 @@
 #             - displaying frames one by one with mpv.
 
 
+import crypto
+
 import ffmpeg
 import subprocess
 
 
 ### Public API.
-
-# cb(frame) - called on each frame
-def run( reader, cb: callable=lambda _: None ):
+def capture( reader ):
     while True:
-        cb( reader.stdout.read(4096) )
+        yield reader.stdout.read(crypto.MAX_PLAINTEXT_BYTES)
+
+
+def watch( mpv, chunks ):
+    for chunk in chunks:
+        mpv.stdin.write(chunk)
 
 
 ### Details.
@@ -59,4 +64,9 @@ mpv = subprocess.Popen(
 )
 
 
-run( reader, lambda chunk: mpv.stdin.write(chunk) )
+def test():
+    watch( mpv, capture(reader) )
+
+
+if __name__ == '__main__':
+    test()
