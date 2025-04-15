@@ -12,12 +12,15 @@ import subprocess
 ### Public API.
 
 # cb(frame) - called on each frame
-#def run(cb):
-#    return None
+def run( reader, cb: callable=lambda _: None ):
+    while True:
+        cb( reader.stdout.read(4096) )
 
 
 ### Details.
 width = 640
+#width = 1920
+#height = 1080
 height = 480
 FRATE = 25
 
@@ -25,7 +28,6 @@ FRATE = 25
 reader = (
     ffmpeg
     .input('/dev/video0', format='v4l2', r=FRATE, s=f'{width}x{height}')
-#    .output('pipe:', format='h264', r=FRATE, vcodec='libx264', pix_fmt='yuv420p')
     .output(
         'pipe:',
         format='h264',
@@ -57,6 +59,4 @@ mpv = subprocess.Popen(
 )
 
 
-while True:
-    chunk = reader.stdout.read(4096)
-    mpv.stdin.write(chunk)
+run( reader, lambda chunk: mpv.stdin.write(chunk) )
