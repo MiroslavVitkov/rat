@@ -19,25 +19,44 @@ import subprocess
 ### Details.
 width = 640
 height = 480
+FRATE = 25
 
 
 reader = (
     ffmpeg
-    .input('/dev/video0', format='v4l2', s=f'{width}x{height}')
-    .output('pipe:', format='h264', vcodec='libx264', pix_fmt='yuv420p')
+    .input('/dev/video0', format='v4l2', r=FRATE, s=f'{width}x{height}')
+#    .output('pipe:', format='h264', r=FRATE, vcodec='libx264', pix_fmt='yuv420p')
+    .output(
+        'pipe:',
+        format='h264',
+        vcodec='libx264',
+        r=FRATE,
+        pix_fmt='yuv420p',
+        preset='ultrafast',  # lowest compression!
+        tune='zerolatency',
+        g=1,
+        **{'x264-params': 'keyint=1'}
+    )
     .run_async(pipe_stdout=True)
 )
 
 
 mpv = subprocess.Popen(
-    ['mpv', '--no-cache', '--untimed', '--demuxer-lavf-o=flv_format=h264', '-'],
+   ['mpv',
+    '--no-cache',
+    '--untimed',
+    '--no-demuxer-thread',
+    '--demuxer-lavf-o=flv_format=h264',
+    '--correct-pts=no',  #
+    '--container-fps-override=25',  #
+    '--opengl-glfinish=yes',  #
+    '--opengl-swapinterval=0',  #
+    '--vo=xv',  #
+    '-'],
     stdin=subprocess.PIPE
 )
 
 
-with open('/tmp/kur.h264', 'wb') as out_file:
-    while True:
-        chunk = reader.stdout.read(4096)
-        print(len(chunk))
-        out_file.write(chunk)
-        mpv.stdin.write(chunk)
+while True:
+    chunk = reader.stdout.read(4096)
+    mpv.stdin.write(chunk)
