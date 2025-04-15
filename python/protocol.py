@@ -15,6 +15,7 @@ from socket import socket
 import conf
 import crypto
 import sock
+import video
 
 
 class User:
