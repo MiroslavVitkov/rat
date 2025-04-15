@@ -52,7 +52,7 @@ def watch( chunks ):
         '--opengl-swapinterval=0',  #
         '--vo=xv',  #
         '-'],
-    stdin=subprocess.PIPE
+        stdin=subprocess.PIPE
     )
     for chunk in chunks:
         mpv.stdin.write(chunk)
