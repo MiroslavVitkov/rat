@@ -15,6 +15,7 @@ from socket import socket
 import conf
 import crypto
 import sock
+import video
 
 
 class User:
@@ -180,6 +181,27 @@ class NameServer:
             pass
 
 
+# Emulate UDP multicast for now.
+def stream_video():
+    def foo(s, _):
+        for chunk in video.capture():
+            s.sendall(chunk)
+
+    s = sock.Server(port=conf.VIDEO, func=foo)
+
+
+def watch_video( remote ):
+    def gen(s):
+        while True:
+            chunk = s.recv(crypto.MAX_PLAINTEXT_BYTES)
+            yield chunk
+
+    def foo(s):
+            video.watch(gen(s))
+
+    c = sock.Client( ip=remote, port=conf.VIDEO, func=foo )
+
+
 ### Details.
 def emit_pubkey() -> bytes:
     '''Convert rsa.PublicKey to a format suitable to be transmitted.'''
@@ -296,6 +318,11 @@ def test_nameserver() -> None:
     s.alive[0] = False
 
 
+def test_video() -> None:
+    stream_video()
+    watch_video( 'localhost' )
+
+
 def test():
     test_send_recv_msg()
     test_send_recv_pubkey()
@@ -303,6 +330,7 @@ def test():
     test_handshake()
     test_nameserver()
     assert User.from_bytes(User().to_bytes()) == User()
+    test_video()
 
     print('protocol.py: UNIT TESTS PASSED')
 

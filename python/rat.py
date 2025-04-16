@@ -152,11 +152,16 @@ def print_help() -> None:
 
         chatting
         ---
-            rat listen - accept incoming chats, interactively
+            rat listen - accept incoming chat messages
             rat relay - start a chatroom
             rat connect <ip> - start chatting if they are listening, interactively
             rat send <ip> <msg> - send a message and shut down
             rat get [<ip>] - read accumulated messages and shut down
+
+        video
+        ---
+            rat stream -
+            rat watch <ip> -
 
         miscellaneous
         ---
@@ -201,6 +206,15 @@ if __name__ == '__main__':
 
     elif sys.argv[1] == 'serve':
         serve()
+
+    # TODO: access control?
+    elif sys.argv[1] == 'stream':
+        protocol.stream_video()
+
+    elif sys.argv[1] == 'watch':
+        assert len(sys.argv) == 3
+        protocol.watch_video(sys.argv[2])
+
 
     elif sys.argv[1] == 'generate':
         assert len(sys.argv) == 2

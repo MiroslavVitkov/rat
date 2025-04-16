@@ -13,7 +13,8 @@ import os
 # Standard ports used by the program.
 CHATSERVER = 42666
 NAMESERVER = CHATSERVER + 1
-TEST = NAMESERVER + 1
+VIDEO = NAMESERVER + 1
+TEST = VIDEO + 1
 
 
 def where_are_we():
