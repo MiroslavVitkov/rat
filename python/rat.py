@@ -142,32 +142,40 @@ def test() -> None:
 
 def print_help() -> None:
     h = '''
-        Usage:
-
-        resolving users
+        example
         ---
-            rat serve - start a nameserver
-            rat register <ip1>...<ip n> - publish details to nameserver(s)
-            rat ask <regex> <ip1>...<ip_n>  - ask nameservers for user details by regex
+            rat generate
+            rat say 46.10.210.37 Unquoted text bro!!!
 
         chatting
         ---
             rat listen - accept incoming chat messages
-            rat relay - start a chatroom
-            rat connect <ip> - start chatting if they are listening, interactively
-            rat send <ip> <msg> - send a message and shut down
-            rat get [<ip>] - read accumulated messages and shut down
+            rat say <IP> <message> - unquoted string to send to someone
+            rat relay [<IP 1>...<IP n>] - host a relay(chatroom)
+            rat invite <IP 1>...<IP n> - enable someone to join a relay
+            rat join <IP 1>...<IP n> - start receiving messages from relay(s)
+            rat leave <IP 1>...<IP n> - stop receiving messages form relay(s)
+
+        resolving users
+        ---
+            rat serve - host a nameserver(phonebook)
+            rat register <IP 1>...<IP n> - publish details to nameserver(s)
+            rat ask <regex> <IP 1>...<IP n> - ask nameservers for user details by regex
+            rat vouch <user> <IP 1>...<IP n> - insist this user is who he claims he is
+            rat report <user> <IP 1>...<IP n> - indicate a scammer
+            rat revoke <IP 1>...<IP n> - delete personal details from nameserver(s)
 
         video
         ---
-            rat stream -
-            rat watch <ip> -
+            rat stream <IP 1>...<IP n> - export video feed to specified endpoints
+            rat watch <IP> -
 
         miscellaneous
         ---
             rat generate - create a new RSA keypair and write it to disk
             rat test - run all unnit and integration tests
             rat help - print this message
+
         '''
     print(h)
 
