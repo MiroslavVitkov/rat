@@ -53,9 +53,20 @@ def listen() -> None:
     sock.Server(forever, conf.CHATSERVER)
 
 
-def relay() -> None:
-    '''Chatroom.'''
+def relay(invited: [str]=[protocol.User()]) -> None:
+    '''
+    Host a chatroom.
+
+    '''
     peers = set()
+
+    # Originally invited users join and they can invite others to join.
+    for i in invited:
+            try:
+                remote = protocol.handshake_as_server(s)
+                protocol.send_msg('hi bitch', s, crypto.read_keypair[0], remote.pub)
+            except:
+                print('Remote', i, 'unreachable!')
 
     def forever(s: socket, a: [bool]):
         try:
