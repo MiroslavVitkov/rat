@@ -1,0 +1,17 @@
+# /etc/systemd/system/rat.service
+
+[Unit]
+Description=The relay in the README.
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=miro
+StandardOutput=append:/var/log/rat.log
+ExecStart=/home/miro/proj/rat/python/rat.py listen
+
+[Install]
+WantedBy=multi-user.target
