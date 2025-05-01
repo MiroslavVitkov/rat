@@ -67,16 +67,18 @@ def relay(ips: [str]=['localhost']) -> None:
 
     # Record the user object once they respond.
     def f(s: socket, a: [bool]=[True]):
-        if s.getpeername() not in ips:
-            return
+        #if s.getpeername() not in ips:
+        #    return
+        #print('OPTNAME', s.getpeername())
 
         try:
             client = protocol.handshake_as_server(s)
             peers.add(client)
-            # priv, _ = crypto.read_keypair()
-            #  while True:
-            #    msg = protocol.recv_msg(s, priv, client.pub, a)
-            #    print(msg.decode('utf8'))
+
+            priv, _ = crypto.read_keypair()
+            while True:
+                msg = protocol.recv_msg(s, priv, client.pub, a)
+                print(msg.decode('utf8'))
             #    for p in peers:
             #        say(p.ips[0], msg.decode('utf8'))
         except:
