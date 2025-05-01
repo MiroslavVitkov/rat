@@ -85,6 +85,20 @@ def relay(ips: [str]=['localhost']) -> None:
     sock.Server(f, conf.RELAY_0)
 
 
+def share( ip: str, text: str) -> None:
+    '''
+    Send a message to be distributed via a relay.
+    '''
+    # TODO: specifying port
+    own_priv, _ = crypto.read_keypair(conf.get_keypath())
+
+    def func(s: socket):
+        remote = protocol.handshake_as_client(s)
+        protocol.send_msg(text, s, own_priv, remote.pub)
+
+    sock.Client(func, ip, conf.RELAY_0)
+
+
 def ask(regex: str, ip: [str]) -> None:
     '''Request a list of matching userames from a nameserver.'''
     own_priv, _ = crypto.read_keypair()
@@ -155,11 +169,8 @@ def print_help() -> None:
         ---
             rat listen - accept incoming chat messages
             rat say <IP> <message> - unquoted string to send to someone
-            rat share <IP> <message> -
             rat relay [<IP 1>...<IP n>] - host a relay(chatroom)
-            rat invite <IP 1>...<IP n> - enable someone to join a relay
-            rat join <IP 1>...<IP n> - start receiving messages from relay(s)
-            rat leave <IP 1>...<IP n> - stop receiving messages form relay(s)
+            rat share <IP[:port]> <message> - like 'say' but for a relay
 
         resolving users
         ---
@@ -202,6 +213,13 @@ if __name__ == '__main__':
 
     elif sys.argv[1] == 'relay':
         relay()
+
+    elif sys.argv[1] == 'share':
+        if len(sys.argv) > 3:
+            msg = ' '.join(sys.argv[3:])
+            share(sys.argv[2], msg)
+        else:
+            print('Provide a destination IP and a message!')
 
     # Example: rat ask regex server1 server2
     elif sys.argv[1] == 'ask':
