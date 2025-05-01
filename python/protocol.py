@@ -64,10 +64,15 @@ class User:
                + 'IPs: ' + ips + '\n'
                + 'status: ' + me.status)
 
+
     def __eq__(me, other):
         if type(me) != type(other):
             return False;
         return me.__dict__ == other.__dict__
+
+
+    def __hash__(me) -> int:
+        return hash(repr(me))
 
 
 def handshake_as_server( s: socket ) -> User:

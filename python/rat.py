@@ -53,43 +53,54 @@ def listen() -> None:
     sock.Server(forever, conf.CHATSERVER)
 
 
-def relay(invited: [str]=[protocol.User()]) -> None:
+def relay(ips: [str]=['localhost']) -> None:
     '''
-    Host a chatroom.
-
+    Host a chatroom. Just proof of concept.
     '''
-    peers = set()
+    peers = set()  # of User objects.
 
-    # Originally invited users join and they can invite others to join.
-    for i in invited:
-            try:
-                remote = protocol.handshake_as_server(s)
-                protocol.send_msg('hi bitch', s, crypto.read_keypair[0], remote.pub)
-            except:
-                print('Remote', i, 'unreachable!')
-
-    def forever(s: socket, a: [bool]):
+    for ip in ips:
         try:
-            # Handshake.
-            client = protocol.handshake_as_server(s)
-            peers.add(s)
-            print('The remote user identifies as', client)
+            say(ip, 'hi bitch')
+        except:
+            print(ip, 'not listening.')
 
-            # Relay messages.
+    # Record the user object once they respond.
+    def f(s: socket, a: [bool]=[True]):
+        #TODO
+        #if s.getpeername() not in ips:
+        #    return
+        #print('OPTNAME', s.getpeername())
+
+        try:
+            client = protocol.handshake_as_server(s)
+            peers.add(client)
+
             priv, _ = crypto.read_keypair()
             while True:
                 msg = protocol.recv_msg(s, priv, client.pub, a)
-                print(msg.decode('utf8'))
-                for s_ in peers:
-                    if s_ != s:
-                        protocol.send_msg(msg, s_)
-                #[protocol.send_msg(msg, s_) for s_ in peers if s_ != s]
+                print(msg.decode('utf8'), len(peers))
+                for p in peers:
+                    print('PEER', p)
+                    say(p.ips[0], '<relay>' + msg.decode('utf8'))
         except:
-            #peers.remove(s)
-            # Drop the connection as soon as it breaks protocol.
             return
 
-    sock.Server(forever, conf.CHATSERVER)
+    sock.Server(f, conf.RELAY_0)
+
+
+def share( ip: str, text: str) -> None:
+    '''
+    Send a message to be distributed via a relay.
+    '''
+    # TODO: specifying port
+    own_priv, _ = crypto.read_keypair(conf.get_keypath())
+
+    def func(s: socket):
+        remote = protocol.handshake_as_client(s)
+        protocol.send_msg(text, s, own_priv, remote.pub)
+
+    sock.Client(func, ip, conf.RELAY_0)
 
 
 def ask(regex: str, ip: [str]) -> None:
@@ -163,9 +174,7 @@ def print_help() -> None:
             rat listen - accept incoming chat messages
             rat say <IP> <message> - unquoted string to send to someone
             rat relay [<IP 1>...<IP n>] - host a relay(chatroom)
-            rat invite <IP 1>...<IP n> - enable someone to join a relay
-            rat join <IP 1>...<IP n> - start receiving messages from relay(s)
-            rat leave <IP 1>...<IP n> - stop receiving messages form relay(s)
+            rat share <IP[:port]> <message> - like 'say' but for a relay
 
         resolving users
         ---
@@ -208,6 +217,13 @@ if __name__ == '__main__':
 
     elif sys.argv[1] == 'relay':
         relay()
+
+    elif sys.argv[1] == 'share':
+        if len(sys.argv) > 3:
+            msg = ' '.join(sys.argv[3:])
+            share(sys.argv[2], msg)
+        else:
+            print('Provide a destination IP and a message!')
 
     # Example: rat ask regex server1 server2
     elif sys.argv[1] == 'ask':
