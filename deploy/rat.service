@@ -1,4 +1,6 @@
 # /etc/systemd/system/rat.service
+# Make sure to have a user 'rat'
+# and to install it in /opt.
 
 [Unit]
 Description=The relay in the README.
@@ -9,9 +11,9 @@ StartLimitIntervalSec=0
 Type=simple
 Restart=always
 RestartSec=1
-User=miro
+User=ra
 StandardOutput=append:/var/log/rat.log
-ExecStart=/home/miro/proj/rat/python/rat.py listen
+ExecStart=/opt/rat/python/rat.py listen
 
 [Install]
 WantedBy=multi-user.target
