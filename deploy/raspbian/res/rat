@@ -1,5 +1,3 @@
-# /etc/logrotate.d/rat
-
 /var/log/rat.log {
     daily
     rotate 7

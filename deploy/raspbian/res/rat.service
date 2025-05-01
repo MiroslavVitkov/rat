@@ -1,7 +1,3 @@
-# /etc/systemd/system/rat.service
-# Make sure to have a user 'rat'
-# and to install it in /opt.
-
 [Unit]
 Description=The relay in the README.
 After=network.target
