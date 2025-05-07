@@ -6,7 +6,7 @@ Warning
 ---
 This app has neither been designed nor inspected by a cryptographer.
 It's a hobby project aimed as portable command line chat.
-It makes strides for confidentiality and privacy but those are marely educational.
+It makes strides for confidentiality and privacy but those are merely educational.
 
 
 How to use
@@ -67,7 +67,7 @@ Those can be merge commits for anything complex at all or single commits for sim
 Inactive feature branches are reaped monthly - there is no persistent branch beyond `master`.
 
 The python implementation is the spec.
-Any change to that is supposed to bring along chagnges in all the others.
+Any change to that is supposed to bring along changes in all the others.
 If not, do indicate in the commit message very clearly why.
 
 
