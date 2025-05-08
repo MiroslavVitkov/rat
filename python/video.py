@@ -15,12 +15,15 @@ import crypto
 def capture():
     reader = (
         ffmpeg
-        .input('/dev/video0', format='v4l2', r=conf[video][fps], s=conf[video][res])
+        .input('/dev/video0',
+               format='v4l2',
+               r=conf.get()['video']['fps'],
+               s=conf.get()['video']['res'])
         .output(
             'pipe:',
             format='h264',
             vcodec='libx264',
-            r=conf[video][fps],
+            r=conf.get()['video']['fps'],
             pix_fmt='yuv420p',
             preset='ultrafast',  # lowest compression!
             tune='zerolatency',

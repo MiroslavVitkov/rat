@@ -206,6 +206,9 @@ def test_key() -> None:
     assert priv == newpriv, (priv, newpriv)
     assert pub == newpub, (pub, newpub)
 
+    # Reset cached key for later tests.
+    read_keypair(conf.get_keypath(), True)
+
 
 def test_encrypt_decrypt():
     # Short strings cover the happy path.
