@@ -7,11 +7,11 @@ require 'Parsedown.php';  # A markdown parser.
 $h = date('H');
 if( $h > 6 and $h < 20 )
 {
-    $pic = 'res/Saint_Rat.png';
+    $pic = 'res/saint_rat.png';
 }
 else
 {
-    $pic = 'res/Saint_Rat.png';
+    $pic = 'res/cyber_rat.png';
 }
 
 $readme = file_get_contents('/opt/rat/README.md');
