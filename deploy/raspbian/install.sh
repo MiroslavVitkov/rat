@@ -9,7 +9,7 @@ set -o pipefail  # exit on error inside a pipe
 set -u  # error on using uninitialized variable
 
 
-PORTS=42666-42672
+PORTS={42666..42672}
 
 
 # A new user with no login, home or group.
@@ -35,9 +35,11 @@ pip install --break-system-packages ffmpeg-python
 # IF it will be facing the internet.
 apt update && apt install ufw
 ufw allow 22
-for PORT in {"$PORTS"}; do
+for PORT in "$PORTS"; do
     ufw limit "$PORT"
 done
+ufw allow 'Apache Full'
+a2enmod ssl
 
 # Generate a key and write it to user.keypath.
 sed -i 's\keypath = ~/.ssh/rat\keypath = /opt/rat/.ssh/rat\' /opt/rat/conf.ini
