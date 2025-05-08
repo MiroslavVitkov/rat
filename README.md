@@ -83,7 +83,7 @@ bot, conf, crypto, sock, video - do specific tasks
 
 License
 ---
-Code - BSD - do whatever with it, sell it if You will.
+Code - MIT - do whatever with it, sell it if You will.
 Images - chatGPT - I have full right to use even for commerial purposes.
 Parsedown.php - https://github.com/erusev/parsedown
 Icon - https://www.iconarchive.com/
