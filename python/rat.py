@@ -48,6 +48,7 @@ def listen() -> None:
                 print(msg.decode('utf8'))
         except:
             # Drop the connection as soon as it breaks protocol.
+            print('Dropping', s)
             return
 
     sock.Server(forever, conf.CHATSERVER)
