@@ -24,15 +24,14 @@ class User:
     Meaning that 5 devices with the same key are one logical user.
     rat is supposed to allow different users to perform code paths in a single invocation.
     '''
-    U = conf.get()['user']
 
 
     def __init__( me
-                , name: str=U['name']
-                , group: str=U['group']
+                , name: str=conf.get()['about']['name']
+                , group: str=conf.get()['about']['group']
                 , pub: crypto.Pub=crypto.read_keypair()[1]
                 , ips: [str]=[sock.get_extern_ip()]
-                , status: str=U['status']
+                , status: str=conf.get()['about']['status']
                 ):
         me.name = name
         me.group = group
@@ -42,7 +41,7 @@ class User:
 
 
     @classmethod
-    def from_bytes(cls, b: bytes) -> 'User':
+    def from_bytes(cls, b: bytes): #-> User:
         obj = pickle.loads(b)
         assert type(obj) == cls, (type(obj), cls)
         return obj

@@ -138,8 +138,8 @@ def serve() -> None:
     protocol.NameServer()
 
 
-def get_prompt( name: str=conf.get()['user']['name']
-              , group:str=conf.get()['user']['group']
+def get_prompt( name: str=conf.get()['about']['name']
+              , group:str=conf.get()['about']['group']
               ) -> str:
     return (name + '@' + group + '<-')
 
