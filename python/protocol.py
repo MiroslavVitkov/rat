@@ -76,6 +76,11 @@ class User:
 
 
 def handshake_as_server( s: socket ) -> User:
+    # This is to prevent port scanners from fingerprinting rat.
+    if not recv_pepper(s):
+        print('Dropping', s)
+        return
+
     # After a client connects, send own pubkey unencrypted.
     send_pubkey(s)
 
@@ -88,6 +93,8 @@ def handshake_as_server( s: socket ) -> User:
 
 
 def handshake_as_client( s: socket ) -> User:
+    send_pepper(s)
+
     # After connecting, receive server unencrypted pubkey.
     server_pub = recv_pubkey(s)
 
@@ -208,6 +215,18 @@ def watch_video( remote ):
 
 
 ### Details.
+def send_pepper( s: socket ) -> None:
+    pepper = conf.get()['crypto']['pepper']
+    s.sendall( pepper.encode('utf8') )
+
+
+def recv_pepper( s: socket ) -> bool:
+    if s.recv(1024).decode('utf8') == conf.get()['crypto']['pepper']:
+        return True
+    else:
+        return False
+
+
 def emit_pubkey() -> bytes:
     '''Convert rsa.PublicKey to a format suitable to be transmitted.'''
     _, pub = crypto.read_keypair()
