@@ -5,13 +5,21 @@ require 'Parsedown.php';  # A markdown parser.
 
 
 $h = date('H');
-if( $h > 6 and $h < 20 )
+if( $h < 5 )
+{
+    $pic = 'res/cyber_rat.png';
+}
+elseif( $h < 11 )
+{
+    $pic = 'res/day_rat.png';
+}
+elseif( $h < 20 )
 {
     $pic = 'res/saint_rat.png';
 }
 else
 {
-    $pic = 'res/cyber_rat.png';
+    $pic = 'res/asm_rat.png';
 }
 
 $readme = file_get_contents('/opt/rat/README.md');
