@@ -11,6 +11,7 @@ import time
 import pickle
 import re
 from socket import socket
+from typing import Self
 
 import conf
 import crypto
@@ -41,7 +42,7 @@ class User:
 
 
     @classmethod
-    def from_bytes(cls, b: bytes): #-> User:
+    def from_bytes(cls, b: bytes) -> Self:
         obj = pickle.loads(b)
         assert type(obj) == cls, (type(obj), cls)
         return obj
