@@ -14,11 +14,12 @@ import conf
 import crypto
 
 
-def capture( stop_event: threading.Event ):
+def capture( stop_event: threading.Event=threading.Event()
+           , camera: str=conf.get()['video']['camera'] ):
     '''  '''
     reader = (
         ffmpeg
-        .input('/dev/video0',
+        .input(camera,
                format='v4l2',
                r=conf.get()['video']['fps'],
                s=conf.get()['video']['res'])
@@ -43,7 +44,8 @@ def capture( stop_event: threading.Event ):
     reader.wait()
 
 
-def watch( chunks: [bytes], stop_event: threading.Event ):
+def watch( chunks: [bytes]
+         , stop_event: threading.Event=threading.Event() ):
     '''  '''
     mpv = subprocess.Popen(
        ['mpv',
