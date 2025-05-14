@@ -40,6 +40,8 @@ for PORT in "$PORTS"; do
 done
 ufw allow 'Apache Full'
 a2enmod ssl
+a2enmod headers
+cp /res/000-default.php /etc/apache2/sites-enabled
 
 # Generate a key and write it to user.keypath.
 sed -i 's\keypath = ~/.ssh/rat\keypath = /opt/rat/.ssh/rat\' /opt/rat/conf.ini
