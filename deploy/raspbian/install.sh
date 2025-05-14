@@ -53,3 +53,4 @@ systemctl start rat
 ufw status
 journalctl -u rat
 nmap -p "$PORTS" localhost
+nikto -host localhost
