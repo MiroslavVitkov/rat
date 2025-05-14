@@ -7,12 +7,15 @@
 
 import ffmpeg
 import subprocess
+import threading
+import time
 
 import conf
 import crypto
 
 
-def capture():
+def capture( stop_event: threading.Event ):
+    '''  '''
     reader = (
         ffmpeg
         .input('/dev/video0',
@@ -32,11 +35,16 @@ def capture():
         )
     .run_async(pipe_stdout=True)
     )
-    while True:
+
+    while not stop_event.is_set():
         yield reader.stdout.read(crypto.MAX_PLAINTEXT_BYTES)
 
+    reader.stdout.close()
+    reader.wait()
 
-def watch( chunks ):
+
+def watch( chunks: [bytes], stop_event: threading.Event ):
+    '''  '''
     mpv = subprocess.Popen(
        ['mpv',
         '--no-cache',
@@ -51,12 +59,20 @@ def watch( chunks ):
         '-'],
         stdin=subprocess.PIPE
     )
+
     for chunk in chunks:
+        if stop_event.is_set():
+            break
         mpv.stdin.write(chunk)
+
+    mpv.terminate()
 
 
 def test():
-    watch( capture() )
+    e = threading.Event()
+    threading.Thread( target=watch, args=(capture(e), e) ).start()
+    time.sleep(12)
+    e.set()
 
 
 if __name__ == '__main__':
