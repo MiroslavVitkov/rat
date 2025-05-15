@@ -41,6 +41,7 @@ done
 ufw allow 'Apache Full'
 a2enmod ssl
 a2enmod headers
+a2dismod -f autoindex  # disable directory listing
 cp /res/000-default.php /etc/apache2/sites-enabled
 
 # Generate a key and write it to user.keypath.
