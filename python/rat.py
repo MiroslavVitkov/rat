@@ -104,6 +104,10 @@ def share( ip: str, text: str) -> None:
     sock.Client(func, ip, conf.RELAY_0)
 
 
+def connect(ip:str) -> None:
+    pass
+
+
 def ask(regex: str, ip: [str]) -> None:
     '''Request a list of matching userames from a nameserver.'''
     own_priv, _ = crypto.read_keypair()
@@ -176,6 +180,7 @@ def print_help() -> None:
             rat say <IP> <message> - unquoted string to send to someone
             rat relay [<IP 1>...<IP n>] - host a relay(chatroom)
             rat share <IP[:port]> <message> - like 'say' but for a relay
+            rat connect <IP> - like 'say' but works behind a firewall
 
         resolving users
         ---
