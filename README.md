@@ -87,3 +87,10 @@ Code - MIT - do whatever with it, sell it if You will.
 Images - chatGPT - I have full right to use even for commerial purposes.
 Parsedown.php - https://github.com/erusev/parsedown
 Icon - https://www.iconarchive.com/
+
+
+Legal
+---
+Running an instance of 'rat relay' can enable various illegal activities e.g. inciting to violence, child porn videos and more.
+Whoever hosts the chartroom(relay) is probably liable in their respective jurisdiction.
+RAT is committed to solving that through 'bots'.
