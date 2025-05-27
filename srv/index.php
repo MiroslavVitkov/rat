@@ -40,62 +40,48 @@ $readme_html = $Parsedown->text($readme);  # Convert Markdown to HTML
     <title>rat</title>
     <link rel="icon" type="image/png" href="res/icon.png">
     <style>
-        body {
-            background-color: black;
-            color: white;
-            font-family: monospace;
-        }
         #chat {
-            border: 1px solid #888;
-            padding: 8px;
-            margin-top: 20px;
-            max-width: 600px;
-        }
-        #messages {
-            max-height: 200px;
+            border: 1px solid #ccc;
+            height: 150px;
             overflow-y: auto;
+            padding: 10px;
             margin-bottom: 10px;
+            font-family: monospace;
+            background: #f9f9f9;
         }
-        input[type="text"] {
-            width: 80%;
-            padding: 4px;
-        }
-        button {
-            padding: 4px;
+        #input {
+            width: 100%;
+            padding: 8px;
+            font-family: monospace;
+            box-sizing: border-box;
         }
     </style>
 </head>
 <body>
+
+    <!-- Chatbox at the top -->
+    <div id="chat"></div>
+    <input type="text" id="input" placeholder="Type a message and hit Enter..." autofocus>
+
+    <!-- Static content -->
     <img src="<?php echo $pic; ?>" alt="Saint Rat" style="max-width: 100%; height: auto;" />
     <pre><span class="inner-pre" style="font-size: 14px"><?php echo $readme_html; ?></span></pre>
 
-    <noscript><p>JavaScript is required for chat functionality.</p></noscript>
-
-    <div id="chat">
-        <div id="messages"></div>
-        <input type="text" id="input" placeholder="Say something...">
-        <button onclick="sendMessage()">Send</button>
-    </div>
-
+    <!-- Code -->
     <script>
-        const messagesDiv = document.getElementById('messages');
+        const chat = document.getElementById('chat');
         const input = document.getElementById('input');
 
-        function sendMessage() {
-            const text = input.value.trim();
-            if (text === '') return;
-            const line = document.createElement('div');
-            line.textContent = '> ' + text;
-            messagesDiv.appendChild(line);
-            input.value = '';
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        }
-
-        input.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                sendMessage();
+        input.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' && input.value.trim() !== '') {
+                const msg = document.createElement('div');
+                msg.textContent = input.value;
+                chat.appendChild(msg);
+                chat.scrollTop = chat.scrollHeight; // scroll to bottom
+                input.value = '';
             }
         });
     </script>
+
 </body>
 </html>
