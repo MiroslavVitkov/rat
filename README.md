@@ -36,7 +36,7 @@ Hopefully soon we'll have forward secrecy meaning no past conversation is vulner
 Modes of Use
 ---
  - p2p - rat listen/say - requires a public IP and punching a port in firewalls and routers
- - chatroom - rat relay/share - have a central server retransmit messages, dropping the IP requirement
+ - chatroom - rat relay/share - have a central server retransmit messages voids the IP requirement
  - phonebook - rat serve/ask - searchable nameserver
 
 
