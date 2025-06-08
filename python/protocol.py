@@ -194,12 +194,13 @@ class NameServer:
 
 
 # Emulate UDP multicast for now.
-def stream_video():
-    def foo(s, _):
-        for chunk in video.capture():
+def stream_video(alive):
+    def foo(s, alive):
+        for chunk in video.capture(alive):
             s.sendall(chunk)
 
     s = sock.Server(port=conf.VIDEO, func=foo)
+    return s
 
 
 def watch_video( remote ):
@@ -343,8 +344,12 @@ def test_nameserver() -> None:
 
 
 def test_video() -> None:
-    stream_video()
+    alive = [True]
+    s = stream_video(alive)
     watch_video( 'localhost' )
+    time.sleep(5)
+    alive[0] = False
+    s.alive[0] = False
 
 
 def test():
