@@ -54,4 +54,9 @@ systemctl start rat
 ufw status
 journalctl -u rat
 nmap -p "$PORTS" localhost
-nikto -host localhost
+
+nikto -h <url>
+a2dismod -f autoindex
+ufw status
+journalctl -u rat
+nmap -p "$PORTS" localhost
