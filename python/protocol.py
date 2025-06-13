@@ -78,7 +78,7 @@ class User:
 def handshake_as_server( s: socket ) -> User:
     # This is to prevent port scanners from fingerprinting rat.
     if not recv_pepper(s):
-        print('Dropping', s)
+        print('Wrong pepper', s)
         return
 
     # After a client connects, send own pubkey unencrypted.
