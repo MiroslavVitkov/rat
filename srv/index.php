@@ -56,18 +56,31 @@ $readme_html = $Parsedown->text($readme);  # Convert Markdown to HTML
             box-sizing: border-box;
         }
     </style>
+    <style>
+        body {
+            background-color: #121212;
+            color: white;
+            font-family: sans-serif;
+            text-align: laft;
+            padding-top: 5em;
+        }
+        a {
+            color: #66ccff;
+        }
+    </style>
 </head>
 <body>
 
     <!-- Chatbox at the top -->
-    <div id="chat"></div>
-    <input type="text" id="input" placeholder="Type a message and hit Enter..." autofocus>
+    <!-- <div id="chat"></div> -->
+    <!-- <input type="text" id="input" placeholder="Type a message and hit Enter..." autofocus> -->
 
     <!-- Static content -->
     <img src="<?php echo $pic; ?>" alt="Saint Rat" style="max-width: 100%; height: auto;" />
     <pre><span class="inner-pre" style="font-size: 14px"><?php echo $readme_html; ?></span></pre>
 
     <!-- Code -->
+    <!-- <span><script src="myscript.js"></script></span> -->
     <script>
         const chat = document.getElementById('chat');
         const input = document.getElementById('input');
