@@ -1,8 +1,0 @@
-[apache-404]
-enabled = true
-port = http,https
-filter = apache-404
-logpath = /var/log/apache2/access.log
-maxretry = 3
-findtime = 300
-bantime = 3600

@@ -45,6 +45,7 @@ a2enmod headers
 a2dismod -f autoindex  # disable directory listing
 apt install libapache2-mod-security2
 a2enmod security2
+sed -i 's\SecRuleEngine DetectionOnly\SecRuleEngine On' /etc/modsecurity/modsecurity.conf
 cp /res/default-ssl.conf /etc/apache2/sites-enabled
 
 # Generate a key and write it to user.keypath.
@@ -69,6 +70,13 @@ certbot --apache -d rat.pm -d www.rat.pm
 
 # `ufw limit` works on the network level; fail2ban is smarter.
 apt install fail2ban
+cp res/apache.conf.jail /etc/fail2ban/jail.d/apache.conf
 cp res/apache-404.conf.filter /etc/fail2ban/filter.d/apache-404.conf
-cp res/apache-404.conf.jail /etc/fail2ban/jail.d/apache-404.conf
+cp res/modsec-scanners.conf.filter /etc/fail2ban/filter.d/modsec-scanners.conf
 systemctl enable fail2ban
+
+# Needed for Apache server monitoring tools.
+a2dismod status
+
+# Needed for serving localized content.
+a2dismod negotiation
