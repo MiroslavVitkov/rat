@@ -34,6 +34,7 @@ pip install --break-system-packages ffmpeg-python
 
 # IF it will be facing the internet.
 apt update && apt install ufw
+ufw default deny incoming
 ufw allow 22
 for PORT in "$PORTS"; do
     ufw limit "$PORT"
@@ -42,7 +43,9 @@ ufw allow 'Apache Full'
 a2enmod ssl
 a2enmod headers
 a2dismod -f autoindex  # disable directory listing
-cp /res/000-default.php /etc/apache2/sites-enabled
+apt install libapache2-mod-security2
+a2enmod security2
+cp /res/default-ssl.conf /etc/apache2/sites-enabled
 
 # Generate a key and write it to user.keypath.
 sed -i 's\keypath = ~/.ssh/rat\keypath = /opt/rat/.ssh/rat\' /opt/rat/conf.ini
@@ -60,6 +63,12 @@ a2dismod -f autoindex
 ufw status
 journalctl -u rat
 nmap -p "$PORTS" localhost
+
 apt install certbot python3-certbot-apache
 certbot --apache -d rat.pm -d www.rat.pm
-cp res/default-ssl.conf /etc/apache2/sites-enabled
+
+# `ufw limit` works on the network level; fail2ban is smarter.
+apt install fail2ban
+cp res/apache-404.conf.filter /etc/fail2ban/filter.d/apache-404.conf
+cp res/apache-404.conf.jail /etc/fail2ban/jail.d/apache-404.conf
+systemctl enable fail2ban
