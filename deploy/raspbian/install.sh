@@ -60,3 +60,6 @@ a2dismod -f autoindex
 ufw status
 journalctl -u rat
 nmap -p "$PORTS" localhost
+apt install certbot python3-certbot-apache
+certbot --apache -d rat.pm -d www.rat.pm
+cp res/default-ssl.conf /etc/apache2/sites-enabled
