@@ -7,9 +7,10 @@ StartLimitIntervalSec=0
 Type=simple
 Restart=always
 RestartSec=1
-User=ra
+User=rat
 StandardOutput=append:/var/log/rat.log
 ExecStart=/opt/rat/python/rat.py listen
+WorkingDirectory=/opt/rat/
 
 [Install]
 WantedBy=multi-user.target
