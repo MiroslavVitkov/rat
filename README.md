@@ -69,6 +69,8 @@ The python implementation is the spec.
 Any change to that is supposed to bring along changes in all the others.
 If not, do indicate in the commit message very clearly why.
 
+Panic plan is to `git switch master && git branch save && git reset --hard <last tag>`.
+
 
 Architecture
 ---
