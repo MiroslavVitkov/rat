@@ -37,7 +37,7 @@ $readme_html = $Parsedown->text($readme);  # Convert Markdown to HTML
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>rat</title>
+    <title>Secure Chat - rat</title>
     <link rel="icon" type="image/png" href="res/icon.png">
     <style>
         #chat {
