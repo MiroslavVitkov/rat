@@ -48,8 +48,8 @@ $readme_html = nl2br(htmlspecialchars($readme));  # Convert line breaks and esca
     <!-- <input type="text" id="input" placeholder="Type a message and hit Enter..." autofocus> -->
 
     <!-- Static content -->
-    <img src="<?php echo $pic; ?>" alt="Saint Rat" style="max-width: 100%; height: auto;" />
-    <pre><span class="inner-pre" style="font-size: 14px"><?php echo $readme_html; ?></span></pre>
+    <img src="<?php echo $pic; ?>" alt="Saint Rat">
+    <pre><span class="inner-pre"><?php echo $readme_html; ?></span></pre>
 
     <!-- Code -->
     <!-- <span><script src="myscript.js"></script></span> -->
