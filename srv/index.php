@@ -37,37 +37,9 @@ $readme_html = $Parsedown->text($readme);  # Convert Markdown to HTML
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Secure Chat - rat</title>
+    <title>rat</title>
     <link rel="icon" type="image/png" href="res/icon.png">
-    <style>
-        #chat {
-            border: 1px solid #ccc;
-            height: 150px;
-            overflow-y: auto;
-            padding: 10px;
-            margin-bottom: 10px;
-            font-family: monospace;
-            background: #f9f9f9;
-        }
-        #input {
-            width: 100%;
-            padding: 8px;
-            font-family: monospace;
-            box-sizing: border-box;
-        }
-    </style>
-    <style>
-        body {
-            background-color: #121212;
-            color: white;
-            font-family: sans-serif;
-            text-align: laft;
-            padding-top: 5em;
-        }
-        a {
-            color: #66ccff;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
