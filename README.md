@@ -47,6 +47,16 @@ A single or multiple `rat` instances can run simultaneously with different keys.
 Any number of devices or instances using the same key is assumed to be a singular logical entity.
 
 
+Digital Identity
+---
+RAT is more than a chat app, it's a trust platform.
+An 'entity' is defined by the following factors in descending order of importance:
+  - posesses the private key,
+  - device fingerprint already authorized from another trusted one <not implemented yet>,
+  - other users have vouched <not implemented yet>.
+This enables one to share huge encrypted files(petabytes) or VoIP<not implemented yet>.
+
+
 Development Notes
 ---
 To exclude conf.ini from staging run  
