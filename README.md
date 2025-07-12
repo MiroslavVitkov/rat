@@ -51,7 +51,7 @@ Digital Identity
 ---
 RAT is more than a chat app, it's a trust platform.
 An 'entity' is defined by the following factors in descending order of importance:
-  - posesses the private key,
+  - possesses the private key,
   - device fingerprint already authorized from another trusted one <not implemented yet>,
   - other users have vouched <not implemented yet>.
 This enables one to share huge encrypted files(petabytes) or VoIP<not implemented yet>.
@@ -103,5 +103,5 @@ Icon - https://www.iconarchive.com/
 Legal
 ---
 Running an instance of 'rat relay' can enable various illegal activities e.g. inciting to violence, child porn videos and more.
-Whoever hosts the chartroom(relay) is probably liable in their respective jurisdiction.
+Whoever hosts the chatroom(relay) is probably liable in their respective jurisdiction.
 RAT is committed to solving that through 'bots'.
