@@ -25,11 +25,11 @@ else
 $readme = file_get_contents('/opt/rat/README.md');
 
 # As a text file
-#$readme_html = nl2br(htmlspecialchars($readme));  # Convert line breaks and escape HTML
+$readme_html = nl2br(htmlspecialchars($readme));  # Convert line breaks and escape HTML
 
 # Or as parsed markdown.
-$Parsedown = new Parsedown();
-$readme_html = $Parsedown->text($readme);  # Convert Markdown to HTML
+#$Parsedown = new Parsedown();
+#$readme_html = $Parsedown->text($readme);  # Convert Markdown to HTML
 
 
 ?>
