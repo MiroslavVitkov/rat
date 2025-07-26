@@ -14,10 +14,11 @@ How to use
     git clone git@github.com:MiroslavVitkov/rat.git
     pip install -r rat/python/requirements.txt
     alias rat="$PWD/rat/python/rat.py"
-    rat help
     rat generate
-    rat listen  # this blocks, open another terminal
-    rat say localhost hi bryh, wazzzup!?  # talk to yourself
+    rat say rat.pm Just _any_ random string.
+
+If this completes without errors then Your installation is sane.
+Nothing responds yet.
 
 
 Inspectable code
