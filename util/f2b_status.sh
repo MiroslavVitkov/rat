@@ -6,4 +6,5 @@
 
 for i in $(fail2ban-client status | grep "Jail list" | cut -d: -f2 | tr ',' ' '); do
     fail2ban-client status "$i";
+    echo
 done
