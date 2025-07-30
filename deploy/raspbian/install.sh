@@ -73,6 +73,7 @@ apt install fail2ban
 cp res/apache.conf.jail /etc/fail2ban/jail.d/apache.conf
 cp res/apache-404.conf.filter /etc/fail2ban/filter.d/apache-404.conf
 cp res/modsec-scanners.conf.filter /etc/fail2ban/filter.d/modsec-scanners.conf
+cp res/modsec-deny.filter /etc/fail2ban/filter.d/modsec-deny.conf
 systemctl enable fail2ban
 
 # Needed for Apache server monitoring tools.

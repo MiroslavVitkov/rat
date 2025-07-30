@@ -32,3 +32,12 @@ logpath = /var/log/apache2/modsec_audit.log
 findtime = 600
 maxretry = 1
 bantime = 86400
+
+[modsec-deny]
+enabled = true
+port = http,https
+filter = modsec-deny
+logpath = /var/log/apache2/error.log
+bantime = 86400
+findtime = 600
+maxretry = 3
