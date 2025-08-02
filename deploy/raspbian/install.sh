@@ -81,3 +81,6 @@ a2dismod status
 
 # Needed for serving localized content.
 a2dismod negotiation
+
+# Honeypot that watchs for attempts to access obviously sensitive files.
+cp honeypot.conf /etc/fail2ban/filter.d/
