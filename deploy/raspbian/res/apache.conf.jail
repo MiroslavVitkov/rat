@@ -1,43 +1,35 @@
-[apache-404]
+[common-hacks]
+enabled  = true
+filter   = common-hacks
+logpath  = /var/log/apache2/error.log
+maxretry = 3
+findtime = 3600
+bantime  = 86400
+action   = iptables-multiport[name=apache-deny, port="http,https"]
+
+[modsec]
 enabled = true
 port = http,https
-filter = apache-404
+filter = modsec
+logpath = /var/log/apache2/error.log
+bantime = 86400
+findtime = 600
+maxretry = 3
+
+[404]
+enabled = true
+port = http,https
+filter = 404
 logpath = /var/log/apache2/access.log
 maxretry = 3
 findtime = 300
 bantime = 3600
 
-[apache-noscript]
+[honeypot]
 enabled = true
 port = http,https
-filter = apache-noscript
-logpath = /var/log/apache2/error.log
-maxretry = 2
-findtime = 600
-bantime = 86400
-
-[apache-badbots]
-enabled = true
-port = http,https
-filter = apache-badbots
+filter = honeypot
 logpath = /var/log/apache2/access.log
 maxretry = 1
-findtime = 600
-bantime = 172800
-
-[modsec-scanners]
-enabled = true
-filter = modsec-scanners
-logpath = /var/log/apache2/modsec_audit.log
-findtime = 600
-maxretry = 1
-bantime = 86400
-
-[modsec-deny]
-enabled = true
-port = http,https
-filter = modsec-deny
-logpath = /var/log/apache2/error.log
-bantime = 86400
-findtime = 600
-maxretry = 3
+findtime = 86400
+bantime = 36000
