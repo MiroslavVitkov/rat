@@ -84,3 +84,7 @@ a2dismod negotiation
 
 # Honeypot that watchs for attempts to access obviously sensitive files.
 cp honeypot.conf /etc/fail2ban/filter.d/
+
+# Diasable directory listing.
+sed 's\Options Indexes FollowSymLinks\Options FollowSymLinks' /etc/apache2/apache2.conf
+# or a2dismod autoindex
