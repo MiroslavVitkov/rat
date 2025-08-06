@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
 # In this file: scan rat's ports status.
+#               Intended as a mini status bar with sleep().
 
-nmap -p42666-42668 localhost | tail -n5 | head -n3
+nmap -p42666-42670 localhost | tail -n7 | head -n5
