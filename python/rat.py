@@ -82,7 +82,6 @@ def relay(ips: [str]=['localhost']) -> None:
                 msg = protocol.recv_msg(s, priv, client.pub, a)
                 print(msg.decode('utf8'), len(peers))
                 for p in peers:
-                    print('PEER', p)
                     say(p.ips[0], '<relay>' + msg.decode('utf8'))
         except:
             return
