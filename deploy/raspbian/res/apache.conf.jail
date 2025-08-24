@@ -33,3 +33,30 @@ logpath = /var/log/apache2/access.log
 maxretry = 1
 findtime = 86400
 bantime = 36000
+
+[git]
+enabled = true
+filter = git
+logpath = /var/log/apache2/error.log
+maxretry = 2
+findtime = 7200
+bantime = 1209600   ; 14 days
+action = iptables-multiport[name=apache-git, port="http,https"]
+
+[envleak]
+enabled = true
+filter  = envleak
+logpath = /var/log/apache2/error.log
+maxretry = 1
+findtime = 3600
+bantime = 2592000  ; 30 days
+action = iptables-multiport[name=envleak, port="http,https"]
+
+[recidive]
+enabled  = true
+filter   = recidive
+logpath  = /var/log/fail2ban.log
+action   = iptables-allports[name=recidive]
+bantime  = 1w
+findtime = 1d
+maxretry = 5
