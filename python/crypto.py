@@ -74,7 +74,7 @@ def generate_keypair(bits: int=BITS) -> Keypair:
 
 def write_keypair( priv: rsa.key.PrivateKey
                  , pub: rsa.key.PublicKey=None
-                 , p: Path=conf.get_keypath()
+                 , p: Path=conf.get()['crypto']['keypath']
                  ) -> None:
     '''Obviously this function violates the RAM-only constraint.'''
     p = Path(p)
@@ -88,12 +88,12 @@ def write_keypair( priv: rsa.key.PrivateKey
             f.write(pub.save_pkcs1())
 
 
-def regenerate_pub(path_priv: Path=conf.get_keypath()) -> None:
+def regenerate_pub(path_priv: Path=conf.get()['crypto']['keypath']) -> None:
     os.system('ssh-keygen -y -f ' + path_priv
              + ' > ' + path_priv + '.pub')
 
 
-def read_keypair( p: Path=conf.get_keypath()
+def read_keypair( p: Path=conf.get()['crypto']['keypath']
                 , force: bool=False
                 , cache: [Keypair]=[]
                 ) -> Keypair:
@@ -207,7 +207,7 @@ def test_key() -> None:
     assert pub == newpub, (pub, newpub)
 
     # Reset cached key for later tests.
-    read_keypair(conf.get_keypath(), True)
+    read_keypair(conf.get()['crypto']['keypath'], True)
 
 
 def test_encrypt_decrypt():
