@@ -6,7 +6,6 @@ Provides TCP/IP connection objects, perhaps soon UDP too.
 '''
 
 
-import requests
 import socket
 import threading
 import time
@@ -57,11 +56,6 @@ def recv_one(s: socket, a: [bool]=[True]):
     return next(iter(recv(s, a)))
 
 
-def get_extern_ip() -> str:
-    ip = requests.get('https://api.ipify.org').text
-    return ip
-
-
 class Server:
     '''
     Anticipate connections forever. Mind your firewall.
@@ -79,7 +73,7 @@ class Server:
 
 
     def __init__(me, func: callable, port: int=conf.TEST):
-        me.ip = get_extern_ip()
+        me.ip = conf.get_extern_ip()
         me.port = port
         me.alive = [True]
         me.thread = threading.Thread( target=me._listen

@@ -31,7 +31,7 @@ class User:
                 , name: str=conf.get()['about']['name']
                 , group: str=conf.get()['about']['group']
                 , pub: crypto.Pub=crypto.read_keypair()[1]
-                , ips: [str]=[sock.get_extern_ip()]
+                , ips: [str]=[conf.get_extern_ip()]
                 , status: str=conf.get()['about']['status']
                 ):
         me.name = name
