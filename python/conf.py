@@ -49,12 +49,23 @@ def get(path: str=where_are_we()+'/../conf.ini', c: list=[]):
 
 
 def test():
-    # Ensure fields exist and are non-empty.
+    # Ensure fields exist and are non-empty/empty as in default values.
     assert len(get()['about']['name'])
     assert len(get()['about']['group'])
     assert len(get()['about']['status'])
+    assert not len(get()['about']['bots'])
+    assert len(get()['about']['ip'])  # Empty in .ini but populated in get().
     assert len(get()['crypto']['keypath'])
-    # ['user']['bots'] is empty by default.
+    assert len(get()['crypto']['pepper'])
+    assert len(get()['crypto']['key_bits'])
+    assert len(get()['crypto']['hash'])
+    assert not len(get()['crypto']['knock_ports'])
+    assert len(get()['video']['res'])
+    assert len(get()['video']['fps'])
+    assert len(get()['video']['camera'])
+
+    assert sum([len(get()[key].keys())
+                for key in get().keys()]) == 13, len(get())
 
     print('conf.py: UNIT TESTS PASSED')
 

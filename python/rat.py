@@ -21,7 +21,7 @@ def say( ip: str, text: str) -> None:
     Send a text message to someone listening and disconnect.
     Example: $rat say localhost hey bryh, wazzup
     '''
-    own_priv, _ = crypto.read_keypair(conf.get_keypath())
+    own_priv, _ = crypto.read_keypair(conf.get()['crypto']['keypath'])
 
     def func(s: socket):
         '''Transmit a message and die.'''
@@ -94,7 +94,7 @@ def share( ip: str, text: str) -> None:
     Send a message to be distributed via a relay.
     '''
     # TODO: specifying port
-    own_priv, _ = crypto.read_keypair(conf.get_keypath())
+    own_priv, _ = crypto.read_keypair(conf.get()['crypto']['keypath'])
 
     def func(s: socket):
         remote = protocol.handshake_as_client(s)
@@ -153,13 +153,13 @@ def test() -> None:
     crypto.test()
     sock.test()
     protocol.test()
-    return
 
     # System test.
     try:
         Thread(target=listen, daemon=True).start()
-        Thread(target=say, args=['localhost', 'test', 'message', '!@#'], daemon=True).start()
-# TODO: actually send a mesage and validate it was received
+        Thread(target=say, args=['localhost', 'Test message!@#'], daemon=True).start()
+        import time
+        time.sleep(1)
         print('\nSYSTEM TEST PASSED')
     except Exception as e:
         print('\nSYSTEM TEST FAILED!')
