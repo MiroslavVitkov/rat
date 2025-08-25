@@ -14,6 +14,10 @@ import conf
 from crypto import CHUNK_BYTES
 
 
+# How often are the 'alive' flags checked.
+POLL_PERIOD = .1  # 100 ms
+
+
 def recv( s: socket.socket
         , alive: [bool]=[True]
         , _cache: [bytes]=[b''] ) -> bytes:
@@ -31,7 +35,7 @@ def recv( s: socket.socket
 
     yield from try_yield()
 
-    s.settimeout(.1)
+    s.settimeout(POLL_PERIOD)
     while alive[0]:
         try:
             # Recommended value in the docs.
@@ -73,7 +77,7 @@ class Server:
 
 
     def __init__(me, func: callable, port: int=conf.TEST):
-        me.ip = conf.get_extern_ip()
+        me.ip = conf.get()['about']['ip']
         me.port = port
         me.alive = [True]
         me.thread = threading.Thread( target=me._listen
@@ -97,7 +101,7 @@ class Server:
             s = socket.socket()
             s.bind(('localhost', port))
 
-        s.settimeout(.1)
+        s.settimeout(POLL_PERIOD)
         s.listen()
 
         for conn, addr in me._poll(s):
@@ -201,6 +205,7 @@ def test_recv() -> None:
     time.sleep(1)
     server.alive[0] = False
     print('20')  # For the newline.
+    time.sleep(POLL_PERIOD)
 
 
 def test() -> None:

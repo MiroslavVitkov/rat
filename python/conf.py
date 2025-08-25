@@ -30,12 +30,6 @@ def where_are_we():
     return dir_path
 
 
-def get_extern_ip() -> str:
-    '''Requires internet connection and is subject to rate limiting.'''
-    ip = requests.get('https://api.ipify.org').text
-    return ip
-
-
 def get(path: str=where_are_we()+'/../conf.ini', c: list=[]):
     '''
     Use like:
@@ -47,7 +41,7 @@ def get(path: str=where_are_we()+'/../conf.ini', c: list=[]):
 
         c_['crypto']['keypath'] = os.path.expanduser(c_['crypto']['keypath'])
         if not c_['about']['ip']:
-            c_['about']['ip'] = get_extern_ip()
+            c_['about']['ip'] = requests.get('https://api.ipify.org').text
 
         c.append(c_)
 

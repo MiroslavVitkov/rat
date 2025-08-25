@@ -31,7 +31,7 @@ class User:
                 , name: str=conf.get()['about']['name']
                 , group: str=conf.get()['about']['group']
                 , pub: crypto.Pub=crypto.read_keypair()[1]
-                , ips: [str]=[conf.get_extern_ip()]
+                , ips: [str]=[conf.get()['about']['ip']]
                 , status: str=conf.get()['about']['status']
                 ):
         me.name = name
@@ -299,6 +299,7 @@ def test_send_recv_msg():
     client = sock.Client(client_send)
 
     server.alive[0] = False
+    time.sleep(sock.POLL_PERIOD)
 
 
 def test_send_recv_pubkey() -> None:
@@ -309,6 +310,7 @@ def test_send_recv_pubkey() -> None:
 
     assert received[0] == pub, received[0]
     server.alive[0] = False
+    time.sleep(sock.POLL_PERIOD)
 
 
 def test_send_recv_user() -> None:
@@ -321,6 +323,7 @@ def test_send_recv_user() -> None:
     time.sleep(1)
     assert received[0] == User(), received[0]
     server.alive[0] = False
+    time.sleep(sock.POLL_PERIOD)
 
 
 def test_handshake():
@@ -332,6 +335,7 @@ def test_handshake():
     time.sleep(1)
     assert server[0] == client[0] == User()
     s.alive[0] = False
+    time.sleep(sock.POLL_PERIOD)
 
 
 def test_nameserver() -> None:
@@ -341,6 +345,7 @@ def test_nameserver() -> None:
     assert len(s.users) == 1, len(s.users)
     assert s.ask(u.name)[0] == u.to_bytes(), len(s.ask(u.name))
     s.alive[0] = False
+    time.sleep(sock.POLL_PERIOD)
 
 
 def test_video() -> None:
