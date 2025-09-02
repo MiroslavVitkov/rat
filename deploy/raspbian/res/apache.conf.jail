@@ -1,12 +1,3 @@
-[common-hacks]
-enabled  = true
-filter   = common-hacks
-logpath  = /var/log/apache2/error.log
-maxretry = 3
-findtime = 3600
-bantime  = 86400
-action   = iptables-multiport[name=apache-deny, port="http,https"]
-
 [modsec]
 enabled = true
 port = http,https
