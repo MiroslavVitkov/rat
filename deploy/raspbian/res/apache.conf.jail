@@ -25,15 +25,6 @@ maxretry = 1
 findtime = 86400
 bantime = 36000
 
-[git]
-enabled = true
-filter = git
-logpath = /var/log/apache2/error.log
-maxretry = 2
-findtime = 7200
-bantime = 1209600   ; 14 days
-action = iptables-multiport[name=apache-git, port="http,https"]
-
 [envleak]
 enabled = true
 filter  = envleak
