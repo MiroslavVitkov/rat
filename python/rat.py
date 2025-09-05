@@ -157,13 +157,14 @@ def test() -> None:
     # System test.
     try:
         Thread(target=listen, daemon=True).start()
-        Thread(target=say, args=['localhost', 'Test message!@#'], daemon=True).start()
-        import time
-        time.sleep(1)
+        # Warn: running a separate thread fails to cathch exceptions.
+        say('localhost', 'Test message!@#')
         print('\nSYSTEM TEST PASSED')
+        return 0
     except Exception as e:
         print('\nSYSTEM TEST FAILED!')
         print('Reason: ', e)
+        return -1
 
 
 def print_help() -> None:
@@ -263,7 +264,7 @@ if __name__ == '__main__':
         crypto.write_keypair(priv, pub, keypath)
 
     elif sys.argv[1] == 'test':
-        test()
+        sys.exit( test() )
 
     else:
         print(sys.argv[1], '- command not recognised')
