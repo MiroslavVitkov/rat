@@ -2,6 +2,7 @@
 
 # In this file: install the RAT executable on a raspbian system.
 #               Needs to run with root privileges.
+#               Currently is more a collection of notes instead of a working script.
 
 
 set -e  # exit on error
