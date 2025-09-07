@@ -1,8 +1,8 @@
-[envleak]
+[ssh-keys]
 enabled = true
 filter  = envleak
 logpath = /var/log/apache2/error.log
 maxretry = 1
 findtime = 3600
 bantime = 2592000  ; 30 days
-action = iptables-multiport[name=envleak, port="http,https"]
+action = iptables-multiport[name=ssh-keys, port="http,https"]

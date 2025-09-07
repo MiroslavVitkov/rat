@@ -1,0 +1,8 @@
+[modsec-deny]
+enabled = true
+filter  = modsec-deny
+logpath = /var/log/apache2/error.log
+maxretry = 3
+findtime = 600
+bantime = 1w
+action = iptables-multiport[name=honeypot, port="http,https"]
