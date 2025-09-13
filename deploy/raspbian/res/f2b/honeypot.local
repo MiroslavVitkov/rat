@@ -1,8 +1,0 @@
-[honeypot]
-enabled = true
-filter  = honeypot
-logpath = /var/log/apache2/error.log
-maxretry = 1
-findtime = 3600
-bantime = 1w
-action = iptables-multiport[name=honeypot, port="http,https"]

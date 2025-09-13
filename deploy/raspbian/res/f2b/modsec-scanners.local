@@ -1,8 +1,0 @@
-[modsec-scaners]
-enabled = true
-filter  = modsec-scaners
-logpath = /var/log/apache2/error.log
-maxretry = 3
-findtime = 600
-bantime = 1w
-action = iptables-multiport[name=modsec-scaners, port="http,https"]
