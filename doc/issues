@@ -8,46 +8,12 @@ miro | mi | found!!
 miro | gsgse | not found
 
 
-Dropped clients not detected #4 
----
-A dropped server is automatically detected but not a client. Perhaps a 1s hearthbeat signal?
-
-
-Host resolution #5 
----
-Currently IPs passed from the command line are not cross-checked with /etc/hosts.
-
-
 Erratic prompt #6 
 ---
 The prompt should represent who are you chatting with. Not only does it not do that, it also does not draw at the correct time. The threading model needs to be reconsidered.
-
-
-Create chatroom and logger bots #7 
----
-And integrate them in the system.
-
-
-rat serve is inefficient #8 
----
-./rat.py serve takes nearly 2 cores to just listen.
-
-
-A simple ping breaks ./rat.py listen #9 
----
-With nmap -sn. The serve process survives though.
-
-
-Print info on new members or when someone leaves.
 
 
 Phonebook section in conf.ini with names and ip-s.
 
 
 When a client goes online or changes IP it multicasts it's friends.
-
-Prompt printed at incorrect times.
-
-Add prompt to recv_filebuf.
-
-Add a phone book!
