@@ -1,28 +1,8 @@
-view_status <bitchg\h>
-set_status
-send <bitch> <msg>
-view_status_history <bitch>
-
-
 name@room->
 name@room<-
 
 do ensure global groups to enable a community
 
-python
-C++
-C
-php(LAMP)
-Java
-Android shit
-iOS shit
-logical programming
-
 So about randomchat:
 either do ML or
 sexting 'please respect minors'
-
-STATUS:
-the legacy client works
-but a legacy server fails to open a socket visible to nmap
-
