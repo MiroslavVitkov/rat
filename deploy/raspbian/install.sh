@@ -89,3 +89,8 @@ cp honeypot.conf /etc/fail2ban/filter.d/
 # Diasable directory listing.
 sed 's\Options Indexes FollowSymLinks\Options FollowSymLinks' /etc/apache2/apache2.conf
 # or a2dismod autoindex
+
+# For GitHub webhooks.
+a2enmod proxy
+a2enmod proxy_http
+a2enmod ssl
