@@ -153,7 +153,7 @@ def test() -> None:
     crypto.test()
     sock.test()
     protocol.test()
-    return 0  # Hack!
+    return 0  # warn: see a93a57d
 
     # System test.
     try:
