@@ -45,7 +45,8 @@ def listen() -> None:
             priv, _ = crypto.read_keypair()
             while True:
                 msg = protocol.recv_msg(s, priv, client.pub, a)
-                print(msg.decode('utf8'))
+                # warn: without 'flush' systemd does not log this!
+                print(msg.decode('utf8'), flush=True)
         except:
             # Drop the connection as soon as it breaks protocol.
             print('Dropping', s)
