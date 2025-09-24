@@ -52,12 +52,11 @@ def watch( chunks: [bytes]
         '--no-cache',
         '--untimed',
         '--no-demuxer-thread',
-        '--demuxer-lavf-o=flv_format=h264',
-        '--correct-pts=no',  #
-        '--container-fps-override=25', # warn
-        '--opengl-glfinish=yes',  #
-        '--opengl-swapinterval=0',  #
-        '--vo=xv',  # warn
+        '--demuxer-lavf-o=flv_format=h264,probesize=32,analyzeduration=0',
+        '--vd-lavc-threads=1',
+        '--correct-pts=no',
+        '--opengl-glfinish=yes',
+        '--opengl-swapinterval=0',
         '-'],
         stdin=subprocess.PIPE
     )
