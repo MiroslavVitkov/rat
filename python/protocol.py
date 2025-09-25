@@ -11,6 +11,7 @@ import time
 import pickle
 import re
 from socket import socket
+import threading
 from typing import Self
 
 import conf
@@ -143,7 +144,7 @@ class NameServer:
     '''
     def __init__(me):
         me.users = {}
-        me.alive = [True]
+        me.alive = threading.Event()
 
         me.server = sock.Server(me._handle, conf.NAMESERVER)
         me.server.alive = me.alive
@@ -194,8 +195,9 @@ class NameServer:
 
 
 # Emulate UDP multicast for now.
-def stream_video(alive):
-    def foo(s, alive):
+def stream_video( alive: threading.Event=threading.Event() ):
+    def foo(s, alive: threading.Event):
+        assert type(alive) == threading.Event
         for chunk in video.capture(alive):
             s.sendall(chunk)
 
@@ -203,7 +205,7 @@ def stream_video(alive):
     return s
 
 
-def watch_video( remote ):
+def watch_video( remote: str ):
     def gen(s):
         while True:
             chunk = s.recv(crypto.MAX_PLAINTEXT_BYTES)
@@ -298,7 +300,7 @@ def test_send_recv_msg():
     server = sock.Server(silent_recv)
     client = sock.Client(client_send)
 
-    server.alive[0] = False
+    server.alive.set()
     time.sleep(sock.POLL_PERIOD)
 
 
@@ -309,7 +311,7 @@ def test_send_recv_pubkey() -> None:
     sock.Client(lambda s: received.append(recv_pubkey(s)))
 
     assert received[0] == pub, received[0]
-    server.alive[0] = False
+    server.alive.set()
     time.sleep(sock.POLL_PERIOD)
 
 
@@ -322,7 +324,7 @@ def test_send_recv_user() -> None:
 
     time.sleep(1)
     assert received[0] == User(), received[0]
-    server.alive[0] = False
+    server.alive.set()
     time.sleep(sock.POLL_PERIOD)
 
 
@@ -334,7 +336,7 @@ def test_handshake():
 
     time.sleep(1)
     assert server[0] == client[0] == User()
-    s.alive[0] = False
+    s.alive.set()
     time.sleep(sock.POLL_PERIOD)
 
 
@@ -344,17 +346,16 @@ def test_nameserver() -> None:
     s.register(u)
     assert len(s.users) == 1, len(s.users)
     assert s.ask(u.name)[0] == u.to_bytes(), len(s.ask(u.name))
-    s.alive[0] = False
+    s.alive.set()
     time.sleep(sock.POLL_PERIOD)
 
 
 def test_video() -> None:
-    alive = [True]
+    alive = threading.Event()
     s = stream_video(alive)
     watch_video( 'localhost' )
     time.sleep(5)
-    alive[0] = False
-    s.alive[0] = False
+    alive.set()
 
 
 def test():

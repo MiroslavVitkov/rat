@@ -72,7 +72,7 @@ def watch( chunks: [bytes]
 def test():
     e = threading.Event()
     threading.Thread( target=watch, args=(capture(e), e) ).start()
-    time.sleep(12)
+    time.sleep(5)
     e.set()
 
 

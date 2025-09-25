@@ -19,7 +19,7 @@ POLL_PERIOD = .1  # 100 ms
 
 
 def recv( s: socket.socket
-        , alive: [bool]=[True]
+        , alive: threading.Event=threading.Event()
         , _cache: [bytes]=[b''] ) -> bytes:
     '''
     Block until one chunk is yielded.
@@ -36,7 +36,7 @@ def recv( s: socket.socket
     yield from try_yield()
 
     s.settimeout(POLL_PERIOD)
-    while alive[0]:
+    while not alive.isSet():
         try:
             # Recommended value in the docs.
             data = s.recv(4096)
@@ -67,9 +67,9 @@ class Server:
     A server TCP socket is always meant to negotiate connections, not content.
     Each returned connection is a content socket with a client.
 
-    func(socket, [alive]) - communicate with one client until connection drops
+    func(socket, alive) - communicate with one client until connection drops
 
-    Set `me.alive[0] = False` to kill permanently but spawned children remain unaffected.
+    Set `me.alive` to kill permanently but spawned children remain unaffected.
     '''
 
 
@@ -79,7 +79,7 @@ class Server:
     def __init__(me, func: callable, port: int=conf.TEST):
         me.ip = conf.get()['about']['ip']
         me.port = port
-        me.alive = [True]
+        me.alive = threading.Event()
         me.thread = threading.Thread( target=me._listen
                                     , args=[port, func]
                                     , name='server'
@@ -116,7 +116,8 @@ class Server:
 
 
     def _poll(me, s: socket):
-        while me.alive[0]:
+        assert type(me.alive) == threading.Event, type(me.alive)
+        while not me.alive.isSet():
             try:
                 conn, addr = s.accept()
                 yield conn, addr
@@ -151,7 +152,7 @@ def test_nonblocking_recv() -> None:
 
     client_s.sendall('If this is commented out, the server hangs.'.encode('utf8'))
 
-    alive = [True]
+    alive = threading.Event()
     def read_one_message():
         data = recv(content_s, alive)
         # print(next(iter(data)))  # This fails if nothing was sent.
@@ -159,7 +160,7 @@ def test_nonblocking_recv() -> None:
     content_th = threading.Thread(target=read_one_message, name='content_th')
     content_th.start()
     time.sleep(1)
-    alive[0] = False
+    alive.set()
     content_th.join()
     assert threading.active_count() == 1
 
@@ -168,8 +169,8 @@ def test_server_client() -> None:
     '''
     This is the intended API of the module.
     '''
-    def listen(s: socket, alive: [bool]=[True]):
-        while alive[0]:
+    def listen(s: socket, alive: threading.Event=threading.Event()):
+        while not alive.isSet():
             print(s.recv(1024))
     def yell(s: socket):
         '''Client transmits something and disconnects.'''
@@ -180,7 +181,7 @@ def test_server_client() -> None:
     # Kill the server.
     # The child connection notices that through it's bool parameter and commits suicide.
     # Manual regression test here: time.sleep() and check cpu usage.
-    s.alive[0] = False
+    s.alive.set()
     time.sleep(1)
     assert threading.active_count() == 1
 
@@ -190,7 +191,7 @@ def test_recv() -> None:
     Ensure packets are received in the correct chunk, byte and bit order.
     Not much to test about send() - all the logic is external.
     '''
-    def listen(s: socket, alive: [bool]=[True]):
+    def listen(s: socket, alive: threading.Event=threading.Event()):
         for msg in recv(s, alive):
             print(msg[0], end=', ')
 
@@ -203,7 +204,7 @@ def test_recv() -> None:
     server = Server(listen)
     client = Client(say)
     time.sleep(1)
-    server.alive[0] = False
+    server.alive.set()
     print('20')  # For the newline.
     time.sleep(POLL_PERIOD)
 

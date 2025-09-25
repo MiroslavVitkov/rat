@@ -133,6 +133,16 @@ def register(ip: [str]) -> None:
     sock.Client(ip=ip[0], port=conf.NAMESERVER, func=func)
 
 
+def watch( remote: str ) -> None:
+    '''Spawn a video player and stream in from remote.'''
+    protocol.watch_video(remote)
+
+
+def stream() -> None:
+    '''Stream camera to conf.VIDEO.'''
+    s = protocol.stream_video()
+
+
 def serve() -> None:
     '''
     Run a nameserver forever.
@@ -252,12 +262,11 @@ if __name__ == '__main__':
 
     # TODO: access control?
     elif sys.argv[1] == 'stream':
-        protocol.stream_video()
+        stream()
 
     elif sys.argv[1] == 'watch':
         assert len(sys.argv) == 3
-        protocol.watch_video(sys.argv[2])
-
+        watch(sys.argv[2])
 
     elif sys.argv[1] == 'generate':
         assert len(sys.argv) == 2
