@@ -270,9 +270,8 @@ if __name__ == '__main__':
 
     elif sys.argv[1] == 'generate':
         assert len(sys.argv) == 2
-        keypath = conf.get_keypath()
         priv, pub = crypto.generate_keypair()
-        crypto.write_keypair(priv, pub, keypath)
+        crypto.write_keypair(priv, pub)
 
     elif sys.argv[1] == 'test':
         sys.exit( test() )

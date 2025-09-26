@@ -10,6 +10,7 @@ import os
 from pathlib import Path
 import random
 import rsa
+import subprocess
 import tempfile
 
 import conf
@@ -83,6 +84,8 @@ def write_keypair( priv: rsa.key.PrivateKey
                            + str(p))
     with open(p, 'wb') as f:
         f.write(priv.save_pkcs1())
+    subprocess.run(['chmod', '600', p])
+
     if pub:
         with open(p.with_suffix('.pub'), 'wb') as f:
             f.write(pub.save_pkcs1())
