@@ -12,6 +12,7 @@ It makes strides for confidentiality and privacy but those are merely educationa
 How to use
 ---
     git clone git@github.com:MiroslavVitkov/rat.git
+    apt install ffmpeg mpv  # optional
     pip install -r rat/python/requirements.txt
     alias rat="$PWD/rat/python/rat.py"
     rat generate
