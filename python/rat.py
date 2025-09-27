@@ -15,6 +15,7 @@ from impl import crypto
 from impl import sock
 
 from prot import protocol
+from prot import name
 
 
 def say( ip: str, text: str) -> None:
@@ -165,6 +166,9 @@ def test() -> None:
     crypto.test()
     sock.test()
     protocol.test()
+
+    name.test()
+
     return 0  # warn: see a93a57d
 
     # System test.
