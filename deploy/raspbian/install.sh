@@ -94,3 +94,5 @@ sed 's\Options Indexes FollowSymLinks\Options FollowSymLinks' /etc/apache2/apach
 a2enmod proxy
 a2enmod proxy_http
 a2enmod ssl
+
+rpi-update
