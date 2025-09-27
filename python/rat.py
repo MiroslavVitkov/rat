@@ -14,10 +14,10 @@ from impl import conf
 from impl import crypto
 from impl import sock
 
-from prot import protocol
 from prot import chat
 from prot import handshake
 from prot import name
+from prot import video
 
 
 def say( ip: str, text: str) -> None:
@@ -29,7 +29,7 @@ def say( ip: str, text: str) -> None:
 
     def func(s: socket):
         '''Transmit a message and die.'''
-        remote = protocol.handshake_as_client(s)
+        remote = handshake.as_client(s)
         protocol.send_msg(text, s, own_priv, remote.pub)
 
     sock.Client(func, ip, conf.CHATSERVER)
@@ -167,7 +167,7 @@ def test() -> None:
     conf.test()
     crypto.test()
     sock.test()
-    protocol.test()
+    video.test()
 
     chat.test()
     handshake.test()

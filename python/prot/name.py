@@ -17,8 +17,9 @@ import time
 from impl import conf
 from impl import crypto
 from impl import sock
-#prot.chat
-from prot.protocol import send_msg, recv_msg
+
+from prot.chat import send_msg, recv_msg
+from prot import handshake
 
 
 class User:
@@ -109,7 +110,7 @@ class Server:
 
     def _handle(me, s: socket, alive: [bool]) -> None:
         try:
-            client = handshake_as_server(s)
+            client = handshake.as_server(s)
             print(client)
         except:
             # Drop the connection as soon as it breaks protocol.

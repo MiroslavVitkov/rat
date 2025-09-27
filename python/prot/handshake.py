@@ -18,7 +18,7 @@ from prot.chat import send_msg
 from prot.name import User
 
 
-def handshake_as_server( s: socket ) -> User:
+def as_server( s: socket ) -> User:
     # This is to prevent port scanners from fingerprinting rat.
     if not recv_pepper(s):
         print('Wrong pepper', s)
@@ -35,7 +35,7 @@ def handshake_as_server( s: socket ) -> User:
     return client
 
 
-def handshake_as_client( s: socket ) -> User:
+def as_client( s: socket ) -> User:
     send_pepper(s)
 
     # After connecting, receive server unencrypted pubkey.
@@ -139,8 +139,8 @@ def test_send_recv_user() -> None:
 def test_handshake():
     server = []
     client = []
-    s = sock.Server(lambda s, _: client.append(handshake_as_server(s)))
-    sock.Client(lambda s: server.append(handshake_as_client(s)))
+    s = sock.Server(lambda s, _: client.append(as_server(s)))
+    sock.Client(lambda s: server.append(as_client(s)))
 
     time.sleep(1)
     assert server[0] == client[0] == User()
