@@ -205,7 +205,7 @@ def test():
     t.join()
 
     # We're done.
-    print('bot.py: UNIT TESTS PASSED')
+    print('impl/bot.py: UNIT TESTS PASSED')
 
 
 if __name__ == '__main__':

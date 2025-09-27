@@ -213,7 +213,7 @@ def test() -> None:
     test_nonblocking_recv()
     test_server_client()
     test_recv()
-    print('sock.py: UNIT TESTS PASSED')
+    print('impl/sock.py: UNIT TESTS PASSED')
 
 
 if __name__ == '__main__':

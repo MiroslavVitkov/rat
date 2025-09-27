@@ -67,7 +67,7 @@ def test():
     assert sum([len(get()[key].keys())
                 for key in get().keys()]) == 13, len(get())
 
-    print('conf.py: UNIT TESTS PASSED')
+    print('impl/conf.py: UNIT TESTS PASSED')
 
 
 if __name__ == '__main__':

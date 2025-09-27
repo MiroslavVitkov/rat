@@ -272,7 +272,7 @@ def test() -> None:
     test_encrypt_decrypt()
     test_API()
     test_failures()
-    print('crypto.py: UNIT TESTS PASSED')
+    print('impl/crypto.py: UNIT TESTS PASSED')
 
 
 if __name__ == '__main__':

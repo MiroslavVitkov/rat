@@ -71,7 +71,7 @@ def test_send_recv_msg():
 def test():
     test_send_recv_msg()
 
-    print('chat.py: UNIT TESTS PASSED')
+    print('prot/chat.py: UNIT TESTS PASSED')
 
 
 if __name__ == '__main__':

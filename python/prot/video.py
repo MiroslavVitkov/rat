@@ -75,6 +75,8 @@ def test():
     time.sleep(5)
     e.set()
 
+    print('prot/video.py: UNIT TESTS PASSED')
+
 
 if __name__ == '__main__':
     test()
