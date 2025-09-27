@@ -10,7 +10,7 @@
 set -u  # error on using uninitialized variable
 
 
-systemctl stop rat
+systemctl stop rat-listen
 
 cd ~/proj/rat &&\
 git pull &&\
@@ -22,4 +22,4 @@ if [ $? -eq 0 ]; then
     mv /tmp/conf.ini /opt/rat/
 fi
 
-systemctl start rat
+systemctl start rat-listen
