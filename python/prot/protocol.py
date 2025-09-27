@@ -14,10 +14,11 @@ from socket import socket
 import threading
 from typing import Self
 
-import conf
-import crypto
-import sock
-import video
+from impl import conf
+from impl import crypto
+from impl import sock
+
+from prot import video
 
 
 class User:

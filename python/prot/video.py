@@ -10,8 +10,8 @@ import subprocess
 import threading
 import time
 
-import conf
-import crypto
+from impl import conf
+from impl import crypto
 
 
 def capture( stop_event: threading.Event=threading.Event()

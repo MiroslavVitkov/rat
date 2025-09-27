@@ -30,7 +30,7 @@ def where_are_we():
     return dir_path
 
 
-def get(path: str=where_are_we()+'/../conf.ini', c: list=[]):
+def get(path: str=where_are_we()+'/../../conf.ini', c: list=[]):
     '''
     Use like:
         get()['section_name']['setting_name']

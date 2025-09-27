@@ -13,7 +13,7 @@ import rsa
 import subprocess
 import tempfile
 
-import conf
+from impl import conf
 
 
 Priv = rsa.key.PrivateKey

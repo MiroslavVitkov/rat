@@ -87,9 +87,9 @@ Architecture
 Three layers.
 Only rule so far is 'never access higher layers'.
 
-rat - interact with outside world  
-protocol - group tasks into algorithms  
-bot, conf, crypto, sock, video - do specific tasks  
+app - interact with outside world  
+prot - group tasks into algorithms  
+impl - do specific tasks  
 
 
 License

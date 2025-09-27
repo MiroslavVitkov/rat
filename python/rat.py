@@ -10,10 +10,11 @@ from threading import Thread
 import sys
 import socket
 
-import conf
-import crypto
-import protocol
-import sock
+from impl import conf
+from impl import crypto
+from impl import sock
+
+from prot import protocol
 
 
 def say( ip: str, text: str) -> None:

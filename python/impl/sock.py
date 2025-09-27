@@ -10,8 +10,8 @@ import socket
 import threading
 import time
 
-import conf
-from crypto import CHUNK_BYTES
+from impl import conf
+from impl.crypto import CHUNK_BYTES
 
 
 # How often are the 'alive' flags checked.
