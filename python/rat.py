@@ -16,6 +16,7 @@ from impl import sock
 
 from prot import protocol
 from prot import chat
+from prot import handshake
 from prot import name
 
 
@@ -168,8 +169,9 @@ def test() -> None:
     sock.test()
     protocol.test()
 
-    name.test()
     chat.test()
+    handshake.test()
+    name.test()
 
     return 0  # warn: see a93a57d
 
