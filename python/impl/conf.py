@@ -49,6 +49,8 @@ def get(path: str=where_are_we()+'/../../conf.ini', c: list=[]):
 
 
 def test():
+    # todo: test(setting, name)
+
     # Ensure fields exist and are non-empty/empty as in default values.
     assert len(get()['about']['name'])
     assert len(get()['about']['group'])
@@ -65,7 +67,7 @@ def test():
     assert len(get()['video']['camera'])
 
     assert sum([len(get()[key].keys())
-                for key in get().keys()]) == 13, len(get())
+                for key in get().keys()]) == 14, len(get())
 
     print('impl/conf.py: UNIT TESTS PASSED')
 
