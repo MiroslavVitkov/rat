@@ -30,7 +30,7 @@ def say( ip: str, text: str) -> None:
     def func(s: socket):
         '''Transmit a message and die.'''
         remote = handshake.as_client(s)
-        protocol.send_msg(text, s, own_priv, remote.pub)
+        chat.send_msg(text, s, own_priv, remote.pub)
 
     sock.Client(func, ip, conf.CHATSERVER)
 
@@ -42,13 +42,13 @@ def listen() -> None:
     def forever(s: socket, a: [bool]):
         try:
             # Handshake.
-            client = protocol.handshake_as_server(s)
+            client = handshake.as_server(s)
             print('The remote user identifies as', client)
 
             # Accept messages.
             priv, _ = crypto.read_keypair()
             while True:
-                msg = protocol.recv_msg(s, priv, client.pub, a)
+                msg = chat.recv_msg(s, priv, client.pub, a)
                 # warn: without 'flush' systemd does not log this!
                 print(msg.decode('utf8'), flush=True)
         except:
@@ -79,12 +79,12 @@ def relay(ips: [str]=['localhost']) -> None:
         #print('OPTNAME', s.getpeername())
 
         try:
-            client = protocol.handshake_as_server(s)
+            client = handshake.as_server(s)
             peers.add(client)
 
             priv, _ = crypto.read_keypair()
             while True:
-                msg = protocol.recv_msg(s, priv, client.pub, a)
+                msg = chat.recv_msg(s, priv, client.pub, a)
                 print(msg.decode('utf8'), len(peers))
                 for p in peers:
                     say(p.ips[0], '<relay>' + msg.decode('utf8'))
@@ -102,8 +102,8 @@ def share( ip: str, text: str) -> None:
     own_priv, _ = crypto.read_keypair(conf.get()['crypto']['keypath'])
 
     def func(s: socket):
-        remote = protocol.handshake_as_client(s)
-        protocol.send_msg(text, s, own_priv, remote.pub)
+        remote = handshake.as_client(s)
+        chat.send_msg(text, s, own_priv, remote.pub)
 
     sock.Client(func, ip, conf.RELAY_0)
 
@@ -116,10 +116,10 @@ def ask(regex: str, ip: [str]) -> None:
     '''Request a list of matching userames from a nameserver.'''
     own_priv, _ = crypto.read_keypair()
     def f(s: socket):
-        server = protocol.handshake_as_client(s)
-        protocol.send_msg(regex, s, own_priv, server.pub)
-        data = protocol.recv_msg(s, own_priv, server.pub)
-        user = protocol.User.from_bytes(data)
+        server = handshake.as_client(s)
+        chat.send_msg(regex, s, own_priv, server.pub)
+        data = chat.recv_msg(s, own_priv, server.pub)
+        user = name.User.from_bytes(data)
         print(user)
 
     c = sock.Client(func=f, ip=ip[0], port=conf.NAMESERVER)
@@ -130,21 +130,21 @@ def register(ip: [str]) -> None:
     Register our User object(conf.ini + pub key) with nameserver(s).
     '''
     def func(s: socket):
-        server = protocol.handshake_as_client(s)
+        server = handshake.as_client(s)
         own_priv, _ = crypto.read_keypair()
-        protocol.send_msg(b'register', s, own_priv, server.pub)
+        chat.send_msg(b'register', s, own_priv, server.pub)
 
     sock.Client(ip=ip[0], port=conf.NAMESERVER, func=func)
 
 
 def watch( remote: str ) -> None:
     '''Spawn a video player and stream in from remote.'''
-    protocol.watch_video(remote)
+    video.watch(remote)
 
 
 def stream() -> None:
     '''Stream camera to conf.VIDEO.'''
-    s = protocol.stream_video()
+    s = video.stream()
 
 
 def serve() -> None:
@@ -153,7 +153,7 @@ def serve() -> None:
     On the standard port.
     Acept all requests from everyone.
     '''
-    protocol.NameServer()
+    name.Server()
 
 
 def get_prompt( name: str=conf.get()['about']['name']
@@ -193,7 +193,7 @@ def print_help() -> None:
         example
         ---
             rat generate
-            rat say 46.10.210.37 Unquoted text bro!!!
+            rat say rat.pm Unquoted text bro!!!
 
         chatting
         ---

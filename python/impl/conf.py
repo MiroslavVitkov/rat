@@ -66,8 +66,9 @@ def test():
     assert len(get()['video']['fps'])
     assert len(get()['video']['camera'])
 
-    assert sum([len(get()[key].keys())
-                for key in get().keys()]) == 14, len(get())
+    # Count items under all headings.
+    items = sum( [len(get()[key].keys()) for key in get().keys()] )
+    assert items == 15, items
 
     print('impl/conf.py: UNIT TESTS PASSED')
 

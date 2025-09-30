@@ -9,6 +9,7 @@ Send and receive text messages over an esteblished channel.
 import time
 
 from socket import socket
+from threading import Event
 
 from impl import crypto
 from impl import sock
@@ -28,7 +29,7 @@ def send_msg( msg: str|bytes
 def recv_msg( s: socket
             , own_priv: crypto.Priv
             , remote_pub: crypto.Pub
-            , alive: [bool]=[True]) -> bytes:
+            , alive: Event=Event()) -> bytes:
     '''
     Block until an entire message has been read out.
     A message is the longest sequence ending with a signature.
