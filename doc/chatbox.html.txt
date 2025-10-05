@@ -1,0 +1,22 @@
+    <!-- Chatbox at the top -->
+    <!-- <div id="chat"></div> -->
+    <!-- <input type="text" id="input" placeholder="Type a message and hit Enter..." autofocus> -->
+
+
+
+    <!-- Code -->
+    <!-- <span><script src="myscript.js"></script></span> -->
+    <script>
+        const chat = document.getElementById('chat');
+        const input = document.getElementById('input');
+ 
+        input.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' && input.value.trim() !== '') {
+                const msg = document.createElement('div');
+                msg.textContent = input.value;
+                chat.appendChild(msg);
+                chat.scrollTop = chat.scrollHeight; // scroll to bottom
+                input.value = '';
+            }
+        });
+    </script>
