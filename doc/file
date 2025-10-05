@@ -1,0 +1,4 @@
+rat file-out goshko f1 f2 ..
+rat listen ..
+rat file-in 1,2 fname*.txt
+rat file-in <default>
