@@ -1,0 +1,6 @@
+If you're using asymmetric keys in this size (especially RSA or DH), you're entering danger territory. For elliptic curves (like Ed25519), 1kB can be plenty, depending on your exact scheme — but only if you know exactly what you're doing.
+
+\ Recommendation
+
+    Use modern EC primitives (e.g., Ed25519, X25519, ChaCha20-Poly1305)
+
