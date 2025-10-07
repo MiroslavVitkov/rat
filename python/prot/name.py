@@ -19,7 +19,7 @@ from impl import crypto
 from impl import sock
 
 from prot.chat import send_msg, recv_msg
-from prot import handshake
+#from prot import handshake
 
 
 class User:
@@ -110,7 +110,9 @@ class Server:
 
     def _handle(me, s: socket, alive: [bool]) -> None:
         try:
-            client = handshake.as_server(s)
+            # A global import causes cirtular dependency.
+            from prot.handshake import as_server
+            client = as_server(s)
             print(client)
         except:
             # Drop the connection as soon as it breaks protocol.
