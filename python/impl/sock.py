@@ -36,7 +36,7 @@ def recv( s: socket.socket
     yield from try_yield()
 
     s.settimeout(POLL_PERIOD)
-    while not alive.isSet():
+    while not alive.is_set():
         try:
             # Recommended value in the docs.
             data = s.recv(4096)
@@ -117,7 +117,7 @@ class Server:
 
     def _poll(me, s: socket):
         assert type(me.alive) == threading.Event, type(me.alive)
-        while not me.alive.isSet():
+        while not me.alive.is_set():
             try:
                 conn, addr = s.accept()
                 yield conn, addr
@@ -170,7 +170,7 @@ def test_server_client() -> None:
     This is the intended API of the module.
     '''
     def listen(s: socket, alive: threading.Event=threading.Event()):
-        while not alive.isSet():
+        while not alive.is_set():
             print(s.recv(1024))
     def yell(s: socket):
         '''Client transmits something and disconnects.'''
