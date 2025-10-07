@@ -8,18 +8,19 @@ Provides TCP/IP connection objects, perhaps soon UDP too.
 
 import socket
 import threading
+from threading import Event
 import time
 
 from impl import conf
 from impl.crypto import CHUNK_BYTES
 
 
-# How often are the 'death' flags checked.
+# How often is the 'death' event checked.
 POLL_PERIOD = .1  # 100 ms
 
 
 def recv( s: socket.socket
-        , death: threading.Event=threading.Event()
+        , death: Event=Event()
         , _cache: [bytes]=[b''] ) -> bytes:
     '''
     Block until one chunk is yielded.
@@ -69,7 +70,7 @@ class Server:
 
     func(socket, death) - communicate with one client until connection drops
 
-    Set `me.death` to kill permanently but spawned children remain unaffected.
+    Set `me.death` to kill; spawned children are notified.
     '''
 
 
@@ -79,7 +80,7 @@ class Server:
     def __init__(me, func: callable, port: int=conf.TEST):
         me.ip = conf.get()['about']['ip']
         me.port = port
-        me.death = threading.Event()
+        me.death = Event()
         me.thread = threading.Thread( target=me._listen
                                     , args=[port, func]
                                     , name='server'
@@ -116,7 +117,7 @@ class Server:
 
 
     def _poll(me, s: socket):
-        assert type(me.death) == threading.Event, type(me.death)
+        assert type(me.death) == Event, type(me.death)
         while not me.death.is_set():
             try:
                 conn, addr = s.accept()
@@ -152,7 +153,7 @@ def test_nonblocking_recv() -> None:
 
     client_s.sendall('If this is commented out, the server hangs.'.encode('utf8'))
 
-    death = threading.Event()
+    death = Event()
     def read_one_message():
         data = recv(content_s, death)
         # print(next(iter(data)))  # This fails if nothing was sent.
@@ -169,7 +170,7 @@ def test_server_client() -> None:
     '''
     This is the intended API of the module.
     '''
-    def listen(s: socket, death: threading.Event=threading.Event()):
+    def listen(s: socket, death: Event=Event()):
         while not death.is_set():
             print(s.recv(1024))
     def yell(s: socket):
@@ -191,7 +192,7 @@ def test_recv() -> None:
     Ensure packets are received in the correct chunk, byte and bit order.
     Not much to test about send() - all the logic is external.
     '''
-    def listen(s: socket, death: threading.Event=threading.Event()):
+    def listen(s: socket, death: Event=Event()):
         for msg in recv(s, death):
             print(msg[0], end=', ')
 
