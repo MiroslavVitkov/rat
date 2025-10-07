@@ -178,6 +178,7 @@ def test_nameserver() -> None:
     s.register(u)
     assert len(s.users) == 1, len(s.users)
     assert s.ask(u.name)[0] == u.to_bytes(), len(s.ask(u.name))
+    assert s.ask('.*')[0] == u.to_bytes(), len(s.ask('*'))
     s.alive.set()
     time.sleep(sock.POLL_PERIOD)
 
