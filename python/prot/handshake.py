@@ -119,7 +119,7 @@ def test_send_recv_pubkey() -> None:
     sock.Client(lambda s: received.append(recv_pubkey(s)))
 
     assert received[0] == pub, received[0]
-    server.alive.set()
+    server.death.set()
     time.sleep(sock.POLL_PERIOD)
 
 
@@ -132,7 +132,7 @@ def test_send_recv_user() -> None:
 
     time.sleep(1)
     assert received[0] == User(), received[0]
-    server.alive.set()
+    server.death.set()
     time.sleep(sock.POLL_PERIOD)
 
 
@@ -144,7 +144,7 @@ def test_handshake():
 
     time.sleep(1)
     assert server[0] == client[0] == User()
-    s.alive.set()
+    s.death.set()
     time.sleep(sock.POLL_PERIOD)
 
 

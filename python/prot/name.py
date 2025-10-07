@@ -82,10 +82,10 @@ class Server:
     '''
     def __init__(me):
         me.users = {}
-        me.alive = Event()
+        me.death = Event()
 
         me.server = sock.Server(me._handle, conf.NAMESERVER)
-        me.server.alive = me.alive
+        me.server.death = me.death
         me.priv, _ = crypto.read_keypair()
 
 
@@ -108,7 +108,7 @@ class Server:
         return r
 
 
-    def _handle(me, s: socket, alive: [bool]) -> None:
+    def _handle(me, s: socket, death: Event) -> None:
         try:
             # A global import causes cirtular dependency.
             from prot.handshake import as_server
@@ -170,7 +170,7 @@ def test_send_recv_user() -> None:
 
     time.sleep(1)
     assert received[0] == User(), received[0]
-    server.alive.set()
+    server.death.set()
     time.sleep(sock.POLL_PERIOD)
 
 
@@ -181,7 +181,7 @@ def test_nameserver() -> None:
     assert len(s.users) == 1, len(s.users)
     assert s.ask(u.name)[0] == u.to_bytes(), len(s.ask(u.name))
     assert s.ask('.*')[0] == u.to_bytes(), len(s.ask('*'))
-    s.alive.set()
+    s.death.set()
     time.sleep(sock.POLL_PERIOD)
 
 

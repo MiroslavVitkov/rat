@@ -29,13 +29,13 @@ def send_msg( msg: str|bytes
 def recv_msg( s: socket
             , own_priv: crypto.Priv
             , remote_pub: crypto.Pub
-            , alive: Event=Event()) -> bytes:
+            , death: Event=Event()) -> bytes:
     '''
     Block until an entire message has been read out.
     A message is the longest sequence ending with a signature.
     '''
     buf = b''
-    for chunk in sock.recv(s, alive):
+    for chunk in sock.recv(s, death):
         try:
             d = crypto.decrypt(chunk, own_priv)
             buf += d
@@ -65,7 +65,7 @@ def test_send_recv_msg():
     server = sock.Server(silent_recv)
     client = sock.Client(client_send)
 
-    server.alive.set()
+    server.death.set()
     time.sleep(sock.POLL_PERIOD)
 
 

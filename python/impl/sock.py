@@ -14,16 +14,16 @@ from impl import conf
 from impl.crypto import CHUNK_BYTES
 
 
-# How often are the 'alive' flags checked.
+# How often are the 'death' flags checked.
 POLL_PERIOD = .1  # 100 ms
 
 
 def recv( s: socket.socket
-        , alive: threading.Event=threading.Event()
+        , death: threading.Event=threading.Event()
         , _cache: [bytes]=[b''] ) -> bytes:
     '''
     Block until one chunk is yielded.
-    Use 'alive' to kill from the outside.
+    Use 'death' to kill from the outside.
     Returns(doesn't throw) on remote disconnect.
     '''
     # Index 0 of the buffer is the oldest received chunk.
@@ -36,7 +36,7 @@ def recv( s: socket.socket
     yield from try_yield()
 
     s.settimeout(POLL_PERIOD)
-    while not alive.is_set():
+    while not death.is_set():
         try:
             # Recommended value in the docs.
             data = s.recv(4096)
@@ -67,9 +67,9 @@ class Server:
     A server TCP socket is always meant to negotiate connections, not content.
     Each returned connection is a content socket with a client.
 
-    func(socket, alive) - communicate with one client until connection drops
+    func(socket, death) - communicate with one client until connection drops
 
-    Set `me.alive` to kill permanently but spawned children remain unaffected.
+    Set `me.death` to kill permanently but spawned children remain unaffected.
     '''
 
 
@@ -79,7 +79,7 @@ class Server:
     def __init__(me, func: callable, port: int=conf.TEST):
         me.ip = conf.get()['about']['ip']
         me.port = port
-        me.alive = threading.Event()
+        me.death = threading.Event()
         me.thread = threading.Thread( target=me._listen
                                     , args=[port, func]
                                     , name='server'
@@ -106,7 +106,7 @@ class Server:
 
         for conn, addr in me._poll(s):
             threading.Thread( target=func
-                            , args=[conn, me.alive]
+                            , args=[conn, me.death]
                             , name='server_content_socket'
                             ).start()
 
@@ -116,8 +116,8 @@ class Server:
 
 
     def _poll(me, s: socket):
-        assert type(me.alive) == threading.Event, type(me.alive)
-        while not me.alive.is_set():
+        assert type(me.death) == threading.Event, type(me.death)
+        while not me.death.is_set():
             try:
                 conn, addr = s.accept()
                 yield conn, addr
@@ -152,15 +152,15 @@ def test_nonblocking_recv() -> None:
 
     client_s.sendall('If this is commented out, the server hangs.'.encode('utf8'))
 
-    alive = threading.Event()
+    death = threading.Event()
     def read_one_message():
-        data = recv(content_s, alive)
+        data = recv(content_s, death)
         # print(next(iter(data)))  # This fails if nothing was sent.
 
     content_th = threading.Thread(target=read_one_message, name='content_th')
     content_th.start()
     time.sleep(1)
-    alive.set()
+    death.set()
     content_th.join()
     assert threading.active_count() == 1
 
@@ -169,8 +169,8 @@ def test_server_client() -> None:
     '''
     This is the intended API of the module.
     '''
-    def listen(s: socket, alive: threading.Event=threading.Event()):
-        while not alive.is_set():
+    def listen(s: socket, death: threading.Event=threading.Event()):
+        while not death.is_set():
             print(s.recv(1024))
     def yell(s: socket):
         '''Client transmits something and disconnects.'''
@@ -181,7 +181,7 @@ def test_server_client() -> None:
     # Kill the server.
     # The child connection notices that through it's bool parameter and commits suicide.
     # Manual regression test here: time.sleep() and check cpu usage.
-    s.alive.set()
+    s.death.set()
     time.sleep(1)
     assert threading.active_count() == 1
 
@@ -191,8 +191,8 @@ def test_recv() -> None:
     Ensure packets are received in the correct chunk, byte and bit order.
     Not much to test about send() - all the logic is external.
     '''
-    def listen(s: socket, alive: threading.Event=threading.Event()):
-        for msg in recv(s, alive):
+    def listen(s: socket, death: threading.Event=threading.Event()):
+        for msg in recv(s, death):
             print(msg[0], end=', ')
 
     def say(s):
@@ -204,7 +204,7 @@ def test_recv() -> None:
     server = Server(listen)
     client = Client(say)
     time.sleep(1)
-    server.alive.set()
+    server.death.set()
     print('20')  # For the newline.
     time.sleep(POLL_PERIOD)
 
