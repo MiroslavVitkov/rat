@@ -14,9 +14,12 @@ from impl import conf
 from impl import crypto
 
 
-def capture( stop_event: threading.Event=threading.Event()
-           , camera: str=conf.get()['video']['camera'] ):
+def stream( stop_event: threading.Event=threading.Event()
+          , camera: str=conf.get()['video']['camera'] ) -> None:
     '''  '''
+    if not conf.get()['video']['enable']:
+        return
+
     reader = (
         ffmpeg
         .input(camera,
@@ -47,6 +50,9 @@ def capture( stop_event: threading.Event=threading.Event()
 def watch( chunks: [bytes]
          , stop_event: threading.Event=threading.Event() ):
     '''  '''
+    if not conf.get()['video']['enable']:
+        return
+
     mpv = subprocess.Popen(
        ['mpv',
         '--no-cache',
@@ -70,8 +76,13 @@ def watch( chunks: [bytes]
 
 
 def test():
+    if not conf.get()['video']['enable']:
+        print('prot/video.py: UNIT TESTS SKIPPED')
+        return
+
+
     e = threading.Event()
-    threading.Thread( target=watch, args=(capture(e), e) ).start()
+    threading.Thread( target=watch, args=(stream(e), e) ).start()
     time.sleep(5)
     e.set()
 
