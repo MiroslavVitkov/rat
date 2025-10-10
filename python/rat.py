@@ -11,6 +11,12 @@ import sys
 import socket
 
 from impl import conf
+if __name__ == '__main__':
+    for i, v in enumerate(sys.argv):
+        if v == '-c' or v == '--conf':
+            conf.get(sys.argv[i+1])
+            sys.argv = sys.argv[:i] + sys.argv[i+2:]
+
 from impl import crypto
 from impl import sock
 
@@ -193,7 +199,7 @@ def print_help() -> None:
         example
         ---
             rat generate
-            rat say rat.pm Unquoted text bro!!!
+            rat say rat.pm Unquoted text bro.
 
         chatting
         ---
@@ -222,6 +228,10 @@ def print_help() -> None:
             rat generate - create a new RSA keypair and write it to disk
             rat test - run all unnit and integration tests
             rat help - print this message
+
+       options
+       ---
+            -c, --conf <fname> - use this instead of rat/conf.ini
 
         '''
     print(h)
