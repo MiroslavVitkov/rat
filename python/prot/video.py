@@ -36,18 +36,26 @@ def get_default_audio_device():
 
 def stream( stop_event: Event=Event()
           , camera: str=conf.get()['video']['camera'] ) -> None:
-    '''  '''
+    '''
+    Capture video+audio, mux into Matroska, send via stdout in chunks.
+    '''
     if not conf.get()['video']['enable']:
         return
 
+    mic = get_default_audio_device()  # todo: conf.ini
+    video_in = ffmpeg.input(
+        camera,
+        format='v4l2',
+        r=conf.get()['video']['fps'],
+        s=conf.get()['video']['res'],
+        thread_queue_size=512  # needed?
+    )
+
     reader = (
         ffmpeg
-        .input(camera,
-               format='v4l2',
-               r=conf.get()['video']['fps'],
-               s=conf.get()['video']['res'])
         .output(
-            'pipe:',
+            video_in,
+            'pipe:',  # needed?
             format='h264',
             vcodec='libx264',
             r=conf.get()['video']['fps'],
@@ -69,7 +77,9 @@ def stream( stop_event: Event=Event()
 
 def watch( chunks: [bytes]
          , stop_event: Event=Event() ):
-    '''  '''
+    '''
+    Feed video+audio to mpv to decode.
+    '''
     if not conf.get()['video']['enable']:
         return
 
