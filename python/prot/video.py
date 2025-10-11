@@ -6,12 +6,32 @@
 
 
 import ffmpeg
+import re
 import subprocess
 import threading
 import time
 
 from impl import conf
 from impl import crypto
+
+
+def get_default_audio_device():
+    """
+    Try to detect the first ALSA capture device using `arecord -l`.
+    Returns a string like 'hw:1,0' or None if not found.
+    """
+    try:
+        out = subprocess.check_output(["arecord", "-l"], text=True, stderr=subprocess.DEVNULL)
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        return None
+
+    # Match lines like: "card 1: Device [USB Audio], device 0: USB Audio"
+    m = re.search(r"card (\d+): .*device (\d+):", out)
+    if not m:
+        return None
+
+    card, dev = m.groups()
+    return f"hw:{card},{dev}"
 
 
 def stream( stop_event: threading.Event=threading.Event()
