@@ -8,7 +8,7 @@
 import ffmpeg
 import re
 import subprocess
-import threading
+from threading import Event, Thread
 import time
 
 from impl import conf
@@ -34,7 +34,7 @@ def get_default_audio_device():
     return f"hw:{card},{dev}"
 
 
-def stream( stop_event: threading.Event=threading.Event()
+def stream( stop_event: Event=Event()
           , camera: str=conf.get()['video']['camera'] ) -> None:
     '''  '''
     if not conf.get()['video']['enable']:
@@ -68,7 +68,7 @@ def stream( stop_event: threading.Event=threading.Event()
 
 
 def watch( chunks: [bytes]
-         , stop_event: threading.Event=threading.Event() ):
+         , stop_event: Event=Event() ):
     '''  '''
     if not conf.get()['video']['enable']:
         return
@@ -101,8 +101,8 @@ def test():
         return
 
 
-    e = threading.Event()
-    threading.Thread( target=watch, args=(stream(e), e) ).start()
+    e = Event()
+    Thread( target=watch, args=(stream(e), e) ).start()
     time.sleep(5)
     e.set()
 
