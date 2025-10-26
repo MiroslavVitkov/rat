@@ -23,7 +23,10 @@ from impl import sock
 from prot import chat
 from prot import handshake
 from prot import name
-from prot import video
+
+if conf.get()['video']['enable']:
+    from prot import audio
+    from prot import video
 
 
 def say( ip: str, text: str) -> None:
@@ -173,11 +176,14 @@ def test() -> None:
     conf.test()
     crypto.test()
     sock.test()
-    video.test()
 
     chat.test()
     handshake.test()
     name.test()
+
+    if conf.get()['video']['enable']:
+        audio.test()
+        video.test()
 
     return 0  # warn: see a93a57d
 
