@@ -1,8 +1,14 @@
 #!/usr/bin/env python
 
 # In this file:
-#             - reading frames one by one from the webcam,
+#             - reading frames(no audio) one by one from the webcam,
 #             - displaying frames one by one with mpv.
+#
+# Dual socket approach. Reasoning:
+#    - entirely avoid mux delay
+#    - avoid mux complexity in the face of heterogenious HW
+#    - fasciliate music streaming.
+
 
 
 import ffmpeg

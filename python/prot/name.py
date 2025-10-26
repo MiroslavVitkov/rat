@@ -190,7 +190,7 @@ def test():
     test_nameserver()
     assert User.from_bytes(User().to_bytes()) == User()
 
-    print('name.py: UNIT TESTS PASSED')
+    print('prot/name.py: UNIT TESTS PASSED')
 
 
 if __name__ == '__main__':

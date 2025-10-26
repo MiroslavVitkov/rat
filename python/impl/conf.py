@@ -14,7 +14,8 @@ import requests
 # Standard ports used by the program.
 CHATSERVER = 42666
 NAMESERVER = CHATSERVER + 1
-VIDEO = NAMESERVER + 1
+AUDIO = NAMESERVER + 1
+VIDEO = AUDIO + 1
 TEST = VIDEO + 1
 RELAY_0 = TEST+1
 
