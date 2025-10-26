@@ -84,7 +84,7 @@ def write_keypair( priv: rsa.key.PrivateKey
                            + str(p))
     with open(p, 'wb') as f:
         f.write(priv.save_pkcs1())
-    subprocess.run(['chmod', '600', p])
+    subprocess.run(['chmod', '400', p])
 
     if pub:
         with open(p.with_suffix('.pub'), 'wb') as f:
