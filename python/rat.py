@@ -19,14 +19,13 @@ if __name__ == '__main__':
 
 from impl import crypto
 from impl import sock
+if conf.get()['video']['enable']:
+    from impl import audio
+    from impl import video
 
 from prot import chat
 from prot import handshake
 from prot import name
-
-if conf.get()['video']['enable']:
-    from prot import audio
-    from prot import video
 
 
 def say( ip: str, text: str) -> None:

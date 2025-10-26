@@ -10,7 +10,8 @@ import subprocess
 from threading import Event, Thread
 import time
 
-from impl import conf, crypto
+from impl import conf
+from impl import crypto
 
 
 def get_default_audio_device():
