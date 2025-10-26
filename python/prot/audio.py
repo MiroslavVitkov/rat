@@ -2,7 +2,7 @@
 
 
 # In this file: steam audio and play it in the remote side.
-
+#               mic → ALSA → ffmpeg → UDP → mpv → ALSA → speaker
 
 import ffmpeg
 import re

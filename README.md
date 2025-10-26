@@ -55,11 +55,10 @@ Any number of devices or instances using the same key is assumed to be a singula
 
 
 Development Notes
----
-To exclude conf.ini from staging run  
-`echo 'conf.ini' >> .git/info/exclude`  
-`git update-index --assume-unchanged conf.ini`  
+===
 
+Conventions
+---
 Keywords throughout code comments:
   - `todo:` - nice to have
   - `warn:` - probably hiding a bug
