@@ -15,60 +15,34 @@ from impl import conf
 from impl import crypto
 
 
-def get_default_audio_device():
-    """
-    Try to detect the first ALSA capture device using `arecord -l`.
-    Returns a string like 'hw:1,0' or None if not found.
-    """
-    try:
-        out = subprocess.check_output(["arecord", "-l"], text=True, stderr=subprocess.DEVNULL)
-    except (FileNotFoundError, subprocess.CalledProcessError):
-        return None
-
-    # Match lines like: "card 1: Device [USB Audio], device 0: USB Audio"
-    m = re.search(r"card (\d+): .*device (\d+):", out)
-    if not m:
-        return None
-
-    card, dev = m.groups()
-    return f"hw:{card},{dev}"
-
-
-def stream( stop_event: Event=Event()
+def stream( death: Event=Event()
           , camera: str=conf.get()['video']['camera'] ) -> None:
     '''
     Capture video+audio, mux into Matroska, send via stdout in chunks.
     '''
-    if not conf.get()['video']['enable']:
-        return
-
-    mic = get_default_audio_device()  # todo: conf.ini
-    video_in = ffmpeg.input(
-        camera,
-        format='v4l2',
-        r=conf.get()['video']['fps'],
-        s=conf.get()['video']['res'],
-        thread_queue_size=512  # needed?
-    )
-
     reader = (
         ffmpeg
+        .input(
+            camera,
+            format='v4l2',
+            input_format='mjpeg',
+            # This is a request to the driver; the same in output is an order to ffmpeg.
+            r=conf.get()['video']['fps'],
+            s=conf.get()['video']['res'],
+            thread_queue_size=512)
         .output(
-            video_in,
-            'pipe:',  # needed?
+            'pipe:',
             format='h264',
             vcodec='libx264',
             r=conf.get()['video']['fps'],
             pix_fmt='yuv420p',
             preset='ultrafast',  # lowest compression!
             tune='zerolatency',
-            g=1,
-            **{'x264-params': 'keyint=1'}
-        )
-    .run_async(pipe_stdout=True)
+            g=1)
+        .run_async(pipe_stdout=True)
     )
 
-    while not stop_event.is_set():
+    while not death.is_set():
         yield reader.stdout.read(crypto.MAX_PLAINTEXT_BYTES)
 
     reader.stdout.close()
@@ -76,13 +50,10 @@ def stream( stop_event: Event=Event()
 
 
 def watch( chunks: [bytes]
-         , stop_event: Event=Event() ):
+         , death: Event=Event() ):
     '''
     Feed video+audio to mpv to decode.
     '''
-    if not conf.get()['video']['enable']:
-        return
-
     mpv = subprocess.Popen(
        ['mpv',
         '--no-cache',
@@ -94,11 +65,11 @@ def watch( chunks: [bytes]
         '--opengl-glfinish=yes',
         '--opengl-swapinterval=0',
         '-'],
-        stdin=subprocess.PIPE
+        stdin=subprocess.PIPE, stderr=subprocess.DEVNULL
     )
 
     for chunk in chunks:
-        if stop_event.is_set():
+        if death.is_set():
             break
         mpv.stdin.write(chunk)
 
@@ -110,11 +81,10 @@ def test():
         print('prot/video.py: UNIT TESTS SKIPPED')
         return
 
-
-    e = Event()
-    Thread( target=watch, args=(stream(e), e) ).start()
-    time.sleep(5)
-    e.set()
+    death = Event()
+    Thread( target=watch, args=(stream(death), death) ).start()
+    time.sleep(10)
+    death.set()
 
     print('prot/video.py: UNIT TESTS PASSED')
 
