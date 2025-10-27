@@ -25,7 +25,7 @@ def get_default_audio_device():
     except( FileNotFoundError, subprocess.CalledProcessError ):
         return None
 
-    # Match lines like: "card 1: Device [USB Audio], device 0: USB Audio".
+    # Match lines like: 'card 1: Device [USB Audio], device 0: USB Audio'.
     m = re.search(r"card (\d+): .*device (\d+):", out)
     if not m:
         return None
@@ -34,8 +34,8 @@ def get_default_audio_device():
     return f"hw:{card},{dev}"
 
 
-def stream( death=Event() ):
-    """Capture microphone audio, encode as AAC-in-MPEGTS, and yield chunks."""
+def stream( death=Event() ) -> [bytes]:  # generator
+    '''Capture microphone audio, encode as AAC-in-MPEGTS, and yield chunks.'''
     mic = get_default_audio_device()
     process = (
         ffmpeg
@@ -64,7 +64,7 @@ def stream( death=Event() ):
 
 
 def watch( chunks, death=Event() ):
-    """Receive audio chunks, feed them to mpv for playback."""
+    '''Receive audio chunks, feed them to mpv for playback.'''
     mpv = subprocess.Popen([
         'mpv',
         '--no-cache',

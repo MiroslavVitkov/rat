@@ -6,7 +6,7 @@ Conferencing.
 '''
 
 
-from threading import Event
+from threading import Event, Thread
 
 from impl import audio
 from impl import conf
@@ -15,22 +15,29 @@ from impl import video
 
 
 def stream( death: Event=Event() ) -> None:
-    def foo( s: sock.socket, _ ):
+    '''Send captured chunks to a socket.'''
+
+    def foo( s: sock.socket, death ):
         for chunk in audio.stream():
             s.sendall(chunk)
 
     sock.Server(foo, conf.AUDIO)
 
 
-def watch():
-    def foo( s:sock.socket ):
-        for chunk in sock.recv(s):
-            print(len(chunk))
+def watch( ip: str, death: Event=Event() ) -> None:
+    '''Read from a socket and show with mpv.'''
 
-    sock.Client(foo, 'localhost', conf.AUDIO)
+    def foo( s: sock.socket ):
+        watch( sock.recv(s) )
+
+    sock.Client(lambda s: audio.watch(sock.recv(s)), ip, conf.AUDIO)
 
 
 def test():
+    death = Event()
+    stream(death)
+    watch('localhost', death)
+    # Thread
     print('prot/media.py: UNIT TESTS PASSED')
 
 

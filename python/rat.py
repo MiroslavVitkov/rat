@@ -26,6 +26,7 @@ if conf.get()['video']['enable']:
 from prot import chat
 from prot import handshake
 from prot import name
+from prot import media
 
 
 def say( ip: str, text: str) -> None:
@@ -147,12 +148,12 @@ def register(ip: [str]) -> None:
 
 def watch( remote: str ) -> None:
     '''Spawn a video player and stream in from remote.'''
-    video.watch(remote)
+    media.watch(remote)
 
 
 def stream() -> None:
     '''Stream camera to conf.VIDEO.'''
-    s = video.stream()
+    media.stream()
 
 
 def serve() -> None:
