@@ -7,8 +7,7 @@ Provides TCP/IP connection objects, perhaps soon UDP too.
 
 
 import socket
-import threading
-from threading import Event
+from threading import active_count, Event, Thread
 import time
 
 from impl import conf
@@ -81,10 +80,10 @@ class Server:
         me.ip = conf.get()['about']['ip']
         me.port = port
         me.death = Event()
-        me.thread = threading.Thread( target=me._listen
-                                    , args=[port, func]
-                                    , name='server'
-                                    )
+        me.thread = Thread( target=me._listen
+                          , args=[port, func]
+                          , name='server'
+                          )
         me.thread.start()
         print('Server listening on ip', me.ip, 'port', me.port)
 
@@ -106,10 +105,10 @@ class Server:
         s.listen()
 
         for conn, addr in me._poll(s):
-            threading.Thread( target=func
-                            , args=[conn, me.death]
-                            , name='server_content_socket'
-                            ).start()
+            Thread( target=func
+                  , args=[conn, me.death]
+                  , name='server_content_socket'
+                  ).start()
 
         # Close listener socket - already established connections are unaffected.
         s.close()
@@ -158,12 +157,12 @@ def test_nonblocking_recv() -> None:
         data = recv(content_s, death)
         # print(next(iter(data)))  # This fails if nothing was sent.
 
-    content_th = threading.Thread(target=read_one_message, name='content_th')
+    content_th = Thread(target=read_one_message, name='content_th')
     content_th.start()
     time.sleep(1)
     death.set()
     content_th.join()
-    assert threading.active_count() == 1
+    assert active_count() == 1
 
 
 def test_server_client() -> None:
@@ -184,7 +183,7 @@ def test_server_client() -> None:
     # Manual regression test here: time.sleep() and check cpu usage.
     s.death.set()
     time.sleep(1)
-    assert threading.active_count() == 1
+    assert active_count() == 1
 
 
 def test_recv() -> None:
