@@ -3,6 +3,10 @@
 
 '''
 Provides TCP/IP connection objects, perhaps soon UDP too.
+
+
+Server(TCP) - mgmt thread - mgmt socket - conn socket - client thread - func
+Server(UDP) - multiplexed thread - server socket
 '''
 
 
@@ -67,13 +71,13 @@ class Server:
     A server TCP socket is always meant to negotiate connections, not content.
     Each returned connection is a content socket with a client.
 
-    func(socket, death) - communicate with one client until connection drops
+    func(s: socket, d: Event) - communicate with one client until connection drops
 
     Set `me.death` to kill; spawned children are notified.
     '''
 
 
-    MAX_THREADS = 20
+    MAX_THREADS = 20  # warn: unused
 
 
     def __init__(me, func: callable, port: int=conf.TEST):
@@ -116,7 +120,6 @@ class Server:
 
 
     def _poll(me, s: socket):
-        assert type(me.death) == Event, type(me.death)
         while not me.death.is_set():
             try:
                 conn, addr = s.accept()
