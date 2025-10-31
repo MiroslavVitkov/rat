@@ -14,10 +14,14 @@ import requests
 # Standard ports used by the program.
 CHATSERVER = 42666
 NAMESERVER = CHATSERVER + 1
-AUDIO = NAMESERVER + 1
-VIDEO = AUDIO + 1
-TEST = VIDEO + 1
-RELAY_0 = TEST+1
+TEST = NAMESERVER + 1
+AV_CTRL = TEST + 1
+RELAY_0 = AV_CTRL + 1
+
+AUDIO_UDP = CHATSERVER
+VIDEO_UDP = AUDIO_UDP + 1
+TEST_UDP = VIDEO_UDP + 1
+
 
 
 def where_are_we():
