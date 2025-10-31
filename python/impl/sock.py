@@ -142,6 +142,35 @@ class Client:
         func(s)
 
 
+class _UDP():
+    pass
+
+class ServerUDP(_UDP):
+    def __init__( me, death: Event=Event() ):
+        me.death = Event()
+
+
+class ClientUDP(_UDP):
+    def __init__( me, _ ):
+        pass
+
+
+def test_udp():
+    def listen( s: _UDP, d: Event ):
+        for msg in s.recv():
+            print(msg)
+
+    def yell( s: _UDP, d: Event ):
+        for i in range(666):
+            s.send(b'Test...')
+
+    s = ServerUDP(listen)
+    ClientUDP(yell)
+    s.death.set()
+    time.sleep(1)
+    assert active_count() == 1
+
+
 def test_nonblocking_recv() -> None:
     '''
     Make sure recv() can be terminated while there's nothing to be read on the socket.
@@ -216,6 +245,7 @@ def test() -> None:
     test_nonblocking_recv()
     test_server_client()
     test_recv()
+    test_udp()
     print('impl/sock.py: UNIT TESTS PASSED')
 
 
