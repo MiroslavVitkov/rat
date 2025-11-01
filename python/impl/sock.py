@@ -23,7 +23,7 @@ POLL_PERIOD = .1  # 100 ms
 
 
 def recv( s: socket.socket
-        , death: Event=Event()
+        , death: Event=None
         , _cache: [bytes]=[b''] ) -> bytes:
     '''
     Block until one chunk is yielded.
@@ -39,6 +39,8 @@ def recv( s: socket.socket
 
     yield from try_yield()
 
+    if not death:
+        death = Event()
     s.settimeout(POLL_PERIOD)
     while not death.is_set():
         try:
@@ -144,8 +146,11 @@ class Client:
 
 class UDP():
     '''UDP socket.'''
-    def __init__( me, death: Event=Event() ):
-        me.death = death
+    def __init__( me, death: Event=None ):
+        if death:
+            me.death = death
+        else:
+            me.death = Event()
 
 
     def send( me, msg: bytes ) -> None:
@@ -165,8 +170,11 @@ class ServerUDP(UDP):
     Runs in own thread and listens to anyone connecting.
     func( me: UDP, death: Event )
     '''
-    def __init__( me, func: callable, port: int=conf.TEST_UDP, death: Event=Event() ):
-        me.death = death
+    def __init__( me, func: callable, port: int=conf.TEST_UDP, death: Event=None ):
+        if death:
+            me.death = death
+        else:
+            me.death = Event()
         me.remotes = []
         me.s = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
         me.s.bind(('0.0.0.0', port))
@@ -216,7 +224,7 @@ def test_server_client() -> None:
     '''
     This is the intended API of the module.
     '''
-    def listen(s: socket, death: Event=Event()):
+    def listen(s: socket, death: Event):
         while not death.is_set():
             print(s.recv(1024))
     def yell(s: socket):
@@ -238,7 +246,7 @@ def test_recv() -> None:
     Ensure packets are received in the correct chunk, byte and bit order.
     Not much to test about send() - all the logic is external.
     '''
-    def listen(s: socket, death: Event=Event()):
+    def listen(s: socket, death: Event):
         for msg in recv(s, death):
             print(msg[0], end=', ')
 
