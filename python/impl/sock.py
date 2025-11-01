@@ -142,33 +142,48 @@ class Client:
         func(s)
 
 
-class _UDP():
-    pass
-
-class ServerUDP(_UDP):
+class UDP():
+    '''UDP socket.'''
     def __init__( me, death: Event=Event() ):
+        me.death = death
+
+
+    def send( me, msg: bytes ) -> None:
+        for r in me.remotes:
+            me.s.sendto(msg, r)
+
+
+    def recv( me  ) -> bytes:
+        while not me.death.is_set():
+            msg, remote = me.s.recvfrom(CHUNK_BYTES)
+            yield msg
+
+
+class ServerUDP(UDP):
+    '''
+    Creates a standalone UDP endpoint.
+    Runs in own thread and listens to anyone connecting.
+    func( me: UDP, death: Event )
+    '''
+    def __init__( me, func: callable, port: int=conf.TEST_UDP, death: Event=Event() ):
+        me.death = death
+        me.remotes = []
+        me.s = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+        me.s.bind(('0.0.0.0', port))
+        Thread(target=func, args=(me, me.death)).start()
+
+
+class ClientUDP(UDP):
+    '''
+    Creates a UDP endpoint OSI_7-connected to another such.
+    Runs callback in caller thread.
+    '''
+    def __init__( me, func: callable, ip: str, port: int=conf.TEST_UDP ):
         me.death = Event()
-
-
-class ClientUDP(_UDP):
-    def __init__( me, _ ):
-        pass
-
-
-def test_udp():
-    def listen( s: _UDP, d: Event ):
-        for msg in s.recv():
-            print(msg)
-
-    def yell( s: _UDP, d: Event ):
-        for i in range(666):
-            s.send(b'Test...')
-
-    s = ServerUDP(listen)
-    ClientUDP(yell)
-    s.death.set()
-    time.sleep(1)
-    assert active_count() == 1
+        me.remotes = [(ip, port)]
+        me.s = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+        me.s.bind(('0.0.0.0', 0))  # Random ephemeral local port.
+        func(me, me.death)
 
 
 def test_nonblocking_recv() -> None:
@@ -241,11 +256,55 @@ def test_recv() -> None:
     time.sleep(POLL_PERIOD)
 
 
+def test_udp_direct():
+    '''The hacky approach that should nevertheless work.'''
+    def run_server(server):
+        server.s.settimeout(POLL_PERIOD)
+        try:
+            for msg in server.recv():
+                print(msg, end=' ')
+        except TimeoutError:
+                pass
+
+    server = ServerUDP(lambda s, _: 0)
+    client = ClientUDP(lambda s, _: 0, 'localhost')
+    t = Thread(target=run_server, args=(server,))
+    t.start()
+    for i in range (199):
+        client.send(b"Test...")
+    time.sleep(1)
+    server.death.set()
+    client.death.set()
+    t.join()
+    assert active_count() == 1
+    time.sleep(1)
+    print()
+
+
+def test_udp_cb():
+    '''The preferred API.'''
+    def listen( s: UDP, d: Event ):
+        for msg in s.recv():
+            print(msg, end='')
+
+    def yell( s: UDP, d: Event ):
+        for i in range(666):
+            s.send(b'Test...')
+
+    s = ServerUDP(listen)
+    c = ClientUDP(yell, 'localhost')
+    s.death.set()
+    c.death.set()
+    time.sleep(1)
+    assert active_count() == 1
+
+
 def test() -> None:
     test_nonblocking_recv()
     test_server_client()
     test_recv()
-    test_udp()
+    test_udp_direct()
+    test_udp_cb()
     print('impl/sock.py: UNIT TESTS PASSED')
 
 
