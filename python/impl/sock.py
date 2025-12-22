@@ -266,11 +266,13 @@ def test_recv() -> None:
 
 def test_udp_direct():
     '''The hacky approach that should nevertheless work.'''
+    MSG = b'Test...'
+
     def run_server(server):
         server.s.settimeout(POLL_PERIOD)
         try:
             for msg in server.recv():
-                print(msg, end=' ')
+                assert msg == MSG, msg
         except TimeoutError:
                 pass
 
@@ -279,7 +281,7 @@ def test_udp_direct():
     t = Thread(target=run_server, args=(server,))
     t.start()
     for i in range (199):
-        client.send(b"Test...")
+        client.send(MSG)
     time.sleep(1)
     server.death.set()
     client.death.set()
@@ -291,13 +293,15 @@ def test_udp_direct():
 
 def test_udp_cb():
     '''The preferred API.'''
+    MSG = b'Test...'
+
     def listen( s: UDP, d: Event ):
         for msg in s.recv():
-            print(msg, end='')
+            assert msg == MSG, msg
 
     def yell( s: UDP, d: Event ):
         for i in range(666):
-            s.send(b'Test...')
+            s.send(MSG)
 
     s = ServerUDP(listen)
     c = ClientUDP(yell, 'localhost')
