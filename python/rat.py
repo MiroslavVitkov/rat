@@ -200,6 +200,19 @@ def test() -> None:
         return -1
 
 
+def why() -> None:
+    w = '''
+        Transparent over simple - but simple over sophisticated.
+        Code to interfaces - and live up to their changing tests.
+        Parts of the whole must be useeful per se.
+        Surprises are nice - if not interfering with the simple things.
+        If I need it but you don't - the we don't need it.
+        Trust is hard to establish - and piece of cake to lose.
+        Respect the law - explicitly.
+    '''
+    print(w)
+
+
 def print_help() -> None:
     h = '''
         example
@@ -233,6 +246,7 @@ def print_help() -> None:
         ---
             rat generate - create a new RSA keypair and write it to disk
             rat test - run all unnit and integration tests
+            rat why - print rat's dogma
             rat help - print this message
 
        options
@@ -300,6 +314,9 @@ if __name__ == '__main__':
 
     elif sys.argv[1] == 'test':
         sys.exit( test() )
+
+    elif sys.argv[1] == 'why':
+        sys.exit( why() )
 
     else:
         print(sys.argv[1], '- command not recognised')
