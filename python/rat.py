@@ -181,7 +181,7 @@ def test() -> None:
     handshake.test()
     name.test()
 
-    if conf.get()['video']['enable']:
+    if conf.get()['video']['enable'] == True:
         audio.test()
         video.test()
 

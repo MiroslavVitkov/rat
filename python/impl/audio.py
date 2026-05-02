@@ -63,7 +63,7 @@ def stream( death=Event() ) -> [bytes]:  # generator
     process.wait()
 
 
-def watch( chunks, death=Event() ):
+def watch( chunks, death=Event() ) -> None:
     '''Receive audio chunks, feed them to mpv for playback.'''
     mpv = subprocess.Popen([
         'mpv',
@@ -72,6 +72,7 @@ def watch( chunks, death=Event() ):
         '--profile=low-latency',
         '--vd-lavc-threads=1',
         '--audio-delay=0',
+        '--no-video'
         '-',
     ], stdin=subprocess.PIPE, stderr=subprocess.DEVNULL)
 
