@@ -17,7 +17,7 @@ PORTS={42666..42672}
 adduser --system rat
 
 # The parent dir of this script is the 'project'.
-PROJDIR="$(dirname ${1})"
+PROJDIR="$(dirname ${0})"
 cp -r "$PROJDIR" /opt
 rm -rf /opt/rat/.git
 
