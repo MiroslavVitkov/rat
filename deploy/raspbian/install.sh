@@ -23,7 +23,7 @@ rm -rf /opt/rat/.git
 
 # Enable log rotation.
 # The log is in the forest: /var/log/rat.log.
-cp res/rat.logrotate /etc/logrotate.d/rat
+cp res/logrotate/rat /etc/logrotate.d/rat
 
 # Tell sysdemd to bring 'rat listen' up on boot
 # and restart if it exits.
