@@ -1,7 +1,7 @@
 <?php
 
 
-require 'Parsedown.php';  # A markdown parser.
+require 'res/Parsedown.php';  # A markdown parser.
 
 
 $h = date('H');
@@ -39,7 +39,7 @@ $readme_html = nl2br(htmlspecialchars($readme));  # Convert line breaks and esca
     <meta charset="UTF-8">
     <title>rat</title>
     <link rel="icon" type="image/png" href="res/icon.png">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="res/style.css">
 </head>
 <body>
 
