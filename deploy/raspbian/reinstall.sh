@@ -34,7 +34,7 @@ update()
 
 update logrotate res/logrotate/rat /etc/logrotate.d/
 update rat res/systemd/rat.service /etc/systemd/system/
-update apache2 res/apache2/000-default.conf /etc/apache2/sites-enabled/
+update apache2 res/apache2/default-ssl.conf /etc/apache2/sites-enabled/
 
 F2B_FILTER='/etc/fail2ban/filter.d/'
 F2B_JAIL='/etc/fail2ban/jail.d/'
