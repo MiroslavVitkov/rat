@@ -1,0 +1,12 @@
+Threat model
+---
+Technical attacks:
+    Bruteforcing of private key over intercepted messages
+    Determining type of traffic(text, video, file)
+    DoS flooding
+    Private key stolen by other means
+
+Social attacks:
+    Pretending to be another known user without having the private key
+    Doxing someone
+    Flooding with synthetic profiles
