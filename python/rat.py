@@ -204,9 +204,9 @@ def why() -> None:
     w = '''
         Transparent over simple - but simple over sophisticated.
         Code to interfaces - and live up to their changing tests.
-        Parts of the whole must be useeful per se.
+        Parts of the whole must be useful per se.
         Surprises are nice - if not interfering with the simple things.
-        If I need it but you don't - the we don't need it.
+        If I need it but you don't - then we don't need it.
         Trust is hard to establish - and piece of cake to lose.
         Respect the law - explicitly.
     '''
